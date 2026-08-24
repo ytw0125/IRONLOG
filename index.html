@@ -3165,7 +3165,7 @@ async function signInEmail(){
     });
     if (error) throw error;
     otpEmail = email;
-    showPasteStep();
+    showCodeStep();
   }catch(e){
     toast('메일 발송에 실패했어요');
     if (btn){ btn.disabled = false; btn.textContent = '인증 코드 받기'; }
@@ -3200,7 +3200,7 @@ function showPasteStep(){
     'oninput="if(this.value.length>40)verifyLink()"></div></div>' +
     '<div id="linkMsg" class="note" style="margin:0 0 12px;min-height:16px"></div>' +
     '<button class="btn" id="linkBtn" onclick="verifyLink()">로그인</button>' +
-    '<button class="btn btn-g btn-sm" style="margin-top:8px" onclick="openLogin()">처음으로</button>' +
+    '<button class="btn btn-g btn-sm" style="margin-top:8px" onclick="showCodeStep()">숫자로 하기</button>' +
     '<div class="note">메일이 여러 개 왔다면 <b>가장 마지막 것</b>을 쓰세요. 새로 요청하면 이전 링크는 무효가 됩니다.<br><br>' +
     '링크를 그냥 눌러도 되지만, 홈 화면 앱에서는 <b>복사해서 붙여넣는 쪽이 확실합니다.</b></div>'
   );
@@ -3269,9 +3269,9 @@ function showCodeStep(){
     'oninput="if(this.value.length===6)verifyCode()"></div></div>' +
     '<div id="otpMsg" class="note" style="margin:0 0 12px;min-height:16px"></div>' +
     '<button class="btn" id="otpBtn" onclick="verifyCode()">로그인</button>' +
-    '<button class="btn btn-g btn-sm" style="margin-top:8px" onclick="openLogin()">다른 방법으로</button>' +
+    '<button class="btn btn-g btn-sm" style="margin-top:8px" onclick="showPasteStep()">숫자가 안 보이면 · 링크로 하기</button>' +
     '<div class="note">메일이 안 보이면 스팸함도 확인해보세요.<br>' +
-    '메일 안의 링크를 눌러도 되지만, 홈 화면 앱에서는 <b>숫자 입력이 확실합니다.</b></div>'
+    '메일이 여러 개면 <b>가장 마지막 것</b>의 숫자를 쓰세요. 새로 요청하면 이전 코드는 무효가 됩니다.</div>'
   );
   setTimeout(() => { const i = $('#otpIn'); if (i) i.focus(); }, 250);
 }
