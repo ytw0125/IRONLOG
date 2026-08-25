@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover,interactive-widget=resizes-content">
 <title>IRONLOG</title>
 
 <link rel="manifest" href="./manifest.webmanifest">
@@ -14,9 +14,9 @@
 
 <style>
 :root{
-  --bg:#09090B; --card:#131316; --card-2:#1B1B20; --card-3:#232329;
-  --line:#26262C; --line-2:#33333B;
-  --tx:#FAFAFA; --tx-2:#A1A1AA; --tx-3:#6B6B75; --white:#FFFFFF;
+  --bg:#000000; --card:#0B0B0D; --card-2:#131316; --card-3:#1C1C21;
+  --line:#1E1E23; --line-2:#2E2E36;
+  --tx:#FFFFFF; --tx-2:#9C9CA6; --tx-3:#5C5C66; --white:#FFFFFF;
   --chest:#FF6B5A; --back:#4C9AFF; --shoulder:#FFB020; --leg:#A78BFA;
   --arm:#2DD4BF; --abs:#84CC16; --cardio:#F472B6;
   --good:#4ADE80; --warn:#FB923C;
@@ -27,9 +27,9 @@
   --e:cubic-bezier(.2,.9,.25,1);
   --edge:inset 0 1px 0 rgba(255,255,255,.055);
   --edge2:inset 0 1px 0 rgba(255,255,255,.09);
-  --steel:linear-gradient(180deg,#20222A 0%,#16171C 55%,#121317 100%);
-  --steel-h:linear-gradient(180deg,#2A2D36 0%,#1C1E24 100%);
-  --r-lg:12px; --r-md:10px; --r-sm:8px;
+  --steel:linear-gradient(180deg,#1A1B21 0%,#101116 58%,#0B0C10 100%);
+  --steel-h:linear-gradient(180deg,#24262E 0%,#15161B 100%);
+  --r-lg:6px; --r-md:5px; --r-sm:4px;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{overscroll-behavior-y:contain}
@@ -39,7 +39,12 @@ body{
   font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;
   font-variant-numeric:tabular-nums;
 }
-button,input,select{font-family:inherit;font-variant-numeric:tabular-nums;touch-action:manipulation}
+button,input,select,textarea{font-family:inherit;font-variant-numeric:tabular-nums;touch-action:manipulation}
+/* iOS는 글씨가 16px보다 작은 입력칸에 포커스하면 화면을 확대해버린다.
+   그때 레이아웃이 튀고 키보드가 흔들리므로 최소 크기를 강제한다. */
+input,select,textarea{font-size:16px!important}
+input[inputmode=decimal],input[inputmode=numeric]{font-size:17px!important}
+body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #app{max-width:520px;margin:0 auto;padding:0 15px 150px}
 
 /* ══ 헤더 ══ */
@@ -49,13 +54,13 @@ button,input,select{font-family:inherit;font-variant-numeric:tabular-nums;touch-
   background:linear-gradient(90deg,transparent,var(--line-2) 18%,var(--line-2) 82%,transparent)}
 .hdr-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:11px}
 .brand{
-  font-size:13.5px;font-weight:900;letter-spacing:.3em;
-  display:flex;align-items:center;gap:9px;
-  background:linear-gradient(180deg,#FFFFFF 0%,#C9CCD4 48%,#8A8F9A 52%,#F2F3F6 100%);
+  font-size:14px;font-weight:900;letter-spacing:.34em;
+  display:flex;align-items:center;gap:10px;
+  background:linear-gradient(178deg,#FFFFFF 0%,#D2D5DC 46%,#7E838E 54%,#EDEFF3 100%);
   -webkit-background-clip:text;background-clip:text;color:transparent;
 }
-.brand:before{content:'';width:3px;height:15px;border-radius:1px;flex:none;
-  background:linear-gradient(180deg,#FFF,#7C818C)}
+.brand:before{content:'';width:4px;height:16px;flex:none;
+  background:linear-gradient(180deg,#FFF,#666B75)}
 /* 바벨 널링 질감 */
 .knurl{position:absolute;left:-15px;right:-15px;top:0;height:calc(100% - 1px);
   pointer-events:none;opacity:.045;
@@ -90,8 +95,8 @@ button,input,select{font-family:inherit;font-variant-numeric:tabular-nums;touch-
 /* ══ 공통 ══ */
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:15px;
   margin-bottom:11px;box-shadow:var(--edge)}
-.sec{font-size:10px;font-weight:800;letter-spacing:.18em;color:var(--tx-3);
-  margin:22px 3px 9px;display:flex;align-items:center;gap:9px}
+.sec{font-size:9.5px;font-weight:800;letter-spacing:.22em;color:var(--tx-3);
+  margin:26px 2px 10px;display:flex;align-items:center;gap:10px;font-family:var(--mono)}
 .sec:after{content:'';flex:1;height:1px;background:var(--line)}
 .empty{text-align:center;color:var(--tx-3);font-size:13px;padding:26px 14px;line-height:1.75}
 .btn{border:none;border-radius:var(--r-md);cursor:pointer;font-weight:800;font-size:15px;
@@ -108,11 +113,12 @@ button,input,select{font-family:inherit;font-variant-numeric:tabular-nums;touch-
 .row2 .btn{flex:1}
 
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:13px}
-.stat{background:var(--steel);border:1px solid var(--line);border-radius:var(--r-md);
-  padding:11px 10px;box-shadow:var(--edge)}
-.stat b{display:block;font-size:21px;font-weight:900;letter-spacing:-.045em;
-  font-variant-numeric:tabular-nums}
-.stat span{display:block;font-size:10px;color:var(--tx-3);margin-top:1px;font-weight:700}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:13px 11px;box-shadow:var(--edge)}
+.stat b{display:block;font-size:24px;font-weight:900;letter-spacing:-.05em;
+  font-variant-numeric:tabular-nums;line-height:1}
+.stat span{display:block;font-size:9px;color:var(--tx-3);margin-top:6px;font-weight:800;
+  letter-spacing:.14em;font-family:var(--mono)}
 
 /* ══ 운동 카드 (아코디언) ══ */
 .ex{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);
@@ -120,7 +126,7 @@ button,input,select{font-family:inherit;font-variant-numeric:tabular-nums;touch-
   transition:border-color .2s var(--e)}
 .ex.open{border-color:var(--line-2)}
 .ex-hd{display:flex;align-items:center;gap:10px;padding:13px 13px;cursor:pointer}
-.ex-cl{width:3px;height:32px;border-radius:2px;flex:none}
+.ex-cl{width:3px;height:34px;flex:none}
 .ex-tt{flex:1;min-width:0}
 .ex-tt b{display:block;font-size:15.5px;font-weight:800;letter-spacing:-.025em;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -133,8 +139,8 @@ button,input,select{font-family:inherit;font-variant-numeric:tabular-nums;touch-
 /* 세트 테이블 */
 .st-h,.st-r{display:grid;grid-template-columns:22px minmax(0,1fr) 78px 44px 30px 24px;
   align-items:center;gap:5px;padding:0 13px}
-.st-h{font-size:9.5px;font-weight:800;letter-spacing:.06em;color:var(--tx-3);
-  padding-top:10px;padding-bottom:6px}
+.st-h{font-size:9px;font-weight:800;letter-spacing:.14em;color:var(--tx-3);
+  padding-top:11px;padding-bottom:7px;font-family:var(--mono)}
 .st-r{padding-top:8px;padding-bottom:8px;border-top:1px solid var(--line);font-size:14px}
 .st-n{font-family:var(--mono);font-size:11px;color:var(--tx-3)}
 .st-p{font-size:11px;color:var(--tx-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -143,8 +149,8 @@ button,input,select{font-family:inherit;font-variant-numeric:tabular-nums;touch-
 .st-e{font-size:10px;color:var(--tx-3);font-weight:700;text-align:center}
 .st-x{background:none;border:none;color:var(--tx-3);cursor:pointer;font-size:14px;padding:3px}
 .st-r.pr{background:rgba(74,222,128,.06)}
-.badge{display:inline-block;font-size:8px;font-weight:900;letter-spacing:0;
-  background:var(--good);color:#052E16;padding:1px 3px;border-radius:3px;margin-left:3px;
+.badge{display:inline-block;font-size:8px;font-weight:900;letter-spacing:.04em;
+  background:var(--good);color:#02150A;padding:1px 3px;border-radius:2px;margin-left:3px;
   vertical-align:1.5px;white-space:nowrap}
 .st-v{white-space:nowrap;overflow:hidden}
 
@@ -159,9 +165,9 @@ button,input,select{font-family:inherit;font-variant-numeric:tabular-nums;touch-
   border-radius:var(--r-sm);color:var(--tx-2);font-size:15px;font-weight:700;cursor:pointer;
   box-shadow:var(--edge2);transition:transform .09s var(--e),background .12s var(--e)}
 .fb button:active{transform:scale(.9);background:var(--steel-h);color:var(--tx)}
-.fb input{flex:1;min-width:0;width:100%;height:38px;background:#101013;
-  border:1px solid var(--line-2);border-radius:8px;color:var(--tx);
-  font-size:16px;font-weight:800;text-align:center;letter-spacing:-.02em}
+.fb input{flex:1;min-width:0;width:100%;height:40px;background:#0A0A0C;
+  border:1px solid var(--line-2);border-radius:var(--r-sm);color:var(--tx);
+  font-size:17px;font-weight:800;text-align:center;letter-spacing:-.02em}
 .ip-go{width:74px;flex:none;height:38px;color:#09090B;border:none;border-radius:var(--r-sm);
   font-size:13.5px;font-weight:900;cursor:pointer;letter-spacing:-.01em;
   background:linear-gradient(180deg,#FFFFFF,#E4E4E8);
@@ -200,7 +206,7 @@ button,input,select{font-family:inherit;font-variant-numeric:tabular-nums;touch-
 .tmr-in{background:#17171C;border:1px solid var(--line-2);border-radius:14px;
   padding:10px 12px;box-shadow:0 10px 30px rgba(0,0,0,.6)}
 .tmr-t{display:flex;align-items:center;gap:10px}
-.tmr-n{font-size:23px;font-weight:900;letter-spacing:-.04em;font-variant-numeric:tabular-nums;min-width:66px}
+.tmr-n{font-size:25px;font-weight:900;letter-spacing:-.05em;font-variant-numeric:tabular-nums;min-width:70px;font-family:var(--mono)}
 .tmr-l{flex:1;min-width:0;font-size:11px;color:var(--tx-3);font-weight:700;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tmr-b{background:var(--card-3);border:1px solid var(--line-2);border-radius:8px;
@@ -220,7 +226,7 @@ button,input,select{font-family:inherit;font-variant-numeric:tabular-nums;touch-
 .tab{flex:1;background:none;border:none;cursor:pointer;color:var(--tx-3);
   padding:6px 0 3px;display:flex;flex-direction:column;align-items:center;gap:3px}
 .tab svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-.tab span{font-size:9.5px;font-weight:800}
+.tab span{font-size:9px;font-weight:800;letter-spacing:.06em}
 .tab{transition:color .18s var(--e)}
 .tab svg{transition:transform .2s var(--e)}
 .tab:active svg{transform:scale(.86)}
@@ -234,18 +240,19 @@ button,input,select{font-family:inherit;font-variant-numeric:tabular-nums;touch-
 .scrim.on{opacity:1;pointer-events:auto}
 .sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;max-width:520px;margin:0 auto;
   background:#0F0F12;border:1px solid var(--line);border-bottom:none;
-  border-radius:20px 20px 0 0;height:88vh;display:flex;flex-direction:column;
+  border-radius:16px 16px 0 0;height:88dvh;max-height:88dvh;display:flex;flex-direction:column;
   transform:translateY(100%);transition:transform .26s cubic-bezier(.32,.72,0,1)}
 .sheet.on{transform:translateY(0)}
 .sh-g{width:34px;height:4px;background:var(--line-2);border-radius:2px;margin:9px auto 3px;flex:none}
 .sh-h{padding:7px 16px 11px;flex:none}
 .sh-h h2{font-size:18px;font-weight:900;letter-spacing:-.03em}
-.sh-b{flex:1;overflow-y:auto;padding:0 16px calc(26px + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch}
+.sh-b{flex:1;overflow-y:auto;overscroll-behavior:contain;
+  padding:0 16px calc(40px + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch}
 .sh-x{position:absolute;right:13px;top:15px;background:var(--card-2);border:1px solid var(--line-2);
   width:29px;height:29px;border-radius:50%;color:var(--tx-2);font-size:14px;cursor:pointer;line-height:1}
 
-.search{width:100%;background:var(--card-2);border:1px solid var(--line-2);border-radius:11px;
-  color:var(--tx);font-size:15px;padding:11px 13px;margin-bottom:10px}
+.search{width:100%;background:var(--card-2);border:1px solid var(--line-2);border-radius:var(--r-md);
+  color:var(--tx);font-size:16px;padding:12px 13px;margin-bottom:10px}
 .search::placeholder{color:var(--tx-3)}
 .chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
@@ -257,7 +264,8 @@ button,input,select{font-family:inherit;font-variant-numeric:tabular-nums;touch-
 .seg button{flex:1;background:none;border:none;border-radius:7px;color:var(--tx-3);
   font-size:12.5px;font-weight:800;padding:8px 0;cursor:pointer}
 .seg button[aria-pressed=true]{background:var(--line-2);color:var(--tx)}
-.grp{font-size:9.5px;font-weight:800;letter-spacing:.13em;color:var(--tx-3);margin:14px 2px 7px}
+.grp{font-size:9.5px;font-weight:800;letter-spacing:.2em;color:var(--tx-3);
+  margin:18px 2px 8px;font-family:var(--mono)}
 .pick{display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;
   border-bottom:1px solid var(--line);padding:12px 2px;cursor:pointer;text-align:left;color:var(--tx)}
 .pick-d{width:6px;height:6px;border-radius:50%;flex:none}
@@ -270,7 +278,7 @@ button,input,select{font-family:inherit;font-variant-numeric:tabular-nums;touch-
 .pf{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:11px}
 .pf label{display:block;font-size:10.5px;color:var(--tx-3);font-weight:700;margin-bottom:4px}
 .pf input,.pf select{width:100%;background:var(--card-2);border:1px solid var(--line-2);
-  border-radius:10px;color:var(--tx);font-size:15px;font-weight:700;padding:10px 11px}
+  border-radius:var(--r-sm);color:var(--tx);font-size:16px;font-weight:700;padding:11px 12px}
 .pf-w{grid-column:1/-1}
 .note{font-size:10.5px;color:var(--tx-3);line-height:1.75;margin-top:11px}
 
@@ -280,7 +288,7 @@ button,input,select{font-family:inherit;font-variant-numeric:tabular-nums;touch-
 .ring{width:104px;height:104px;flex:none;position:relative}
 .ring svg{transform:rotate(-90deg)}
 .ring-m{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.ring-m b{font-size:23px;font-weight:900;letter-spacing:-.04em;line-height:1}
+.ring-m b{font-size:25px;font-weight:900;letter-spacing:-.05em;line-height:1}
 .ring-m span{font-size:9.5px;color:var(--tx-3);margin-top:3px;font-weight:600}
 .macros{flex:1;min-width:0;display:flex;flex-direction:column;gap:11px}
 .mh{display:flex;justify-content:space-between;align-items:baseline;font-size:11.5px;margin-bottom:4px}
@@ -368,7 +376,7 @@ button,input,select{font-family:inherit;font-variant-numeric:tabular-nums;touch-
   padding:17px 15px;margin-bottom:11px;text-align:center}
 .grow-a{width:120px;height:120px;margin:0 auto 4px}
 .grow-a svg{width:100%;height:100%}
-.grow-n{font-size:20px;font-weight:900;letter-spacing:-.035em}
+.grow-n{font-size:21px;font-weight:900;letter-spacing:-.04em}
 .grow-l{font-size:10.5px;color:var(--tx-3);font-weight:800;letter-spacing:.09em;margin-top:2px}
 .grow-b{height:7px;background:var(--card-2);border-radius:4px;overflow:hidden;margin:13px 0 6px}
 .grow-b i{display:block;height:100%;background:var(--white);border-radius:4px;transition:width .4s}
@@ -383,7 +391,7 @@ button,input,select{font-family:inherit;font-variant-numeric:tabular-nums;touch-
 .big3-t{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:2px}
 .big3-t span{font-size:10.5px;font-weight:800;letter-spacing:.11em;color:var(--tx-3)}
 .big3-t em{font-style:normal;font-size:10.5px;color:var(--tx-3);font-weight:700}
-.big3-n{font-size:35px;font-weight:900;letter-spacing:-.045em;line-height:1.05}
+.big3-n{font-size:40px;font-weight:900;letter-spacing:-.055em;line-height:1}
 .big3-n small{font-size:13px;color:var(--tx-3);font-weight:700;letter-spacing:0}
 .big3-r{display:flex;gap:7px;margin:13px 0 11px}
 .big3-c{flex:1;background:var(--card-2);border-radius:11px;padding:10px 8px}
@@ -406,6 +414,52 @@ button,input,select{font-family:inherit;font-variant-numeric:tabular-nums;touch-
 .wt-n span{font-size:11px;color:var(--tx-3);font-weight:700;display:block}
 .wt-g{flex:1;min-width:0;height:46px}
 .wt-g svg{width:100%;height:100%;overflow:visible}
+
+/* ══ 시작 가이드 ══ */
+.guide-cta{display:flex;align-items:center;gap:12px;width:100%;margin-top:9px;
+  background:var(--steel);border:1px solid var(--line-2);border-radius:var(--r-lg);
+  padding:14px 14px;cursor:pointer;text-align:left;color:var(--tx);box-shadow:var(--edge2)}
+.guide-cta:active{transform:scale(.99)}
+.gc-i{font-size:20px;flex:none}
+.gc-x{flex:1;min-width:0}
+.gc-x b{display:block;font-size:14.5px;font-weight:800;letter-spacing:-.02em}
+.gc-x span{font-size:11px;color:var(--tx-3);line-height:1.5}
+.gc-go{color:var(--tx-3);font-size:17px;flex:none}
+.gcard{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);
+  margin-bottom:9px;overflow:hidden;box-shadow:var(--edge)}
+.gcard.open{border-color:var(--line-2)}
+.gc-h{display:flex;align-items:center;gap:10px;padding:14px;cursor:pointer}
+.gc-t{flex:1;min-width:0}
+.gc-t b{display:block;font-size:15.5px;font-weight:800;letter-spacing:-.025em}
+.gc-t span{font-size:11px;color:var(--tx-3)}
+.gc-tag{font-size:10px;font-weight:800;letter-spacing:.06em;color:var(--tx-2);
+  background:var(--card-2);border:1px solid var(--line-2);border-radius:6px;padding:4px 7px;flex:none}
+.gc-b{padding:0 14px 14px;border-top:1px solid var(--line);animation:drop .22s var(--e)}
+.gday{margin-top:12px}
+.gday>b{display:block;font-size:12px;font-weight:800;letter-spacing:.04em;color:var(--tx-2);margin-bottom:6px}
+.gday-x{display:flex;flex-wrap:wrap;gap:5px}
+.gday-x i{font-style:normal;display:flex;align-items:center;gap:5px;font-size:11.5px;
+  background:var(--card-2);border-radius:6px;padding:5px 8px;color:var(--tx-2)}
+.gday-x s{text-decoration:none;width:5px;height:5px;border-radius:50%;display:block;flex:none}
+.gvol{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:9px 0;border-bottom:1px solid var(--line);font-size:12.5px}
+.gvol:last-of-type{border-bottom:none}
+.gvol span{color:var(--tx-3);font-weight:600}
+.gvol b{font-weight:800;letter-spacing:-.01em}
+
+/* ══ 운동 완료 ══ */
+.fin{background:var(--steel);border:1px solid var(--line-2);border-radius:var(--r-lg);
+  padding:20px 16px;margin-bottom:12px;box-shadow:var(--edge2);text-align:center}
+.fin-tag{display:inline-block;font-size:10px;font-weight:900;letter-spacing:.18em;
+  color:var(--good);border:1px solid rgba(74,222,128,.4);border-radius:5px;padding:3px 9px}
+.fin-top b{display:block;font-size:38px;font-weight:900;letter-spacing:-.05em;margin-top:11px;line-height:1}
+.fin-sub{display:block;font-size:12px;color:var(--tx-3);font-weight:700;margin-top:6px}
+.fin-dots{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-top:13px}
+.fin-dots i{font-style:normal;display:flex;align-items:center;gap:6px;font-size:11px;
+  color:var(--tx-2);background:rgba(255,255,255,.05);border-radius:var(--r-sm);padding:5px 9px}
+.fin-dots s{text-decoration:none;width:6px;height:6px;border-radius:50%;display:block;flex:none}
+.rt-dots{display:flex;gap:3px;margin-top:4px}
+.rt-dots i{width:5px;height:5px;border-radius:50%;display:block}
 
 /* ══ 계정 · 친구 ══ */
 .acct{display:flex;align-items:center;gap:10px}
@@ -894,7 +948,8 @@ const partOf = id => PARTS.find(p => p.id === id) || PARTS[0];
 const KEY = 'ironlog-v1';
 const BLANK = { slots:[], sets:[], meals:[], profile:null, seenStage:0,
                 customEx:[], customFood:[], weights:[], restPref:{},
-                routines:[], lastReport:null, tomb:{}, updatedAt:0 };
+                routines:[], lastReport:null, tomb:{}, updatedAt:0,
+                done:{}, notify:false };
 
 async function loadData(){
   let raw = null;
@@ -1069,7 +1124,8 @@ function targets(){
 function eaten(d){
   const t = { kcal:0, c:0, p:0, f:0 };
   mealsOn(d).forEach(m => {
-    const f = FOODMAP[m.food]; if (!f) return;
+    const b = FOODMAP[m.food]; if (!b) return;
+    const f = m.ov ? Object.assign({}, b, m.ov) : b;
     t.kcal += f.kcal*m.qty; t.c += f.c*m.qty; t.p += f.p*m.qty; t.f += f.f*m.qty;
   });
   return { kcal:Math.round(t.kcal), c:Math.round(t.c), p:Math.round(t.p), f:Math.round(t.f) };
@@ -1095,6 +1151,36 @@ const mmss = s => {
   s = Math.max(0, Math.round(s));
   return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
 };
+
+/* 앱을 벗어나 있어도 휴식이 끝난 걸 알려준다.
+   ※ 아이폰 다이나믹 아일랜드는 네이티브 앱 전용 기능이라 웹앱에서는 쓸 수 없다.
+      대신 알림과 정확한 시간 복원으로 대신한다. */
+async function askNotify(){
+  if (!('Notification' in window)) { toast('이 기기는 알림을 지원하지 않아요'); return false; }
+  try{
+    const r = await Notification.requestPermission();
+    D.notify = (r === 'granted');
+    await saveData();
+    toast(D.notify ? '휴식이 끝나면 알려드릴게요' : '알림이 거부됐어요');
+    return D.notify;
+  }catch(e){ return false; }
+}
+
+async function notifyRestDone(label){
+  if (!D.notify || !('Notification' in window) || Notification.permission !== 'granted') return;
+  const body = (label && label !== '휴식' ? label + ' · ' : '') + '다음 세트를 시작하세요';
+  try{
+    if (navigator.serviceWorker && navigator.serviceWorker.ready){
+      const reg = await navigator.serviceWorker.ready;
+      await reg.showNotification('휴식 끝', {
+        body, icon:'./icon-192.png', badge:'./icon-192.png',
+        tag:'ironlog-rest', renotify:true, vibrate:[200,90,200]
+      });
+      return;
+    }
+  }catch(e){}
+  try{ new Notification('휴식 끝', { body, icon:'./icon-192.png' }); }catch(e){}
+}
 
 function beep(){
   try{
@@ -1151,7 +1237,7 @@ function tickFn(){
   if (T.mode === 'rest'){
     if (T.left > 0){
       T.left--;
-      if (T.left === 0){ beep(); vibrate([200,90,200]); toast('휴식 끝 — 다음 세트'); }
+      if (T.left === 0){ beep(); vibrate([200,90,200]); toast('휴식 끝 — 다음 세트'); notifyRestDone(T.label); }
     }
   } else {
     T.up++;
@@ -1197,7 +1283,7 @@ document.addEventListener('visibilitychange', () => {
     if (T.mode === 'rest'){
       const was = T.left;
       T.left = Math.max(0, T.left - gone);
-      if (was > 0 && T.left === 0) toast('휴식 시간이 끝나 있었어요');
+      if (was > 0 && T.left === 0){ toast('휴식 시간이 끝나 있었어요'); vibrate([120,60,120]); }
     } else T.up += gone;
     paintTimer();
   }
@@ -1212,8 +1298,18 @@ function openTimer(){
     '<button aria-pressed="'+(T.on && T.mode==='watch')+'" onclick="tmSet(\'watch\')">스톱워치</button></div>';
   h += '<div class="grp">바로 시작</div><div class="chips" style="flex-wrap:wrap">' +
     opts.map(s => '<button onclick="tmGo('+s+')">'+mmss(s)+'</button>').join('') + '</div>';
+  const canNotify = ('Notification' in window);
+  const on = D.notify && canNotify && Notification.permission === 'granted';
+  h += '<div class="grp">알림</div>' +
+    '<button class="shrow" onclick="'+(on?'toast(\'이미 켜져 있어요\')':'askNotify().then(()=>openTimer())')+'">' +
+    '<span class="shbox'+(on?' on':'')+'">'+(on?'✓':'')+'</span>' +
+    '<span class="shtx"><b>휴식 끝나면 알림</b><span>' +
+    (canNotify ? '앱을 벗어나 있어도 알려줍니다' : '이 기기는 알림을 지원하지 않아요') +
+    '</span></span></button>';
+
   h += '<div class="note">세트를 기록하면 종목에 맞는 휴식 시간이 자동으로 시작됩니다.<br>' +
-       '복합운동 3분, 바벨 운동 2분 30초, 머신·덤벨 1분 30초, 맨몸 1분이 기본값이에요.</div>';
+       '복합운동 3분, 바벨 2분 30초, 머신·덤벨 1분 30초, 맨몸 1분이 기본값이에요.<br><br>' +
+       '앱을 잠깐 나갔다 와도 <b>흐른 시간만큼 정확히 차감</b>됩니다.</div>';
 
   const used = [...new Set(D.slots.filter(s => s.date === viewDate).map(s => s.exId))];
   if (used.length){
@@ -1281,10 +1377,27 @@ function viewWorkout(){
     h += '<div class="card"><div class="empty">' +
       (d === today() ? '오늘 기록이 비어 있습니다.' : fmtD(d)+' 기록이 없습니다.') +
       '<br>아래에서 종목을 추가하세요.</div></div>';
+    /* 아직 기록이 거의 없는 사람에게는 무엇부터 할지 알려준다 */
+    if (D.slots.length < 3){
+      h += '<button class="guide-cta" onclick="openGuide()">' +
+        '<span class="gc-i">📋</span>' +
+        '<span class="gc-x"><b>뭘 해야 할지 모르겠다면</b>' +
+        '<span>주 몇 회 갈 수 있는지만 정하면 분할과 종목을 짜드려요</span></span>' +
+        '<span class="gc-go">›</span></button>';
+    }
   }
   slots.forEach(sl => { h += exCard(sl); });
 
+  /* 이미 끝낸 날이면 요약만 보여주고, 언제든 다시 열 수 있게 한다 */
+  if (D.done && D.done[d] && slots.length){
+    return sessionDoneHTML(d, slots, vol, cnt);
+  }
+
   h += '<button class="btn" onclick="openExPicker()">＋ 운동 추가</button>';
+
+  if (slots.length && cnt > 0){
+    h += '<button class="btn btn-g" style="margin-top:8px" onclick="finishSession()">운동 종료</button>';
+  }
 
   const R = D.routines || [];
   if (!slots.length){
@@ -1300,6 +1413,32 @@ function viewWorkout(){
       (R.length ? '<button class="btn btn-g btn-sm" onclick="openRoutines()">루틴 불러오기</button>' : '') +
       '</div>';
   }
+  return h;
+}
+
+function sessionDoneHTML(d, slots, vol, cnt){
+  const parts = [...new Set(slots.map(x => EX[x.exId] && EX[x.exId].part).filter(Boolean))];
+  let h = '<div class="fin"><div class="fin-top">' +
+    '<span class="fin-tag">완료</span>' +
+    '<b>' + (vol >= 1000 ? r1(vol/1000)+'t' : Math.round(vol)+'kg') + '</b>' +
+    '<span class="fin-sub">' + slots.length + '종목 · ' + cnt + '세트</span>' +
+    '<div class="fin-dots">' + parts.map(pp =>
+      '<i><s style="background:'+partOf(pp).color+'"></s>'+partOf(pp).name+'</i>').join('') + '</div>' +
+    '</div></div>';
+
+  slots.forEach(sl => {
+    const ex = EX[sl.exId]; if (!ex) return;
+    const ss = setsOf(sl.id);
+    h += '<div class="dd" style="padding:12px 14px;background:var(--card);border:1px solid var(--line);' +
+      'border-radius:var(--r-lg);margin-bottom:8px"><div class="dd-h">' +
+      '<i class="dd-c" style="background:'+partOf(ex.part).color+'"></i><b>'+esc(ex.name)+'</b>' +
+      '<span>'+ss.length+'세트</span></div>' +
+      '<div class="dd-s">'+ss.map(x => '<i>'+setLabel(x)+'</i>').join('')+'</div></div>';
+  });
+
+  h += '<div class="row2" style="margin-top:10px">' +
+    '<button class="btn btn-g" onclick="reopenSession()">다시 열어서 수정</button>' +
+    '<button class="btn btn-g" onclick="saveRoutine()">루틴으로 저장</button></div>';
   return h;
 }
 
@@ -1393,7 +1532,7 @@ function exCard(sl){
       '<button aria-pressed="'+(v===dr.rpe)+'" onclick="setDr(\''+sl.id+'\',\'rpe\','+v+',1)">'+v+'</button>'
     ).join('') + '</div>';
   }
-  if (ex.kind === 'bar' && dr.w > 0) h += '<div class="pls">'+plateHTML(dr.w)+'</div>';
+  if (ex.kind === 'bar') h += '<div class="pls" id="pl-'+sl.id+'">'+(dr.w>0?plateHTML(dr.w):'')+'</div>';
   h += '</div>';
 
   /* 하단 조작 */
@@ -1533,12 +1672,14 @@ function viewDiet(){
 
   MEALTIME.forEach(mt => {
     const list = mealsOn(d).filter(m => m.time === mt);
-    const kc = list.reduce((a,m) => a + (FOODMAP[m.food] ? FOODMAP[m.food].kcal*m.qty : 0), 0);
+    const kc = list.reduce((a,m) => { const b0 = FOODMAP[m.food]; if (!b0) return a;
+    return a + ((m.ov && m.ov.kcal != null) ? m.ov.kcal : b0.kcal) * m.qty; }, 0);
     h += '<div class="meal"><div class="meal-h"><b>'+mt+'</b><span>'+Math.round(kc)+' kcal</span></div><div class="meal-b">';
     list.forEach(m => {
-      const f = FOODMAP[m.food]; if (!f) return;
-      h += '<div class="food"><div class="food-t"><b>'+esc(f.name)+'</b>' +
-        '<span>'+esc(f.unit)+(m.qty!==1?' × '+m.qty:'')+' · 단 '+r1(f.p*m.qty)+'g</span></div>' +
+      const b0 = FOODMAP[m.food]; if (!b0) return;
+      const f = m.ov ? Object.assign({}, b0, m.ov) : b0;
+      h += '<div class="food"><div class="food-t"><b>'+esc(f.name)+(m.ov?' <span style="font-size:9px;color:var(--tx-3)">수정</span>':'')+'</b>' +
+        '<span>'+esc(b0.unit)+(m.qty!==1?' × '+m.qty:'')+' · 단 '+r1(f.p*m.qty)+'g</span></div>' +
         '<span class="food-k">'+Math.round(f.kcal*m.qty)+'</span>' +
         '<button class="food-x" onclick="rmMeal(\''+m.id+'\')" aria-label="삭제">✕</button></div>';
     });
@@ -1934,9 +2075,56 @@ function routineListHTML(compact){
     '</div>').join('');
 }
 function openRoutines(){
-  let h = routineListHTML(false);
-  h += '<div class="note">루틴을 불러오면 종목만 추가됩니다. 무게·횟수는 그 종목의 지난 기록에서 자동으로 채워져요.</div>';
-  openSheet('내 루틴', h);
+  let h = '<div class="grp">저장한 루틴</div>' + routineListHTML(false);
+
+  /* 지난 날짜의 구성을 그대로 가져오기 */
+  const past = [...new Set(D.slots.map(x => x.date))]
+    .filter(x => x < viewDate && daySets(x) > 0)
+    .sort().reverse().slice(0, 14);
+
+  h += '<div class="grp" style="margin-top:20px">지난 운동에서 가져오기</div>';
+  if (!past.length){
+    h += '<div class="empty" style="padding:16px">지난 기록이 없습니다.</div>';
+  } else {
+    past.forEach(dt => {
+      const sl = slotsOn(dt);
+      const names = sl.map(x => x.exId);
+      const parts = [...new Set(sl.map(x => EX[x.exId] && EX[x.exId].part).filter(Boolean))];
+      h += '<div class="rt"><div class="rt-t">' +
+        '<b>'+fmtD(dt)+' ('+fmtW(dt)+') · '+names.length+'종목</b>' +
+        '<span>'+esc(names.slice(0,3).join(', '))+(names.length>3?' 외':'')+'</span>' +
+        '<span class="rt-dots">'+parts.map(pp =>
+          '<i style="background:'+partOf(pp).color+'"></i>').join('')+'</span></div>' +
+        '<button class="rt-b" onclick="loadFromDay(\''+dt+'\')">가져오기</button>' +
+        '<button class="rt-x" onclick="saveRoutineFrom(\''+dt+'\')" title="루틴으로 저장">＋</button></div>';
+    });
+  }
+  h += '<div class="note">가져오면 <b>종목만</b> 추가됩니다. 무게와 횟수는 그 종목의 지난 기록에서 자동으로 채워져요.<br>' +
+    '＋ 를 누르면 그날 구성을 이름 붙여 루틴으로 저장합니다.</div>';
+  openSheet('루틴 · 불러오기', h);
+}
+
+async function loadFromDay(dt){
+  const exist = new Set(slotsOn(viewDate).map(x => x.exId));
+  let added = 0;
+  slotsOn(dt).forEach(sl => {
+    if (!EX[sl.exId] || exist.has(sl.exId)) return;
+    D.slots.push({ id:uid(), date:viewDate, exId:sl.exId }); added++;
+  });
+  if (D.done) delete D.done[viewDate];
+  await saveData(); closeSheet(); tab = 'workout'; render();
+  toast(added ? fmtD(dt)+' 구성 '+added+'개 추가' : '이미 다 들어있어요');
+}
+
+async function saveRoutineFrom(dt){
+  const list = slotsOn(dt).map(x => x.exId);
+  if (!list.length) return;
+  const name = prompt('루틴 이름', suggestRoutineName(list));
+  if (!name) return;
+  D.routines = D.routines || [];
+  D.routines.push({ id:uid(), name:name.trim(), exIds:list, created:today() });
+  await saveData(); openRoutines(); render();
+  toast('“'+name.trim()+'” 저장했어요');
 }
 
 /* ═══════════════════════════════════════════════════
@@ -2108,6 +2296,159 @@ function nextWeekPlan(R){
   return out.slice(0,4).map((x,i) => (i+1)+'. '+x).join('<br><br>');
 }
 
+
+/* ═══════════════════════════════════════════════════
+   18. 시작 가이드 — 분할 · 볼륨 · 종목
+   ───────────────────────────────────────────────────
+   근거: 부위별 주당 10~20세트가 근비대에 유효하다는 용량-반응 연구,
+   같은 주간 볼륨이면 분할 형태보다 총량과 빈도가 더 중요하다는 결과,
+   부위별 주 2회 자극이 주 1회보다 유리하다는 메타분석을 기준으로 삼았습니다.
+   개인차가 있으니 절대 규칙이 아니라 출발점으로 쓰세요.
+   ═══════════════════════════════════════════════════ */
+const SPLITS = [
+  {
+    id:'full2', days:2, name:'전신 2분할', tag:'주 2회',
+    who:'운동을 막 시작했거나, 시간이 정말 없을 때',
+    why:'주 2회라도 전신을 다 건드리면 모든 부위가 주 2회 자극을 받습니다. 초보에게는 이 빈도가 가장 효율적이에요.',
+    plan:[
+      { name:'A · 전신', ex:['백스쿼트','벤치프레스','랫풀다운','덤벨 숄더프레스','플랭크'] },
+      { name:'B · 전신', ex:['루마니안 데드리프트','인클라인 덤벨프레스','시티드 케이블로우','사이드 래터럴레이즈','행잉 니레이즈'] }
+    ]
+  },
+  {
+    id:'full3', days:3, name:'전신 3분할', tag:'주 3회',
+    who:'초보자에게 가장 추천. 3~6개월차까지',
+    why:'전신을 주 3회 반복하면 부위별 주 3회 자극이 됩니다. 종목 수가 적어 폼을 익히기에도 좋아요.',
+    plan:[
+      { name:'A', ex:['백스쿼트','벤치프레스','바벨로우','덤벨 숄더프레스','행잉 니레이즈'] },
+      { name:'B', ex:['데드리프트','오버헤드 프레스','랫풀다운','레그프레스','케이블 크런치'] },
+      { name:'C', ex:['프론트스쿼트','인클라인 바벨프레스','시티드 케이블로우','사이드 래터럴레이즈','플랭크'] }
+    ]
+  },
+  {
+    id:'ppl3', days:3, name:'PPL 3분할', tag:'주 3~6회',
+    who:'6개월차 이상. 부위별로 집중하고 싶을 때',
+    why:'밀기·당기기·하체로 나눠 회복이 겹치지 않습니다. 주 3회면 부위별 1회, 두 바퀴 돌리면 2회가 됩니다.',
+    plan:[
+      { name:'Push · 가슴 어깨 삼두', ex:['벤치프레스','인클라인 덤벨프레스','덤벨 숄더프레스','사이드 래터럴레이즈','케이블 크로스오버','로프 푸시다운'] },
+      { name:'Pull · 등 이두', ex:['데드리프트','풀업','시티드 케이블로우','리어델트 펙덱','바벨컬','해머컬'] },
+      { name:'Legs · 하체 복근', ex:['백스쿼트','루마니안 데드리프트','레그프레스','라잉 레그컬','스탠딩 카프레이즈 머신','행잉 레그레이즈'] }
+    ]
+  },
+  {
+    id:'ul4', days:4, name:'상하 4분할', tag:'주 4회',
+    who:'주 4회 갈 수 있고, 부위별 빈도를 지키고 싶을 때',
+    why:'상체·하체를 각각 주 2회. 빈도와 볼륨의 균형이 가장 좋아 중급자에게 널리 쓰입니다.',
+    plan:[
+      { name:'상체 A', ex:['벤치프레스','바벨로우','덤벨 숄더프레스','랫풀다운','바벨컬','로프 푸시다운'] },
+      { name:'하체 A', ex:['백스쿼트','루마니안 데드리프트','레그 익스텐션','라잉 레그컬','스탠딩 카프레이즈 머신'] },
+      { name:'상체 B', ex:['오버헤드 프레스','풀업','인클라인 덤벨프레스','시티드 케이블로우','사이드 래터럴레이즈','해머컬'] },
+      { name:'하체 B', ex:['데드리프트','레그프레스','불가리안 스플릿스쿼트','시티드 레그컬','시티드 카프레이즈'] }
+    ]
+  },
+  {
+    id:'ppl5', days:5, name:'PPL + 상하 5분할', tag:'주 5회',
+    who:'1년차 이상. 회복이 충분하고 시간이 될 때',
+    why:'볼륨을 늘리면서도 부위별 주 2회 가까이 맞출 수 있습니다. 다만 식사와 수면이 받쳐줘야 해요.',
+    plan:[
+      { name:'Push', ex:['벤치프레스','오버헤드 프레스','인클라인 덤벨프레스','사이드 래터럴레이즈','로프 푸시다운'] },
+      { name:'Pull', ex:['데드리프트','풀업','시티드 케이블로우','리어델트 펙덱','바벨컬'] },
+      { name:'Legs', ex:['백스쿼트','루마니안 데드리프트','레그프레스','라잉 레그컬','스탠딩 카프레이즈 머신'] },
+      { name:'상체', ex:['인클라인 바벨프레스','랫풀다운','아놀드 프레스','케이블 크로스오버','해머컬'] },
+      { name:'하체 · 복근', ex:['프론트스쿼트','불가리안 스플릿스쿼트','레그 익스텐션','행잉 레그레이즈','케이블 크런치'] }
+    ]
+  }
+];
+
+let gDays = 3, gOpen = 'full3';
+function openGuide(){ openSheet('시작 가이드', guideHTML()); }
+
+function guideHTML(){
+  let h = '<div class="note" style="margin:0 0 16px">몇 번 갈 수 있는지부터 정하세요. ' +
+    '<b>어떤 분할이냐보다 주당 총 볼륨과 빈도가 더 중요합니다.</b> 못 지킬 계획은 안 지켜집니다.</div>';
+
+  h += '<div class="grp">주 몇 회 가시나요</div><div class="chips" style="flex-wrap:wrap;gap:7px">' +
+    [2,3,4,5].map(n => '<button aria-pressed="'+(gDays===n)+'" onclick="gSet('+n+')">주 '+n+'회</button>').join('') +
+    '</div>';
+
+  const list = SPLITS.filter(x => x.days === gDays);
+  list.forEach(sp => {
+    const open = gOpen === sp.id;
+    h += '<div class="gcard'+(open?' open':'')+'">' +
+      '<div class="gc-h" onclick="gToggle(\'' + sp.id + '\')">' +
+      '<div class="gc-t"><b>'+sp.name+'</b><span>'+sp.who+'</span></div>' +
+      '<span class="gc-tag">'+sp.tag+'</span></div>';
+    if (open){
+      h += '<div class="gc-b"><div class="note" style="margin:0 0 12px">'+sp.why+'</div>';
+      sp.plan.forEach(dayp => {
+        h += '<div class="gday"><b>'+dayp.name+'</b><div class="gday-x">' +
+          dayp.ex.map(n => {
+            const e = EX[n];
+            const c = e ? partOf(e.part).color : 'var(--tx-3)';
+            return '<i><s style="background:'+c+'"></s>'+esc(n)+'</i>';
+          }).join('') + '</div></div>';
+      });
+      h += '<button class="btn" style="margin-top:12px" onclick="applySplit(\'' + sp.id + '\')">' +
+        '이 분할을 루틴으로 저장</button>';
+      h += '<div class="note">저장하면 운동 탭의 <b>루틴 불러오기</b>에서 요일마다 골라 쓸 수 있어요.</div></div>';
+    }
+    h += '</div>';
+  });
+
+  h += '<div class="grp" style="margin-top:22px">볼륨 기준</div><div class="card">' +
+    '<div class="gvol"><span>한 부위 주당</span><b>10~20세트</b></div>' +
+    '<div class="gvol"><span>같은 부위 빈도</span><b>주 2회</b></div>' +
+    '<div class="gvol"><span>한 세트 반복</span><b>6~12회</b></div>' +
+    '<div class="gvol"><span>세트 사이 휴식</span><b>복합 2~3분 · 고립 1~2분</b></div>' +
+    '<div class="gvol"><span>강도 (RPE)</span><b>7~9</b></div>' +
+    '<div class="note">10세트 아래면 성장이 더디고, 20세트를 넘으면 회복이 못 따라옵니다. ' +
+    '<b>처음에는 부위당 10세트로 시작해 매주 1~2세트씩 늘리세요.</b><br><br>' +
+    'RPE 10(완전 실패)까지 매번 가는 건 오히려 손해입니다. 1~2회 남기고 끝내는 쪽이 회복에 유리해요.</div></div>';
+
+  h += '<div class="grp">증량하는 법</div><div class="card"><div class="note" style="margin:0">' +
+    '<b>이중 점진 방식</b>을 쓰세요. 목표 반복 범위를 8~12회로 잡았다면,<br><br>' +
+    '<b>1.</b> 모든 세트에서 12회를 채울 때까지 무게는 그대로 두고 횟수를 늘립니다<br>' +
+    '<b>2.</b> 다 채우면 무게를 올리고 다시 8회부터 시작합니다<br>' +
+    '<b>3.</b> 상체는 2.5kg, 하체는 5kg씩 올리는 게 기본입니다<br><br>' +
+    '앱이 이걸 자동으로 봐줍니다. 3세션 동안 제자리면 <b>정체 알림</b>이, 신기록급이 나오면 <b>PR 도전 알림</b>이 떠요.</div></div>';
+
+  h += '<div class="note" style="margin-top:16px;line-height:1.85">' +
+    '위 수치는 근비대 용량-반응 연구와 빈도 메타분석에서 널리 인용되는 범위를 정리한 것입니다. ' +
+    '개인차가 크니 <b>출발점으로만</b> 쓰시고, 2~4주 기록을 보며 본인에게 맞게 조정하세요. ' +
+    '통증이 있거나 질환이 있다면 전문가와 상담하시는 게 우선입니다.</div>';
+
+  return h;
+}
+
+function gSet(n){
+  gDays = n;
+  const first = SPLITS.find(x => x.days === n);
+  gOpen = first ? first.id : null;
+  gPaint();
+}
+function gToggle(id){ gOpen = (gOpen === id) ? null : id; gPaint(); }
+function gPaint(){
+  const b = $('#shB'); if (!b) return;
+  const keep = b.scrollTop;
+  b.innerHTML = guideHTML();
+  b.scrollTop = keep;
+}
+
+async function applySplit(id){
+  const sp = SPLITS.find(x => x.id === id);
+  if (!sp) return;
+  D.routines = D.routines || [];
+  let n = 0;
+  sp.plan.forEach(dayp => {
+    const nm = sp.name.split(' ')[0] + ' · ' + dayp.name;
+    if (D.routines.some(r => r.name === nm)) return;
+    D.routines.push({ id:uid(), name:nm, exIds:dayp.ex.filter(x => EX[x]), created:today() });
+    n++;
+  });
+  await saveData(); closeSheet(); render();
+  toast(n ? sp.name+' 루틴 '+n+'개 저장' : '이미 저장되어 있어요');
+}
+
 /* ═══════════════════════════════════════════════════
    12. 헬냥이
    ═══════════════════════════════════════════════════ */
@@ -2180,12 +2521,13 @@ function catSVG(idx, mood){
   const S = STAGES[Math.max(0,Math.min(STAGES.length-1,idx))];
   const SW = S.sw, AR = S.arm, BI = S.bi;
   const WW = SW*(0.7-idx*0.05);
-  const FUR='#F3E3CE', FUR2='#DCC0A0', LINE='#C9A87E', PINK='#FF9DA5', DARK='#2A2118';
-  const CX = 50, ol = 'stroke="'+LINE+'" stroke-width="1.3" stroke-linejoin="round"';
+  /* 색을 차분하게, 윤곽선을 얇게 다듬어 덜 유치하게 */
+  const FUR='#EDE4D8', FUR2='#CDBCA8', LINE='#A99781', PINK='#F2A0A6', DARK='#1F1B16';
+  const CX = 50, ol = 'stroke="'+LINE+'" stroke-width="1" stroke-linejoin="round"';
   let g = '';
-  if (idx >= 5) g += '<g opacity=".55" stroke="#F5C445" stroke-width="2.6" stroke-linecap="round">' +
+  if (idx >= 5) g += '<g opacity=".4" stroke="#D9A93C" stroke-width="2.2" stroke-linecap="round">' +
     '<path d="M14 18 l-5 -4 M86 18 l5 -4 M8 44 l-6 -1 M92 44 l6 -1 M24 6 l-3 -5 M76 6 l3 -5"/></g>';
-  g += '<path d="M'+(CX+WW-2)+' 78 q 17 5 13 -13" fill="none" stroke="'+LINE+'" stroke-width="8.5" stroke-linecap="round"/>' +
+  g += '<path d="M'+(CX+WW-2)+' 78 q 17 5 13 -13" fill="none" stroke="'+LINE+'" stroke-width="7.6" stroke-linecap="round"/>' +
        '<path d="M'+(CX+WW-2)+' 78 q 17 5 13 -13" fill="none" stroke="'+FUR+'" stroke-width="6" stroke-linecap="round"/>';
   const legW = 7+idx*1.5, legX = WW*0.68;
   [-1,1].forEach(d => { g += '<rect x="'+(CX+d*legX-legW/2)+'" y="73" width="'+legW+'" height="19" rx="'+(legW/2)+'" fill="'+FUR+'" '+ol+'/>'; });
@@ -2205,8 +2547,8 @@ function catSVG(idx, mood){
       bx=(sx+ex)/2+d*BI*0.4; by=(sy+ey)/2; br=BI;
     }
     const w = AR*1.75;
-    let o = '<path d="'+path+'" fill="none" stroke="'+LINE+'" stroke-width="'+(w+2.4)+'" stroke-linecap="round" stroke-linejoin="round"/>';
-    if (br) o += '<ellipse cx="'+bx+'" cy="'+by+'" rx="'+(br+AR*0.6+1.2)+'" ry="'+(br*1.2+AR*0.55+1.2)+'" fill="'+LINE+'"/>';
+    let o = '<path d="'+path+'" fill="none" stroke="'+LINE+'" stroke-width="'+(w+1.8)+'" stroke-linecap="round" stroke-linejoin="round"/>';
+    if (br) o += '<ellipse cx="'+bx+'" cy="'+by+'" rx="'+(br+AR*0.6+0.9)+'" ry="'+(br*1.2+AR*0.55+0.9)+'" fill="'+LINE+'"/>';
     o += '<path d="'+path+'" fill="none" stroke="'+FUR+'" stroke-width="'+w+'" stroke-linecap="round" stroke-linejoin="round"/>';
     if (br){
       o += '<ellipse cx="'+bx+'" cy="'+by+'" rx="'+(br+AR*0.6)+'" ry="'+(br*1.2+AR*0.55)+'" fill="'+FUR+'"/>';
@@ -2215,13 +2557,13 @@ function catSVG(idx, mood){
     return o;
   };
   g += arm(-1)+arm(1);
-  if (idx >= 4) g += '<rect x="'+(CX-WW-2)+'" y="69" width="'+(WW*2+4)+'" height="7.5" rx="2.5" fill="'+(idx>=5?'#F5C445':'#8B5E3C')+'" stroke="#5A3A22" stroke-width="1"/>' +
-    '<rect x="'+(CX-2.5)+'" y="70.5" width="5" height="4.5" rx="1" fill="#5A3A22"/>';
+  if (idx >= 4) g += '<rect x="'+(CX-WW-2)+'" y="69" width="'+(WW*2+4)+'" height="7" rx="1.5" fill="'+(idx>=5?'#C79A38':'#6E4B31')+'" stroke="#3E2A19" stroke-width=".9"/>' +
+    '<rect x="'+(CX-2.5)+'" y="70.3" width="5" height="4.4" rx=".8" fill="#3E2A19"/>';
   g += '<path d="M36 23 L30.5 6.5 L46.5 14 Z" fill="'+FUR+'" '+ol+'/><path d="M36.8 19.5 L34 11.5 L42.2 15 Z" fill="'+PINK+'"/>' +
        '<path d="M64 23 L69.5 6.5 L53.5 14 Z" fill="'+FUR+'" '+ol+'/><path d="M63.2 19.5 L66 11.5 L57.8 15 Z" fill="'+PINK+'"/>';
   g += '<circle cx="50" cy="31" r="18" fill="'+FUR+'" '+ol+'/>' +
-       '<path d="M45 15.5 l-1.5 5.5 M50 14.5 v5.5 M55 15.5 l1.5 5.5" stroke="'+FUR2+'" stroke-width="1.9" stroke-linecap="round"/>';
-  if (idx >= 3) g += '<path d="M33.5 24.5 q16.5 -7.5 33 0" fill="none" stroke="'+(idx>=5?'#F5C445':'#FF6B5A')+'" stroke-width="5.2" stroke-linecap="round"/>';
+       '<path d="M45 15.5 l-1.2 5 M50 14.8 v5 M55 15.5 l1.2 5" stroke="'+FUR2+'" stroke-width="1.5" stroke-linecap="round" opacity=".75"/>';
+  if (idx >= 3) g += '<path d="M33.5 24.5 q16.5 -7.5 33 0" fill="none" stroke="'+(idx>=5?'#D9A93C':'#D8574A')+'" stroke-width="4.6" stroke-linecap="round"/>';
   g += {
     happy:'<path d="M41 31.5 q3.6 -4.4 7.2 0 M51.8 31.5 q3.6 -4.4 7.2 0" fill="none" stroke="'+DARK+'" stroke-width="2.5" stroke-linecap="round"/>',
     normal:'<circle cx="44.4" cy="31" r="2.7" fill="'+DARK+'"/><circle cx="55.6" cy="31" r="2.7" fill="'+DARK+'"/><circle cx="45.3" cy="30.1" r=".9" fill="#fff"/><circle cx="56.5" cy="30.1" r=".9" fill="#fff"/>',
@@ -2235,7 +2577,7 @@ function catSVG(idx, mood){
     : mood === 'sad'
       ? '<path d="M46.4 40.4 q3.6 -2.8 7.2 0" fill="none" stroke="'+DARK+'" stroke-width="1.9" stroke-linecap="round"/>'
       : '<path d="M50 36.2 q-2.6 3.6 -5.2 0.5 M50 36.2 q2.6 3.6 5.2 0.5" fill="none" stroke="'+DARK+'" stroke-width="1.9" stroke-linecap="round"/>';
-  g += '<g stroke="'+DARK+'" stroke-width="1.25" stroke-linecap="round" opacity=".45"><path d="M35.5 34 l-8.5 -2.2 M35.5 37.2 l-8.5 1.6 M64.5 34 l8.5 -2.2 M64.5 37.2 l8.5 1.6"/></g>';
+  g += '<g stroke="'+DARK+'" stroke-width="1" stroke-linecap="round" opacity=".3"><path d="M35.5 34 l-8 -2 M35.5 37.2 l-8 1.5 M64.5 34 l8 -2 M64.5 37.2 l8 1.5"/></g>';
   if (mood === 'worry') g += '<path d="M70.5 20 q3.2 4.8 0 6.4 q-3.2 -1.6 0 -6.4" fill="#7DC4F5"/>';
   return '<svg viewBox="-11 -3 122 106" xmlns="http://www.w3.org/2000/svg">'+g+'</svg>';
 }
@@ -2328,6 +2670,7 @@ function catSay(st){
   if (st.since !== null && st.since >= 3) out.push({i:'😿',tone:'a',t:'<b>'+st.since+'일째</b> 안 왔다냥... 가볍게라도 오자냥.'});
   else if (st.streak >= 3) out.push({i:'🔥',tone:'g',t:'<b>'+st.streak+'일 연속</b> 기록 중이다냥! 곧 '+(st.nxt?st.nxt.name:'최종 단계')+'이다냥.'});
   else if (tSet === 0) out.push({i:'👀',tone:'',t:'오늘은 아직 기록이 없다냥. 종목 하나만 눌러도 시작이다냥.'});
+  if (D.slots.length < 3) out.push({i:'📋',tone:'',t:'뭘 할지 모르겠으면 <b>내 정보 → 시작 가이드</b>를 보라냥. 주 몇 회 갈지만 정하면 짜준다냥.'});
 
   out.push({i:'💡',tone:'',t:TIPS[Math.floor(new Date(d).getTime()/864e5) % TIPS.length]});
   return out;
@@ -2443,6 +2786,7 @@ function viewMe(){
     '브라우저 데이터를 지우거나 기기를 바꾸면 사라지니 가끔 백업하세요.</div>' +
     '<div class="row2"><button class="btn btn-g btn-sm" onclick="exportData()">백업 내려받기</button>' +
     '<button class="btn btn-g btn-sm" onclick="importData()">백업 복원</button></div>' +
+    '<button class="btn btn-g btn-sm" style="margin-top:8px" onclick="openGuide()">시작 가이드 · 분할과 볼륨</button>' +
     '<button class="btn btn-g btn-sm" style="margin-top:8px" onclick="openRoutines()">루틴 관리</button>' +
     '<button class="btn btn-g btn-sm" style="margin-top:8px" onclick="openCustomList()">내가 추가한 종목·음식</button>' +
     '<button class="btn btn-g btn-sm" style="margin-top:8px;color:var(--chest)" onclick="wipe()">기록 전체 삭제</button></div>';
@@ -2665,7 +3009,8 @@ function openFood(mt){
 function foodHTML(){
   const s = shState;
   if (s.food){
-    const f = FOODMAP[s.food];
+    const base = FOODMAP[s.food];
+    const f = s.ov ? Object.assign({}, base, s.ov) : base;
     let h = '<div class="card" style="text-align:center;padding:20px 15px">' +
       '<div style="font-size:18px;font-weight:900;letter-spacing:-.03em">'+esc(f.name)+'</div>' +
       '<div style="font-size:11.5px;color:var(--tx-3);margin-top:3px">'+esc(f.unit)+' 기준</div>' +
@@ -2673,6 +3018,24 @@ function foodHTML(){
         Math.round(f.kcal*s.qty)+'<span style="font-size:13px;color:var(--tx-3)"> kcal</span></div>' +
       '<div style="font-size:11.5px;color:var(--tx-2);margin-top:5px">탄 '+r1(f.c*s.qty)+'g · 단 '+r1(f.p*s.qty)+'g · 지 '+r1(f.f*s.qty)+'g</div>' +
       '<div class="qty"><button onclick="qtyB(-0.5)">−</button><div>'+s.qty+'인분</div><button onclick="qtyB(0.5)">＋</button></div></div>';
+
+    /* 실제로 먹은 양이 기본값과 다를 때 직접 고칠 수 있게 */
+    if (s.edit){
+      h += '<div class="grp">영양소 직접 입력 <span style="font-weight:600;letter-spacing:0;text-transform:none">(1인분 기준)</span></div>' +
+        '<div class="pf">' +
+        '<div><label>칼로리 kcal</label><input id="ovK" inputmode="decimal" value="'+f.kcal+'" oninput="ovSet()"></div>' +
+        '<div><label>단백질 g</label><input id="ovP" inputmode="decimal" value="'+f.p+'" oninput="ovSet()"></div>' +
+        '<div><label>탄수화물 g</label><input id="ovC" inputmode="decimal" value="'+f.c+'" oninput="ovSet()"></div>' +
+        '<div><label>지방 g</label><input id="ovF" inputmode="decimal" value="'+f.f+'" oninput="ovSet()"></div>' +
+        '</div>' +
+        '<div class="row2" style="margin-bottom:12px">' +
+        '<button class="btn btn-g btn-sm" onclick="ovAuto()">탄단지로 칼로리 계산</button>' +
+        '<button class="btn btn-g btn-sm" onclick="ovReset()">기본값으로</button></div>';
+    } else {
+      h += '<button class="btn btn-g btn-sm" style="margin-bottom:12px" onclick="ovOpen()">' +
+        '영양소가 다른가요? 직접 입력</button>';
+    }
+
     h += '<div class="mpick">'+MEALTIME.map(m =>
       '<button aria-pressed="'+(m===s.time)+'" onclick="pickTime(\''+m+'\')">'+m+'</button>').join('')+'</div>';
     h += '<button class="btn" style="margin-top:13px" onclick="commitFood()">'+s.time+'에 추가</button>';
@@ -2708,13 +3071,35 @@ function foodSearch(v){
   const i = $('#fdQ'); if (i){ i.focus(); i.setSelectionRange(v.length, v.length); }
   b.scrollTop = p;
 }
-function pickFood(n){ shState.food = n; shState.qty = 1; refresh(foodHTML()); }
+function pickFood(n){ shState.food = n; shState.qty = 1; shState.ov = null; shState.edit = false; refresh(foodHTML()); }
+
+/* 영양소 직접 입력 — 다시 그리지 않고 값만 읽어 보관한다 (커서 튐 방지) */
+function ovOpen(){ shState.edit = true; refresh(foodHTML()); }
+function ovSet(){
+  const g = id => { const el = $(id); return el ? num(el.value) : 0; };
+  shState.ov = { kcal:g('#ovK'), p:g('#ovP'), c:g('#ovC'), f:g('#ovF') };
+  const b = FOODMAP[shState.food];
+  const f = Object.assign({}, b, shState.ov);
+  const box = document.querySelector('#ovSum');
+  if (box) box.innerHTML = Math.round(f.kcal*shState.qty) +
+    '<span style="font-size:13px;color:var(--tx-3)"> kcal</span>';
+}
+function ovAuto(){
+  ovSet();
+  const o = shState.ov;
+  o.kcal = Math.round(o.c*4 + o.p*4 + o.f*9);
+  refresh(foodHTML());
+}
+function ovReset(){ shState.ov = null; shState.edit = false; refresh(foodHTML()); }
 function backFood(){ shState.food = null; refresh(foodHTML()); }
 function qtyB(d){ shState.qty = Math.max(0.5, Math.round((shState.qty+d)*10)/10); refresh(foodHTML()); }
 function pickTime(t){ shState.time = t; refresh(foodHTML()); }
 
 async function commitFood(){
-  D.meals.push({ id:uid(), date:viewDate, time:shState.time, food:shState.food, qty:shState.qty });
+  if (shState.edit) ovSet();
+  const rec = { id:uid(), date:viewDate, time:shState.time, food:shState.food, qty:shState.qty };
+  if (shState.ov) rec.ov = shState.ov;
+  D.meals.push(rec);
   await saveData(); closeSheet(); render(); toast('추가했어요');
 }
 async function rmMeal(id){ bury(id); D.meals = D.meals.filter(m => m.id !== id); await saveData(); render(); }
@@ -2891,6 +3276,23 @@ async function rmSlot(id){
   if (openEx === id) openEx = null;
   await saveData(); render();
 }
+async function finishSession(){
+  const d = viewDate;
+  if (!daySets(d)){ toast('기록된 세트가 없어요'); return; }
+  D.done = D.done || {};
+  D.done[d] = true;
+  openEx = null;
+  stopTimer();
+  await saveData(); render(); window.scrollTo(0,0);
+  vibrate([40,60,40]);
+  toast('오늘 운동 완료!');
+}
+async function reopenSession(){
+  D.done = D.done || {};
+  delete D.done[viewDate];
+  await saveData(); render();
+}
+
 async function copyLast(){
   const dates = [...new Set(D.slots.map(s => s.date))].filter(d => d < viewDate).sort();
   const last = dates[dates.length-1];
@@ -2903,7 +3305,14 @@ async function copyLast(){
 function setDr(id, key, val, re){
   draft[id] = draft[id] || {};
   draft[id][key] = typeof val === 'string' ? num(val) : val;
-  if (re) render();
+  if (re){ render(); return; }
+  /* 타이핑 중에는 화면 전체를 다시 그리지 않는다.
+     다시 그리면 입력칸이 새로 만들어지면서 커서가 튀고 키보드가 흔들린다.
+     대신 바뀐 부분(원판 그림)만 살짝 고쳐준다. */
+  if (key === 'w'){
+    const box = document.querySelector('#pl-' + id);
+    if (box) box.innerHTML = plateHTML(num(draft[id].w));
+  }
 }
 function bump(id, key, d){
   const o = draft[id]; if (!o) return;
@@ -3017,7 +3426,8 @@ Object.assign(window, {
   openPR, openCat, openTimer, tmSet, tmGo, restPref, startRest, defaultRest, mmss,
   exportData, importData, wipe, closeSheet,
   openTrend, stallCheck, saveRoutine, applyRoutine, rmRoutine, openRoutines,
-  openWeekReport, restAdj
+  openWeekReport, restAdj, finishSession, reopenSession, loadFromDay, saveRoutineFrom,
+  ovOpen, ovSet, ovAuto, ovReset, askNotify, openGuide, gSet, gToggle, applySplit
 });
 
 /* 이벤트 */
@@ -3262,11 +3672,11 @@ async function verifyLink(){
 function showCodeStep(){
   refresh(
     '<div class="note" style="margin:0 0 14px"><b style="color:var(--tx);font-size:15px">메일을 보냈어요</b><br><br>' +
-    esc(otpEmail) + ' 으로 <b>6자리 숫자</b>를 보냈습니다.<br>메일을 열어 숫자를 확인하고 아래에 입력하세요.</div>' +
+    esc(otpEmail) + ' 으로 <b>인증 숫자</b>를 보냈습니다.<br>메일을 열어 숫자를 그대로 입력하세요.</div>' +
     '<div class="pf"><div class="pf-w"><label>인증 코드</label>' +
-    '<input id="otpIn" inputmode="numeric" maxlength="6" placeholder="000000" ' +
-    'style="font-size:26px;font-weight:900;text-align:center;letter-spacing:.4em;font-family:var(--mono)" ' +
-    'oninput="if(this.value.length===6)verifyCode()"></div></div>' +
+    '<input id="otpIn" inputmode="numeric" maxlength="10" placeholder="숫자 입력" ' +
+    'style="font-size:24px;font-weight:900;text-align:center;letter-spacing:.28em;font-family:var(--mono)" ' +
+    'oninput="otpTouch(this)"></div></div>' +
     '<div id="otpMsg" class="note" style="margin:0 0 12px;min-height:16px"></div>' +
     '<button class="btn" id="otpBtn" onclick="verifyCode()">로그인</button>' +
     '<button class="btn btn-g btn-sm" style="margin-top:8px" onclick="showPasteStep()">숫자가 안 보이면 · 링크로 하기</button>' +
@@ -3276,12 +3686,27 @@ function showCodeStep(){
   setTimeout(() => { const i = $('#otpIn'); if (i) i.focus(); }, 250);
 }
 
+/* 숫자를 입력하는 동안 상태를 알려주고,
+   잠깐 멈추면 자동으로 로그인을 시도한다 (길이가 6~10으로 제각각이라 타이머 방식) */
+let otpTimer = null;
+function otpTouch(el){
+  const n = (el.value || '').replace(/\D/g, '').length;
+  const msg = $('#otpMsg');
+  clearTimeout(otpTimer);
+  if (msg){
+    msg.style.color = 'var(--tx-3)';
+    msg.textContent = n < 6 ? (n ? n + '자리 입력됨' : '') : '확인하려면 로그인을 누르세요';
+  }
+  if (n >= 6) otpTimer = setTimeout(verifyCode, 1200);
+}
+
 async function verifyCode(){
   const el = $('#otpIn'); if (!el) return;
   const token = (el.value || '').replace(/\D/g, '');
   const msg = $('#otpMsg'), btn = $('#otpBtn');
-  if (token.length !== 6){
-    if (msg){ msg.textContent = '6자리 숫자를 입력해주세요.'; msg.style.color = 'var(--warn)'; }
+  /* Supabase 설정에 따라 코드 길이가 6~10자리로 다를 수 있다 */
+  if (token.length < 6 || token.length > 10){
+    if (msg){ msg.textContent = '메일에 적힌 숫자를 그대로 입력해주세요.'; msg.style.color = 'var(--warn)'; }
     return;
   }
   if (btn){ btn.disabled = true; btn.textContent = '확인 중…'; }
@@ -3782,7 +4207,7 @@ function userRow(u, rel){
 
 Object.assign(window, {
   signIn, signInEmail, signOut, openLogin, openAccount, openShare, openFriends,
-  saveNickname, copyCode, toggleShare, addFriend, acceptFriend, removeFriend, verifyCode, verifyLink, showPasteStep, showCodeStep, loginErrHTML,
+  saveNickname, copyCode, toggleShare, addFriend, acceptFriend, removeFriend, verifyCode, otpTouch, verifyLink, showPasteStep, showCodeStep, loginErrHTML,
   pullMerge, pushVault, initCloud, openNickSetup, toggleSearchable, onSearchInput,
   sendRequest, paintFriendBody
 });
