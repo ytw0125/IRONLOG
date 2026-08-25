@@ -318,6 +318,27 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   color:var(--tx-2);font-size:12.5px;font-weight:700;padding:10px 0;cursor:pointer}
 .mpick button[aria-pressed=true]{background:var(--white);color:#09090B;border-color:var(--white)}
 
+/* ══ 당류 · 카페인 ══ */
+.sub-row{display:flex;align-items:center;gap:10px;padding:9px 14px;margin-bottom:11px;
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);box-shadow:var(--edge)}
+.sub-n{font-size:11.5px;font-weight:700;color:var(--tx-2);width:38px;flex:none}
+.sub-t{flex:1;height:5px;background:var(--card-2);border-radius:3px;overflow:hidden}
+.sub-t i{display:block;height:100%;border-radius:3px;transition:width .3s}
+.sub-v{font-size:11px;color:var(--tx-3);font-weight:700;flex:none;font-family:var(--mono)}
+
+.caff{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:12px 14px;margin-bottom:11px;box-shadow:var(--edge)}
+.caff.over{border-color:rgba(251,146,60,.4);background:rgba(251,146,60,.06)}
+.caff-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:8px}
+.caff-h span{font-size:12px;font-weight:700;color:var(--tx-2)}
+.caff-h b{font-size:15px;font-weight:900;letter-spacing:-.02em;font-family:var(--mono)}
+.caff-h em{font-style:normal;font-size:10.5px;color:var(--tx-3);font-weight:700}
+.caff-t{height:5px;background:var(--card-2);border-radius:3px;overflow:hidden}
+.caff-t i{display:block;height:100%;background:#8B6F47;border-radius:3px;transition:width .3s}
+.caff.over .caff-t i{background:var(--warn)}
+.caff-n{font-size:10.5px;color:var(--tx-3);line-height:1.75;margin-top:9px}
+.caff-n b{color:var(--tx-2)}
+
 /* ══ 기록실 ══ */
 .cal-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .cal-h b{font-size:17px;font-weight:900;letter-spacing:-.03em}
@@ -843,73 +864,86 @@ machine:[
    ═══════════════════════════════════════════════════ */
 const BASE_FOOD = {
 '밥·면·빵':[
-['공기밥','1공기 210g',310,68,6,1],['현미밥','1공기 210g',300,65,6,2],['잡곡밥','1공기 210g',305,64,7,2],
-['햇반','1개 210g',310,69,6,1],['삼각김밥','1개',180,33,4,3],['김밥','1줄',480,75,14,13],
-['비빔밥','1인분',600,90,18,14],['볶음밥','1인분',650,90,16,22],['오므라이스','1인분',620,85,18,20],
-['라면','1봉지',500,79,10,16],['컵라면','1개',350,55,7,12],['칼국수','1인분',550,90,18,10],
-['잔치국수','1인분',480,88,14,6],['비빔국수','1인분',550,95,13,10],['냉면','1인분',520,95,16,5],
-['크림파스타','1인분',700,80,20,32],['토마토파스타','1인분',550,85,17,14],
-['짜장면','1인분',700,110,18,20],['짬뽕','1인분',650,90,28,18],
-['식빵','1장',80,15,2.5,1],['통밀식빵','1장',90,16,4,1.5],['베이글','1개',250,48,9,1.5],
-['크로와상','1개',270,26,5,17],['고구마','150g',190,44,2,0.3],['감자','150g',115,26,3,0.1],
-['오트밀','40g',150,27,5,3],['시리얼','40g',150,32,3,2],['그래놀라','50g',220,32,5,8],
-['떡볶이','1인분',480,90,9,9],['만두','5개',300,35,12,12]
+['공기밥','1공기 210g',310,68,6,1,0,0.1],['현미밥','1공기 210g',300,65,6,2,0,0.5],['잡곡밥','1공기 210g',305,64,7,2,0,0.5],
+['햇반','1개 210g',310,69,6,1,0,0.1],['삼각김밥','1개',180,33,4,3,0,2],['김밥','1줄',480,75,14,13,0,4],
+['비빔밥','1인분',600,90,18,14,0,8],['볶음밥','1인분',650,90,16,22,0,4],['오므라이스','1인분',620,85,18,20,0,8],
+['라면','1봉지',500,79,10,16,0,3],['컵라면','1개',350,55,7,12,0,2],['칼국수','1인분',550,90,18,10,0,3],
+['잔치국수','1인분',480,88,14,6,0,3],['비빔국수','1인분',550,95,13,10,0,12],['냉면','1인분',520,95,16,5,0,14],
+['크림파스타','1인분',700,80,20,32,0,6],['토마토파스타','1인분',550,85,17,14,0,10],
+['짜장면','1인분',700,110,18,20,0,14],['짬뽕','1인분',650,90,28,18,0,8],
+['식빵','1장',80,15,2.5,1,0,1.5],['통밀식빵','1장',90,16,4,1.5,0,1.5],['베이글','1개',250,48,9,1.5,0,5],
+['크로와상','1개',270,26,5,17,0,6],['고구마','150g',190,44,2,0.3,0,10],['감자','150g',115,26,3,0.1,0,1.2],
+['오트밀','40g',150,27,5,3,0,0.5],['시리얼','40g',150,32,3,2,0,10],['그래놀라','50g',220,32,5,8,0,12],
+['떡볶이','1인분',480,90,9,9,0,18],['만두','5개',300,35,12,12,0,3]
 ],
 '고기·생선':[
-['닭가슴살','100g',110,0,23,1.5],['닭가슴살 (시판)','1팩 100g',115,1,24,1.5],
-['닭가슴살 큐브','100g',120,2,23,2],['닭가슴살 소시지','1개 90g',110,4,17,3],
-['닭안심','100g',105,0,24,0.6],['닭다리살','100g',190,0,19,12],['닭날개','100g',210,0,18,15],
-['소 등심','100g',250,0,22,18],['소 안심','100g',190,0,23,10],['소 사태','100g',140,0,21,5],
-['소불고기','1인분 150g',330,12,26,19],['차돌박이','100g',310,0,18,26],
-['삼겹살','100g',330,0,17,29],['돼지 목살','100g',220,0,20,15],['돼지 앞다리','100g',170,0,20,9],
-['돼지 안심','100g',120,0,22,3],['훈제오리','100g',280,1,19,22],
-['연어','100g',200,0,22,12],['고등어','100g',200,0,20,13],['참치캔','100g',130,0,26,2],
-['참치캔 (기름뺀)','100g',110,0,25,1],['새우','100g',100,0,20,1.5],['오징어','100g',95,1,18,1.5],
-['회 모듬','150g',180,2,32,5],['닭가슴살 스테이크','1팩 100g',130,3,22,3]
+['닭가슴살','100g',110,0,23,1.5,0,0.0],['닭가슴살 (시판)','1팩 100g',115,1,24,1.5,0,0.5],
+['닭가슴살 큐브','100g',120,2,23,2,0,0.5],['닭가슴살 소시지','1개 90g',110,4,17,3,0,2],
+['닭안심','100g',105,0,24,0.6,0,0.0],['닭다리살','100g',190,0,19,12,0,0.0],['닭날개','100g',210,0,18,15,0,0.0],
+['소 등심','100g',250,0,22,18,0,0.0],['소 안심','100g',190,0,23,10,0,0.0],['소 사태','100g',140,0,21,5,0,0.0],
+['소불고기','1인분 150g',330,12,26,19,0,8],['차돌박이','100g',310,0,18,26,0,0.0],
+['삼겹살','100g',330,0,17,29,0,0.0],['돼지 목살','100g',220,0,20,15,0,0.0],['돼지 앞다리','100g',170,0,20,9,0,0.0],
+['돼지 안심','100g',120,0,22,3,0,0.0],['훈제오리','100g',280,1,19,22,0,0.5],
+['연어','100g',200,0,22,12,0,0.0],['고등어','100g',200,0,20,13,0,0.0],['참치캔','100g',130,0,26,2,0,0],
+['참치캔 (기름뺀)','100g',110,0,25,1,0,0],['새우','100g',100,0,20,1.5,0,0.0],['오징어','100g',95,1,18,1.5,0,0.1],
+['회 모듬','150g',180,2,32,5,0,0.3],['닭가슴살 스테이크','1팩 100g',130,3,22,3,0,1]
 ],
 '계란·두부·유제품':[
-['계란','1개',78,0.6,6.3,5.3],['계란 흰자','1개',17,0.2,3.6,0.1],['계란후라이','1개',100,0.5,6.5,8],
-['삶은계란','1개',78,0.6,6.3,5.3],['계란찜','1인분',180,4,14,11],
-['두부','150g',130,4,13,7],['순두부','1팩 350g',150,6,14,8],['낫토','1팩',100,7,8,5],
-['우유','200ml',125,10,6.5,7],['저지방우유','200ml',85,10,7,2],['두유','190ml',95,9,6,4],
-['그릭요거트','100g',60,4,10,0.5],['플레인요거트','85g',70,10,3,2],['치즈','1장',60,1,4,4.5],
-['코티지치즈','100g',98,3,11,4],['프로틴 쉐이크','1스쿱',120,3,24,1.5],['단백질 음료','1병 250ml',150,8,20,3]
+['계란','1개',78,0.6,6.3,5.3,0,0.4],['계란 흰자','1개',17,0.2,3.6,0.1,0,0.2],['계란후라이','1개',100,0.5,6.5,8,0,0.3],
+['삶은계란','1개',78,0.6,6.3,5.3,0,0.4],['계란찜','1인분',180,4,14,11,0,2],
+['두부','150g',130,4,13,7,0,0.6],['순두부','1팩 350g',150,6,14,8,0,1],['낫토','1팩',100,7,8,5,0,2],
+['우유','200ml',125,10,6.5,7,0,9.5],['저지방우유','200ml',85,10,7,2,0,9.5],['두유','190ml',95,9,6,4,0,6],
+['그릭요거트','100g',60,4,10,0.5,0,3.5],['플레인요거트','85g',70,10,3,2,0,9],['치즈','1장',60,1,4,4.5,0,0.5],
+['코티지치즈','100g',98,3,11,4,0,3],['프로틴 쉐이크','1스쿱',120,3,24,1.5,0,2],['단백질 음료','1병 250ml',150,8,20,3,0,4]
 ],
 '국·찌개':[
-['김치찌개','1인분',350,12,22,22],['된장찌개','1인분',200,14,14,10],['순두부찌개','1인분',280,12,18,16],
-['미역국','1인분',120,5,10,6],['콩나물국','1인분',60,6,5,2],['육개장','1인분',350,18,28,18],
-['갈비탕','1인분',450,15,35,26],['설렁탕','1인분',400,20,32,20],['곰탕','1인분',380,10,34,22],
-['감자탕','1인분',600,30,38,35],['삼계탕','1인분',900,50,70,45],['부대찌개','1인분',500,35,25,28]
+['김치찌개','1인분',350,12,22,22,0,4],['된장찌개','1인분',200,14,14,10,0,4],['순두부찌개','1인분',280,12,18,16,0,4],
+['미역국','1인분',120,5,10,6,0,1],['콩나물국','1인분',60,6,5,2,0,1.5],['육개장','1인분',350,18,28,18,0,4],
+['갈비탕','1인분',450,15,35,26,0,3],['설렁탕','1인분',400,20,32,20,0,2],['곰탕','1인분',380,10,34,22,0,2],
+['감자탕','1인분',600,30,38,35,0,6],['삼계탕','1인분',900,50,70,45,0,3],['부대찌개','1인분',500,35,25,28,0,8]
 ],
 '반찬·샐러드':[
-['김치','50g',15,3,1,0.2],['멸치볶음','30g',90,5,8,4],['시금치나물','70g',45,4,3,2.5],
-['샐러드 (드레싱 X)','1접시',50,8,3,1],['시저샐러드','1접시',250,12,8,20],
-['닭가슴살 샐러드','1팩',280,18,28,10],['제육볶음','1인분',550,25,32,35],['족발','200g',480,2,44,32],
-['순대','200g',360,45,14,13]
+['김치','50g',15,3,1,0.2,0,1.5],['멸치볶음','30g',90,5,8,4,0,3],['시금치나물','70g',45,4,3,2.5,0,1],
+['샐러드 (드레싱 X)','1접시',50,8,3,1,0,4],['시저샐러드','1접시',250,12,8,20,0,4],
+['닭가슴살 샐러드','1팩',280,18,28,10,0,6],['제육볶음','1인분',550,25,32,35,0,10],['족발','200g',480,2,44,32,0,0],
+['순대','200g',360,45,14,13,0,2]
 ],
 '과일':[
-['바나나','1개',95,24,1.2,0.3],['사과','1개',95,25,0.5,0.3],['딸기','100g',32,8,0.7,0.3],
-['블루베리','100g',57,14,0.7,0.3],['포도','100g',69,18,0.7,0.2],['오렌지','1개',62,15,1.2,0.2],
-['키위','1개',42,10,0.8,0.4],['배','1/2개',60,16,0.4,0.1],['수박','200g',60,15,1.2,0.3],
-['파인애플','100g',50,13,0.5,0.1],['방울토마토','100g',18,4,0.9,0.2],['아보카도','1/2개',160,9,2,15]
+['바나나','1개',95,24,1.2,0.3,0,14],['사과','1개',95,25,0.5,0.3,0,19],['딸기','100g',32,8,0.7,0.3,0,5],
+['블루베리','100g',57,14,0.7,0.3,0,10],['포도','100g',69,18,0.7,0.2,0,16],['오렌지','1개',62,15,1.2,0.2,0,12],
+['키위','1개',42,10,0.8,0.4,0,6],['배','1/2개',60,16,0.4,0.1,0,10],['수박','200g',60,15,1.2,0.3,0,12],
+['파인애플','100g',50,13,0.5,0.1,0,10],['방울토마토','100g',18,4,0.9,0.2,0,2.6],['아보카도','1/2개',160,9,2,15,0,0.7]
 ],
 '간식·견과':[
-['아몬드','20g',116,4,4,10],['호두','20g',131,3,3,13],['캐슈넛','20g',110,6,4,9],
-['피스타치오','20g',112,6,4,9],['땅콩버터','15g',90,3,4,8],
-['단백질바','1개',200,20,20,6],['초콜릿','30g',160,18,2,9],['과자','60g 1봉',300,40,4,14],
-['아이스크림','100ml',200,24,3,10],['떡','100g',220,50,4,0.5]
+['아몬드','20g',116,4,4,10,0,0.9],['호두','20g',131,3,3,13,0,0.5],['캐슈넛','20g',110,6,4,9,0,1.2],
+['피스타치오','20g',112,6,4,9,0,1.5],['땅콩버터','15g',90,3,4,8,0,1.5],
+['단백질바','1개',200,20,20,6,0,6],['초콜릿','30g',160,18,2,9,6,16],['과자','60g 1봉',300,40,4,14,0,16],
+['아이스크림','100ml',200,24,3,10,0,21],['떡','100g',220,50,4,0.5,0,1]
 ],
 '외식·배달':[
-['후라이드 치킨','1/2마리',800,40,50,48],['양념 치킨','1/2마리',950,70,48,50],
-['피자','1조각',285,33,12,12],['햄버거','1개',500,50,22,24],['치즈버거 세트','1세트',900,100,30,42],
-['돈까스','1인분',700,55,30,38],['탕수육','1/3인분',450,45,18,22],['초밥','10피스',520,90,24,6],
-['샌드위치','1개',350,38,15,15],['샤브샤브','1인분',450,20,38,22]
+['후라이드 치킨','1/2마리',800,40,50,48,0,2],['양념 치킨','1/2마리',950,70,48,50,0,30],
+['피자','1조각',285,33,12,12,0,4],['햄버거','1개',500,50,22,24,0,9],['치즈버거 세트','1세트',900,100,30,42,0,30],
+['돈까스','1인분',700,55,30,38,0,6],['탕수육','1/3인분',450,45,18,22,0,18],['초밥','10피스',520,90,24,6,0,12],
+['샌드위치','1개',350,38,15,15,0,6],['샤브샤브','1인분',450,20,38,22,0,6]
+],
+'커피·부스터':[
+['아메리카노 (톨)','355ml',10,1,0,0,150,0],['아메리카노 (그란데)','473ml',15,2,0,0,225,0],
+['아이스 아메리카노 (대용량)','591ml',20,2,0,0,300,0],['콜드브루','355ml',5,0,0,0,205,0],
+['에스프레소','1샷 30ml',3,0,0,0,75,0],['드립커피','355ml',5,0,0,0,165,0],
+['카페라떼 (톨)','355ml',180,15,9,9,150,13],['바닐라라떼','355ml',250,37,9,7,150,35],
+['믹스커피','1봉',55,9,1,1.5,50,7],['디카페인 아메리카노','355ml',10,1,0,0,10,0],
+['프리워크아웃 (1스쿱)','1스쿱',15,3,0,0,250,0],['프리워크아웃 (하프스쿱)','1/2스쿱',8,1.5,0,0,125,0],
+['카페인 알약 (200mg)','1정',0,0,0,0,200,0],['카페인 알약 (100mg)','1정',0,0,0,0,100,0],
+['에너지드링크','250ml',115,28,0,0,80,27],['에너지드링크 (대용량)','473ml',210,54,0,0,160,52],
+['핫식스','250ml',105,26,0,0,60,25],['녹차','1잔',3,0,0,0,30,0],
+['홍차','1잔',3,0,0,0,45,0],['말차라떼','355ml',200,32,7,5,70,30],
+['BCAA 음료','1스쿱',10,1,0,0,0,0],['크레아틴','5g',0,0,0,0,0,0]
 ],
 '음료·조미료':[
-['아메리카노','1잔',10,1,0,0],['카페라떼','350ml',180,15,9,9],['콜라','355ml',150,39,0,0],
-['제로콜라','355ml',0,0,0,0],['이온음료','500ml',125,31,0,0],['오렌지주스','200ml',90,21,1,0],
-['맥주','500ml',210,17,2,0],['소주','1병',400,0,0,0],['막걸리','1병',350,50,5,0],
-['올리브유','1큰술',120,0,0,14],['마요네즈','1큰술',90,0.5,0.2,10],['케첩','1큰술',18,4.5,0.2,0]
+['아메리카노','1잔',10,1,0,0,150,0],['카페라떼','350ml',180,15,9,9,150,13],['콜라','355ml',150,39,0,0,34,39],
+['제로콜라','355ml',0,0,0,0,34,0],['이온음료','500ml',125,31,0,0,0,30],['오렌지주스','200ml',90,21,1,0,0,20],
+['맥주','500ml',210,17,2,0,0,0],['소주','1병',400,0,0,0,0,0],['막걸리','1병',350,50,5,0,0,10],
+['올리브유','1큰술',120,0,0,14,0,0],['마요네즈','1큰술',90,0.5,0.2,10,0,0.3],['케첩','1큰술',18,4.5,0.2,0,0,4]
 ]
 };
 
@@ -934,11 +968,13 @@ function rebuildIndex(){
   FOOD = {};
   Object.keys(BASE_FOOD).forEach(c => FOOD[c] = BASE_FOOD[c].slice());
   if ((D.customFood || []).length){
-    FOOD['내가 추가한 음식'] = (D.customFood || []).map(f => [f.name, f.unit, f.kcal, f.c, f.p, f.f]);
+    FOOD['내가 추가한 음식'] = (D.customFood || []).map(f =>
+      [f.name, f.unit, f.kcal, f.c, f.p, f.f, f.caf||0, f.sug||0]);
   }
   FOODMAP = {};
   Object.keys(FOOD).forEach(cat => FOOD[cat].forEach(f =>
-    FOODMAP[f[0]] = { cat, name:f[0], unit:f[1], kcal:f[2], c:f[3], p:f[4], f:f[5] }));
+    FOODMAP[f[0]] = { cat, name:f[0], unit:f[1], kcal:f[2], c:f[3], p:f[4], f:f[5],
+                      caf:f[6]||0, sug:f[7]||0 }));
 }
 const partOf = id => PARTS.find(p => p.id === id) || PARTS[0];
 
@@ -949,7 +985,7 @@ const KEY = 'ironlog-v1';
 const BLANK = { slots:[], sets:[], meals:[], profile:null, seenStage:0,
                 customEx:[], customFood:[], weights:[], restPref:{},
                 routines:[], lastReport:null, tomb:{}, updatedAt:0,
-                done:{}, notify:false };
+                done:{}, notify:false, caffLimit:400 };
 
 async function loadData(){
   let raw = null;
@@ -1119,16 +1155,24 @@ function targets(){
   const pr = Math.round(p.kg * (p.goal==='cut'?2.2 : p.goal==='bulk'?1.8 : 1.9));
   const fat = Math.round(kcal*0.25/9);
   const carb = Math.max(0, Math.round((kcal - pr*4 - fat*9)/4));
-  return { kcal, p:pr, f:fat, c:carb, tdee:Math.round(tdee) };
+  /* 당류는 총 칼로리의 10% 이내 (WHO 권고 기준을 칼로리로 환산) */
+  const sug = Math.round(kcal * 0.10 / 4);
+  /* 카페인은 성인 하루 400mg이 일반 기준 */
+  const caf = D.caffLimit || 400;
+  return { kcal, p:pr, f:fat, c:carb, sug, caf, tdee:Math.round(tdee) };
 }
 function eaten(d){
-  const t = { kcal:0, c:0, p:0, f:0 };
+  const t = { kcal:0, c:0, p:0, f:0, caf:0, sug:0 };
+  let lateCaf = null;   /* 카페인을 마신 가장 늦은 시각 (HH:MM) */
   mealsOn(d).forEach(m => {
     const b = FOODMAP[m.food]; if (!b) return;
     const f = m.ov ? Object.assign({}, b, m.ov) : b;
     t.kcal += f.kcal*m.qty; t.c += f.c*m.qty; t.p += f.p*m.qty; t.f += f.f*m.qty;
+    t.caf += (f.caf||0)*m.qty; t.sug += (f.sug||0)*m.qty;
+    if ((f.caf||0) > 0 && m.at && (!lateCaf || m.at > lateCaf)) lateCaf = m.at;
   });
-  return { kcal:Math.round(t.kcal), c:Math.round(t.c), p:Math.round(t.p), f:Math.round(t.f) };
+  return { kcal:Math.round(t.kcal), c:Math.round(t.c), p:Math.round(t.p), f:Math.round(t.f),
+           caf:Math.round(t.caf), sug:r1(t.sug), lateCaf };
 }
 
 /* ═══════════════════════════════════════════════════
@@ -1309,7 +1353,8 @@ function openTimer(){
 
   h += '<div class="note">세트를 기록하면 종목에 맞는 휴식 시간이 자동으로 시작됩니다.<br>' +
        '복합운동 3분, 바벨 2분 30초, 머신·덤벨 1분 30초, 맨몸 1분이 기본값이에요.<br><br>' +
-       '앱을 잠깐 나갔다 와도 <b>흐른 시간만큼 정확히 차감</b>됩니다.</div>';
+       '앱을 잠깐 나갔다 와도 <b>흐른 시간만큼 정확히 차감</b>됩니다.<br><br>' +
+       '아이폰은 앱을 완전히 벗어나면 잠시 멈출 수 있어요. 그래도 돌아오면 시간이 맞춰집니다.</div>';
 
   const used = [...new Set(D.slots.filter(s => s.date === viewDate).map(s => s.exId))];
   if (used.length){
@@ -1666,6 +1711,26 @@ function viewDiet(){
     mac('탄수화물', e.c, t.c, 'var(--back)') +
     mac('지방', e.f, t.f, 'var(--shoulder)') + '</div></div>';
 
+  /* 당류 — 탄수화물의 하위 항목이라 매크로 카드 바로 아래 */
+  if (e.sug > 0 || e.c > 0){
+    const over = e.sug > t.sug;
+    h += '<div class="sub-row"><span class="sub-n">당류</span>' +
+      '<span class="sub-t"><i style="width:'+Math.min(100, t.sug? e.sug/t.sug*100 : 0)+
+        '%;background:'+(over?'var(--warn)':'var(--back)')+'"></i></span>' +
+      '<span class="sub-v"'+(over?' style="color:var(--warn)"':'')+'>'+e.sug+' / '+t.sug+'g</span></div>';
+  }
+
+  /* 카페인 — 먹은 날에만 나타난다. 채우는 목표가 아니라 넘지 말 한도 */
+  if (e.caf > 0){
+    const pct = Math.min(100, e.caf/t.caf*100);
+    const over = e.caf > t.caf;
+    h += '<div class="caff'+(over?' over':'')+'">' +
+      '<div class="caff-h"><span>☕ 카페인</span>' +
+      '<b'+(over?' style="color:var(--warn)"':'')+'>'+e.caf+' <em>/ '+t.caf+'mg</em></b></div>' +
+      '<div class="caff-t"><i style="width:'+pct+'%"></i></div>' +
+      caffNote(e, t) + '</div>';
+  }
+
   h += '<div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:11px 14px">' +
     '<span style="font-size:12.5px;color:var(--tx-2)">목표 '+t.kcal+' · 섭취 '+e.kcal+' kcal</span>' +
     '<button class="tmr-b" onclick="openProfile()">목표 수정</button></div>';
@@ -1687,6 +1752,27 @@ function viewDiet(){
   });
   return h;
 }
+/* 카페인은 총량보다 '언제 먹었나'가 수면에 더 큰 영향을 준다.
+   반감기가 5~6시간이라 오후 늦게 마시면 잘 때까지 절반이 남는다. */
+function caffNote(e, t){
+  const now = new Date();
+  const hh = now.getHours();
+  const msgs = [];
+  if (e.caf > t.caf) msgs.push('하루 권장 '+t.caf+'mg을 넘었어요. 수면과 심박에 영향이 있을 수 있습니다.');
+  else if (e.caf > t.caf*0.75) msgs.push('권장량의 4분의 3을 넘었어요. 오늘은 여기까지가 좋습니다.');
+
+  if (e.lateCaf){
+    const h2 = parseInt(String(e.lateCaf).slice(0,2), 10);
+    if (!isNaN(h2) && h2 >= 15){
+      msgs.push('마지막 섭취가 '+e.lateCaf+'. 반감기가 5~6시간이라 <b>자정에도 절반이 남아 있습니다.</b>');
+    }
+  } else if (viewDate === today() && hh >= 15 && e.caf > 0){
+    msgs.push('오후 3시 이후 카페인은 잠들 때까지 남습니다. <b>취침 6시간 전엔 끊는 게 좋아요.</b>');
+  }
+  if (!msgs.length) return '';
+  return '<div class="caff-n">'+msgs.join('<br>')+'</div>';
+}
+
 function mac(label, cur, goal, color){
   return '<div><div class="mh"><b>'+label+'</b><span>'+cur+' / '+goal+'g</span></div>' +
     '<div class="trk"><i style="width:'+Math.min(100, goal?cur/goal*100:0)+'%;background:'+color+'"></i></div></div>';
@@ -1852,6 +1938,12 @@ function recDay(){
       '<div class="stat"><b>'+e.kcal+'</b><span>kcal'+(t?' / '+t.kcal:'')+'</span></div>' +
       '<div class="stat"><b>'+e.p+'</b><span>단백질 g</span></div>' +
       '<div class="stat"><b>'+e.c+'</b><span>탄수 g</span></div></div>';
+    if (e.sug > 0 || e.caf > 0){
+      h += '<div class="stats" style="margin-bottom:12px">' +
+        '<div class="stat"><b>'+e.sug+'</b><span>당류 g</span></div>' +
+        '<div class="stat"><b'+(t && e.caf>t.caf?' style="color:var(--warn)"':'')+'>'+e.caf+'</b><span>카페인 mg</span></div>' +
+        '<div class="stat"><b>'+e.f+'</b><span>지방 g</span></div></div>';
+    }
     MEALTIME.forEach(mt => {
       const list = ms.filter(m => m.time === mt);
       if (!list.length) return;
@@ -2141,15 +2233,15 @@ function buildWeek(anchor){
   const agg = ds => {
     let vol=0, sets=0, wd=0;
     const parts={}; PARTS.forEach(p => parts[p.id]=0);
-    let kcal=0, prot=0, mdays=0, hitP=0;
+    let kcal=0, prot=0, mdays=0, hitP=0, caff=0, sug=0;
     const t = targets();
     ds.forEach(d => {
       const sc = daySets(d);
       if (sc){ wd++; sets += sc; vol += dayVolume(d); }
       slotsOn(d).forEach(sl => { const e=EX[sl.exId]; if(e) parts[e.part] += setsOf(sl.id).length; });
-      if (mealsOn(d).length){ const e=eaten(d); mdays++; kcal+=e.kcal; prot+=e.p; if(t && e.p>=t.p*0.9) hitP++; }
+      if (mealsOn(d).length){ const e=eaten(d); mdays++; kcal+=e.kcal; prot+=e.p; caff+=e.caf; sug+=e.sug; if(t && e.p>=t.p*0.9) hitP++; }
     });
-    return { vol, sets, wd, parts, kcal, prot, mdays, hitP };
+    return { vol, sets, wd, parts, kcal, prot, mdays, hitP, caff, sug };
   };
   /* 진행 중인 주라면 지난주도 같은 일수만큼만 잘라서 비교한다.
      월요일에 지난주 7일치와 비교하면 항상 "폭락"으로 보이기 때문. */
@@ -2250,6 +2342,16 @@ function openWeekReport(anchor){
       '<div class="stat"><b>'+Math.round(n.kcal/n.mdays)+'</b><span>일평균 kcal</span></div>' +
       '<div class="stat"><b>'+Math.round(n.prot/n.mdays)+'</b><span>일평균 단백질</span></div>' +
       '<div class="stat"><b>'+n.hitP+'/'+n.mdays+'</b><span>단백질 달성</span></div></div>';
+    if (n.caff > 0){
+      const avgC = Math.round(n.caff/n.mdays);
+      h += '<div class="rep-li"><i>☕</i><span>카페인 일평균 <b>'+avgC+'mg</b>' +
+        (t && avgC > t.caf ? ' — 권장 '+t.caf+'mg을 넘습니다' : '') + '</span></div>';
+    }
+    if (n.sug > 0){
+      const avgS = Math.round(n.sug/n.mdays);
+      h += '<div class="rep-li"><i>🍬</i><span>당류 일평균 <b>'+avgS+'g</b>' +
+        (t && avgS > t.sug ? ' — 권장 '+t.sug+'g보다 많아요' : '') + '</span></div>';
+    }
     if (t){
       const avg = n.kcal/n.mdays, gap = Math.round(avg - t.kcal);
       if (Math.abs(gap) <= 150) h += '<div class="rep-li"><i>🎯</i><span>목표 칼로리에 잘 맞췄어요. 이대로 유지하세요.</span></div>';
@@ -2608,7 +2710,10 @@ const TIPS = [
 '술은 하루치 회복을 통째로 깎아먹는다냥. 마셨으면 다음날은 가볍게 가자냥.',
 '휴식 시간을 재면 세트 강도가 일정해진다냥. 앱 안에 타이머가 있으니 쓰자냥.',
 '3주 넘게 무게가 안 오르면 더 밀어붙이지 말고 한 주 가볍게 가라냥. 그게 더 빨리 는다냥.',
-'같은 무게로 횟수가 늘었으면 그것도 신기록이다냥. 종목을 눌러 추이 그래프를 보라냥.'
+'같은 무게로 횟수가 늘었으면 그것도 신기록이다냥. 종목을 눌러 추이 그래프를 보라냥.',
+'프리워크아웃 먹고 커피까지 마시면 400mg을 금방 넘는다냥. 둘 중 하나만 하자냥.',
+'카페인은 운동 30~60분 전이 가장 효과가 좋다냥. 체중 1kg당 3mg이면 충분하다냥.',
+'당류를 줄이려면 음료부터 바꾸라냥. 액체로 마신 설탕은 배가 안 부르다냥.'
 ];
 
 function catSay(st){
@@ -2636,6 +2741,16 @@ function catSay(st){
     else if (mc >= 3 && over < -500 && new Date().getHours() >= 20)
       out.push({i:'🥺',tone:'a',t:'오늘 <b>'+Math.abs(over)+'kcal</b>나 덜 먹었다냥. 너무 굶으면 근육부터 빠진다냥.'});
     if (mc === 0 && tSet > 0) out.push({i:'🍚',tone:'',t:'운동은 했는데 식단이 비었다냥. 기록해야 도와줄 수 있다냥.'});
+
+    if (e.caf > t.caf)
+      out.push({i:'☕',tone:'a',t:'카페인 <b>'+e.caf+'mg</b>이다냥. 하루 '+t.caf+'mg을 넘었어. 잠 못 자면 근육도 안 자란다냥.'});
+    else if (e.caf > 0 && e.lateCaf){
+      const ch = parseInt(String(e.lateCaf).slice(0,2),10);
+      if (!isNaN(ch) && ch >= 16)
+        out.push({i:'😴',tone:'',t:'<b>'+e.lateCaf+'</b>에 카페인을 먹었다냥. 반감기가 5~6시간이라 잘 때까지 남아있다냥.'});
+    }
+    if (e.sug > t.sug * 1.5)
+      out.push({i:'🍬',tone:'a',t:'당류가 <b>'+e.sug+'g</b>이다냥. 권장 '+t.sug+'g의 1.5배야. 탄수는 밥으로 채우자냥.'});
   } else if (!t){
     out.push({i:'📋',tone:'',t:'아직 네 정보를 모른다냥. 내 정보 탭에서 키·몸무게를 알려주라냥.'});
   }
@@ -3017,6 +3132,8 @@ function foodHTML(){
       '<div style="font-size:32px;font-weight:900;letter-spacing:-.04em;margin-top:12px">' +
         Math.round(f.kcal*s.qty)+'<span style="font-size:13px;color:var(--tx-3)"> kcal</span></div>' +
       '<div style="font-size:11.5px;color:var(--tx-2);margin-top:5px">탄 '+r1(f.c*s.qty)+'g · 단 '+r1(f.p*s.qty)+'g · 지 '+r1(f.f*s.qty)+'g</div>' +
+      '<div style="font-size:11px;color:var(--tx-3);margin-top:3px">당류 '+r1((f.sug||0)*s.qty)+'g' +
+        ((f.caf||0)>0 ? ' · <b style="color:var(--warn)">카페인 '+Math.round(f.caf*s.qty)+'mg</b>' : '')+'</div>' +
       '<div class="qty"><button onclick="qtyB(-0.5)">−</button><div>'+s.qty+'인분</div><button onclick="qtyB(0.5)">＋</button></div></div>';
 
     /* 실제로 먹은 양이 기본값과 다를 때 직접 고칠 수 있게 */
@@ -3027,6 +3144,8 @@ function foodHTML(){
         '<div><label>단백질 g</label><input id="ovP" inputmode="decimal" value="'+f.p+'" oninput="ovSet()"></div>' +
         '<div><label>탄수화물 g</label><input id="ovC" inputmode="decimal" value="'+f.c+'" oninput="ovSet()"></div>' +
         '<div><label>지방 g</label><input id="ovF" inputmode="decimal" value="'+f.f+'" oninput="ovSet()"></div>' +
+        '<div><label>당류 g</label><input id="ovS" inputmode="decimal" value="'+(f.sug||0)+'" oninput="ovSet()"></div>' +
+        '<div><label>카페인 mg</label><input id="ovA" inputmode="numeric" value="'+(f.caf||0)+'" oninput="ovSet()"></div>' +
         '</div>' +
         '<div class="row2" style="margin-bottom:12px">' +
         '<button class="btn btn-g btn-sm" onclick="ovAuto()">탄단지로 칼로리 계산</button>' +
@@ -3060,7 +3179,8 @@ function foodHTML(){
 function foodRow(f){
   if (!f) return '';
   return '<button class="pick" onclick="pickFood(\''+q(f.name)+'\')">' +
-    '<span class="pick-t"><b>'+esc(f.name)+'</b><span>'+esc(f.unit)+' · 탄 '+f.c+' 단 '+f.p+' 지 '+f.f+'</span></span>' +
+    '<span class="pick-t"><b>'+esc(f.name)+'</b><span>'+esc(f.unit)+' · 탄 '+f.c+' 단 '+f.p+' 지 '+f.f +
+    ((f.caf||0)>0 ? ' · <b style="color:var(--warn)">☕'+f.caf+'</b>' : '')+'</span></span>' +
     '<span class="pick-k">'+f.kcal+'</span><span class="pick-g">›</span></button>';
 }
 function foodCat(c){ shState.cat = c; refresh(foodHTML()); }
@@ -3077,7 +3197,8 @@ function pickFood(n){ shState.food = n; shState.qty = 1; shState.ov = null; shSt
 function ovOpen(){ shState.edit = true; refresh(foodHTML()); }
 function ovSet(){
   const g = id => { const el = $(id); return el ? num(el.value) : 0; };
-  shState.ov = { kcal:g('#ovK'), p:g('#ovP'), c:g('#ovC'), f:g('#ovF') };
+  shState.ov = { kcal:g('#ovK'), p:g('#ovP'), c:g('#ovC'), f:g('#ovF'),
+                 sug:g('#ovS'), caf:g('#ovA') };
   const b = FOODMAP[shState.food];
   const f = Object.assign({}, b, shState.ov);
   const box = document.querySelector('#ovSum');
@@ -3097,7 +3218,9 @@ function pickTime(t){ shState.time = t; refresh(foodHTML()); }
 
 async function commitFood(){
   if (shState.edit) ovSet();
-  const rec = { id:uid(), date:viewDate, time:shState.time, food:shState.food, qty:shState.qty };
+  const now = new Date();
+  const rec = { id:uid(), date:viewDate, time:shState.time, food:shState.food, qty:shState.qty,
+    at: String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0') };
   if (shState.ov) rec.ov = shState.ov;
   D.meals.push(rec);
   await saveData(); closeSheet(); render(); toast('추가했어요');
@@ -3113,6 +3236,8 @@ function openNewFood(){
     '<div><label>단백질 (g)</label><input id="fP" inputmode="decimal" placeholder="0"></div>' +
     '<div><label>탄수화물 (g)</label><input id="fC" inputmode="decimal" placeholder="0"></div>' +
     '<div><label>지방 (g)</label><input id="fF" inputmode="decimal" placeholder="0"></div>' +
+    '<div><label>당류 (g)</label><input id="fS" inputmode="decimal" placeholder="0"></div>' +
+    '<div><label>카페인 (mg)</label><input id="fA" inputmode="numeric" placeholder="0"></div>' +
     '</div><button class="btn" onclick="saveNewFood()">추가하기</button>' +
     '<div class="note">칼로리를 비워두면 탄단지로 자동 계산합니다 (탄·단 4kcal, 지방 9kcal).<br>' +
     '제품 뒷면 영양성분표를 그대로 옮겨 적으면 정확해요.</div>';
@@ -3127,7 +3252,8 @@ async function saveNewFood(){
   if (!k) k = Math.round(c*4 + p*4 + f*9);
   if (!k && !c && !p && !f){ toast('영양 정보를 입력해주세요'); return; }
   D.customFood = D.customFood || [];
-  D.customFood.push({ name, unit:($('#fUnit').value||'1인분').trim(), kcal:k, c, p, f });
+  D.customFood.push({ name, unit:($('#fUnit').value||'1인분').trim(), kcal:k, c, p, f,
+    sug:num($('#fS') ? $('#fS').value : 0), caf:num($('#fA') ? $('#fA').value : 0) });
   rebuildIndex(); await saveData();
   shState.food = name; shState.qty = 1; shState.q = '';
   openSheet(shState.time+' 추가', foodHTML());
