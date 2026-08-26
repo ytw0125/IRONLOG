@@ -14,14 +14,14 @@
    이 방식이면 앱 내용을 고칠 때 아래 CACHE 이름을 건드릴 필요가 없습니다.
    (이 sw.js 파일 자체를 고칠 때만 숫자를 올려주세요) */
 
-const CACHE = 'ironlog-v2';
+const CACHE = 'ironlog-v3';
 const ASSETS = [
   './',
   './index.html',
   './manifest.webmanifest',
-  './icon-192.png',
-  './icon-512.png',
-  './icon-maskable.png'
+  './icon-192.png?v=3',
+  './icon-512.png?v=3',
+  './icon-maskable.png?v=3'
 ];
 
 self.addEventListener('install', e => {

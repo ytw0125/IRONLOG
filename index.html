@@ -9,8 +9,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="IRONLOG">
-<link rel="apple-touch-icon" href="./icon-180.png">
-<link rel="icon" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-180.png?v=3">
+<link rel="icon" href="./icon-192.png?v=3">
 
 <style>
 :root{
@@ -1335,13 +1335,13 @@ async function notifyRestDone(label){
     if (navigator.serviceWorker && navigator.serviceWorker.ready){
       const reg = await navigator.serviceWorker.ready;
       await reg.showNotification('휴식 끝', {
-        body, icon:'./icon-192.png', badge:'./icon-192.png',
+        body, icon:'./icon-192.png?v=3', badge:'./icon-192.png?v=3',
         tag:'ironlog-rest', renotify:true, vibrate:[200,90,200]
       });
       return;
     }
   }catch(e){}
-  try{ new Notification('휴식 끝', { body, icon:'./icon-192.png' }); }catch(e){}
+  try{ new Notification('휴식 끝', { body, icon:'./icon-192.png?v=3' }); }catch(e){}
 }
 
 function beep(){
