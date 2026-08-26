@@ -318,6 +318,70 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   color:var(--tx-2);font-size:12.5px;font-weight:700;padding:10px 0;cursor:pointer}
 .mpick button[aria-pressed=true]{background:var(--white);color:#09090B;border-color:var(--white)}
 
+/* ══ 세트 성격 (워밍업 · 드랍) ══ */
+.tech{display:flex;align-items:center;gap:6px;margin-top:9px;flex-wrap:wrap}
+.tc-b{background:#0A0A0C;border:1px solid var(--line-2);border-radius:var(--r-sm);
+  color:var(--tx-3);font-size:11px;font-weight:800;padding:6px 11px;cursor:pointer;
+  letter-spacing:.02em;transition:transform .09s var(--e)}
+.tc-b:active{transform:scale(.94)}
+.tc-b.on.w{background:var(--card-3);border-color:var(--tx-3);color:var(--tx)}
+.tc-b.on.d{background:rgba(167,139,250,.16);border-color:var(--leg);color:#C4B5FD}
+.tc-hint{font-size:10px;color:var(--tx-3);margin-left:2px}
+
+.st-r.warm{opacity:.5}
+.st-r.warm .st-v{font-weight:600}
+.st-r.dropset{background:rgba(167,139,250,.05)}
+.st-r.dropset .st-n{color:var(--leg)}
+
+/* ══ 슈퍼세트 · 컴파운드세트 묶음 ══ */
+.glabel{display:flex;align-items:baseline;gap:8px;padding:0 3px 6px;margin-top:4px}
+.glabel span{font-size:9.5px;font-weight:800;letter-spacing:.16em;color:var(--leg);
+  font-family:var(--mono)}
+.glabel em{font-style:normal;font-size:10px;color:var(--tx-3);font-weight:700}
+.ex.grouped{border-left:2px solid var(--leg);margin-bottom:5px}
+.ex.grouped + .ex.grouped{margin-top:-1px}
+
+/* ══ 바벨 무게 ══ */
+.pl-bw{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:5px}
+.pl-bw button{background:var(--card-3);border:1px solid var(--line-2);border-radius:var(--r-sm);
+  color:var(--tx-3);font-size:9.5px;font-weight:800;padding:3px 7px;cursor:pointer;font-family:var(--mono)}
+.pl-bw button:active{transform:scale(.94)}
+
+/* ══ 메모 ══ */
+.memo{width:100%;background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:12px 14px;color:var(--tx);font-size:13px;line-height:1.7;resize:none;
+  font-family:var(--sans);min-height:74px;box-shadow:var(--edge)}
+.memo::placeholder{color:var(--tx-3)}
+.memo-btn{display:flex;align-items:center;gap:9px;width:100%;background:var(--card);
+  border:1px solid var(--line);border-radius:var(--r-md);padding:12px 14px;
+  cursor:pointer;text-align:left;color:var(--tx-2);font-size:12.5px;box-shadow:var(--edge)}
+.memo-btn b{color:var(--tx);font-weight:700}
+.dur{display:flex;align-items:center;justify-content:center;gap:6px;font-size:11px;
+  color:var(--tx-3);font-weight:700;font-family:var(--mono);margin-top:7px}
+
+/* ══ 확인 · 입력 모달 ══ */
+.mask{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:60;opacity:0;
+  pointer-events:none;transition:.16s;backdrop-filter:blur(3px)}
+.mask.on{opacity:1;pointer-events:auto}
+.modal{position:fixed;inset:0;z-index:61;display:flex;align-items:center;justify-content:center;
+  padding:22px;pointer-events:none;opacity:0;transition:.18s var(--e)}
+.modal.on{opacity:1;pointer-events:auto}
+.md-in{width:100%;max-width:340px;background:#0E0E11;border:1px solid var(--line-2);
+  border-radius:var(--r-lg);padding:20px 18px 16px;box-shadow:0 20px 50px rgba(0,0,0,.7),var(--edge2);
+  transform:scale(.96);transition:transform .18s var(--e)}
+.modal.on .md-in{transform:none}
+.md-t{font-size:16px;font-weight:900;letter-spacing:-.03em;margin-bottom:8px}
+.md-b{font-size:12.5px;color:var(--tx-2);line-height:1.7}
+.md-b input{width:100%;margin-top:12px;background:var(--card-2);border:1px solid var(--line-2);
+  border-radius:var(--r-sm);color:var(--tx);padding:12px;font-weight:700}
+.md-f{display:flex;gap:8px;margin-top:18px}
+.md-f button{flex:1;border:none;border-radius:var(--r-sm);font-size:14px;font-weight:800;
+  padding:13px;cursor:pointer;transition:transform .1s var(--e)}
+.md-f button:active{transform:scale(.97)}
+.md-no{background:var(--card-2);color:var(--tx-2);border:1px solid var(--line-2)!important}
+.md-ok{background:linear-gradient(180deg,#FFF,#E4E4E8);color:#09090B}
+.md-ok.danger{background:linear-gradient(180deg,#F0554A,#C93A31);color:#fff}
+
 /* ══ 당류 · 카페인 ══ */
 .sub-row{display:flex;align-items:center;gap:10px;padding:9px 14px;margin-bottom:11px;
   background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);box-shadow:var(--edge)}
@@ -709,6 +773,15 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   <div class="sh-b" id="shB"></div>
 </div>
 
+<div class="mask" id="mask"></div>
+<div class="modal" id="modal" role="dialog" aria-modal="true">
+  <div class="md-in">
+    <div class="md-t" id="mdT"></div>
+    <div class="md-b" id="mdB"></div>
+    <div class="md-f" id="mdF"></div>
+  </div>
+</div>
+
 <input type="file" id="impFile" accept="application/json,.json" hidden>
 <div id="toast"></div>
 
@@ -985,7 +1058,7 @@ const KEY = 'ironlog-v1';
 const BLANK = { slots:[], sets:[], meals:[], profile:null, seenStage:0,
                 customEx:[], customFood:[], weights:[], restPref:{},
                 routines:[], lastReport:null, tomb:{}, updatedAt:0,
-                done:{}, notify:false, caffLimit:400 };
+                done:{}, notify:false, caffLimit:400, barPref:{}, memo:{} };
 
 async function loadData(){
   let raw = null;
@@ -1042,6 +1115,8 @@ const num = v => { const x = parseFloat(v); return isNaN(x) ? 0 : x; };
 const r1 = x => Math.round(x*10)/10;
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const q = s => String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+const nowHM = () => { const d = new Date();
+  return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); };
 const DAYS = ['일','월','화','수','목','금','토'];
 const fmtD = d => { const x = new Date(d); return (x.getMonth()+1)+'월 '+x.getDate()+'일'; };
 const fmtW = d => DAYS[new Date(d).getDay()];
@@ -1067,9 +1142,22 @@ const BAR = 20;
 const PLATE = [[25,'#D64541',28],[20,'#3E7BD6',28],[15,'#F5C445',25],
                [10,'#46B48A',21],[5,'#E8EDF5',17],[2.5,'#D64541',14],[1.25,'#B9C6D8',11]];
 
-function plateHTML(total){
-  if (total < BAR) return '<div class="pl-t">빈 봉이 20kg입니다</div>';
-  let side = (total-BAR)/2;
+/* 바벨 무게는 종목마다 다르다. 올림픽 바 20kg, 여성용 15kg,
+   EZ바 10kg, 세이프티 스쿼트 바 25kg 등. 잘못 잡으면 원판 계산이 전부 틀린다. */
+function barOf(exName){
+  if (D.barPref && D.barPref[exName] != null) return D.barPref[exName];
+  if (/EZ바|프리처|스컬크러셔/.test(exName||'')) return 10;
+  return BAR;
+}
+
+function plateHTML(total, exName){
+  const bw = barOf(exName);
+  const foot = '<div class="pl-bw">' +
+    [20,15,10,25].map(v => '<button type="button" onclick="setBar(\''+q(exName||'')+'\','+v+')"' +
+      (v===bw?' style="background:var(--white);color:#09090B;border-color:var(--white)"':'') +
+      '>'+v+'kg 봉</button>').join('') + '</div>';
+  if (total < bw) return '<div class="pl-t">빈 봉이 '+bw+'kg입니다</div>' + foot;
+  let side = (total-bw)/2;
   const out = [], cnt = {};
   for (const [kg,color,h] of PLATE){
     while (side >= kg-0.001){
@@ -1082,7 +1170,15 @@ function plateHTML(total){
     ? Object.keys(cnt).sort((a,b) => b-a).map(k => k+'×'+cnt[k]).join(' + ') + (side>0 ? '  ('+side+'kg 부족)' : '')
     : '빈 봉';
   return '<div class="pl-bar"><i class="pl-s" style="width:22px"></i>'+out.join('')+
-         '<i class="pl-s" style="width:40px"></i></div><div class="pl-t">한쪽에 '+txt+'</div>';
+         '<i class="pl-s" style="width:40px"></i></div>' +
+         '<div class="pl-t">'+bw+'kg 봉 + 한쪽에 '+txt+'</div>' + foot;
+}
+
+async function setBar(exName, v){
+  D.barPref = D.barPref || {};
+  D.barPref[exName] = v;
+  await saveData(); render();
+  toast(v+'kg 봉으로 계산합니다');
 }
 
 /* ═══════════════════════════════════════════════════
@@ -1112,13 +1208,35 @@ const setsOf = id => D.sets.filter(s => s.slotId === id);
 const slotsOn = d => D.slots.filter(s => s.date === d);
 const mealsOn = d => D.meals.filter(m => m.date === d);
 
+/* 워밍업 세트는 자극을 만들지 않으므로 통계에서 뺀다.
+   주당 10~20세트라는 기준 자체가 '하드 세트' 기준이라
+   램프업을 섞어 세면 기준이 무너진다.
+   ※ 선피로(풀오버·플라이 등)는 워밍업이 아니라 진짜 작업 세트다.
+      실패 근처까지 가므로 볼륨에 포함되어야 한다. */
+const isWork = s => !s.w0;
+
 function volumeOf(s){
   const ex = EX[s.exId];
   if (!ex || ex.kind === 'cardio' || ex.kind === 'hold') return 0;
+  if (s.w0) return 0;
   return (s.w||0) * (s.r||0);
 }
+/* 첫 세트부터 마지막 세트까지 걸린 시간 */
+function dayDuration(d){
+  const times = [];
+  slotsOn(d).forEach(sl => setsOf(sl.id).forEach(x => { if (x.at) times.push(x.at); }));
+  if (times.length < 2) return null;
+  times.sort();
+  const toMin = t => { const a = String(t).split(':').map(Number); return a[0]*60 + a[1]; };
+  let mins = toMin(times[times.length-1]) - toMin(times[0]);
+  if (mins < 0) mins += 1440;
+  if (mins < 1 || mins > 360) return null;
+  return mins;
+}
+const fmtDur = m => m >= 60 ? Math.floor(m/60)+'시간 '+(m%60?(m%60)+'분':'') : m+'분';
+
 function dayVolume(d){ let v=0; slotsOn(d).forEach(sl => setsOf(sl.id).forEach(s => v += volumeOf(s))); return v; }
-function daySets(d){ let c=0; slotsOn(d).forEach(sl => c += setsOf(sl.id).length); return c; }
+function daySets(d){ let c=0; slotsOn(d).forEach(sl => c += setsOf(sl.id).filter(isWork).length); return c; }
 
 function prevSession(exId, before){
   const past = D.slots.filter(s => s.exId === exId && s.date < before)
@@ -1129,7 +1247,7 @@ function prevSession(exId, before){
 function bestOf(exId){
   let m = 0;
   D.slots.filter(s => s.exId === exId).forEach(sl =>
-    setsOf(sl.id).forEach(s => { if ((s.w||0) > m) m = s.w; }));
+    setsOf(sl.id).filter(isWork).forEach(s => { if ((s.w||0) > m) m = s.w; }));
   return m;
 }
 function setLabel(s){
@@ -1441,7 +1559,14 @@ function viewWorkout(){
   h += '<button class="btn" onclick="openExPicker()">＋ 운동 추가</button>';
 
   if (slots.length && cnt > 0){
-    h += '<button class="btn btn-g" style="margin-top:8px" onclick="finishSession()">운동 종료</button>';
+    const dm = dayDuration(d);
+    h += '<button class="btn btn-g" style="margin-top:8px" onclick="finishSession()">운동 종료' +
+      (dm ? ' · '+fmtDur(dm) : '')+'</button>';
+  }
+  if (slots.length){
+    const mm0 = (D.memo || {})[d];
+    h += '<button class="memo-btn" style="margin-top:8px" onclick="openMemo()">' +
+      (mm0 ? '<b>'+esc(mm0.length>48?mm0.slice(0,48)+'…':mm0)+'</b>' : '메모 남기기') + '</button>';
   }
 
   const R = D.routines || [];
@@ -1469,6 +1594,7 @@ function sessionDoneHTML(d, slots, vol, cnt){
     '<span class="fin-sub">' + slots.length + '종목 · ' + cnt + '세트</span>' +
     '<div class="fin-dots">' + parts.map(pp =>
       '<i><s style="background:'+partOf(pp).color+'"></s>'+partOf(pp).name+'</i>').join('') + '</div>' +
+    (dayDuration(d) ? '<div class="dur">⏱ '+fmtDur(dayDuration(d))+'</div>' : '') +
     '</div></div>';
 
   slots.forEach(sl => {
@@ -1478,10 +1604,16 @@ function sessionDoneHTML(d, slots, vol, cnt){
       'border-radius:var(--r-lg);margin-bottom:8px"><div class="dd-h">' +
       '<i class="dd-c" style="background:'+partOf(ex.part).color+'"></i><b>'+esc(ex.name)+'</b>' +
       '<span>'+ss.length+'세트</span></div>' +
-      '<div class="dd-s">'+ss.map(x => '<i>'+setLabel(x)+'</i>').join('')+'</div></div>';
+      '<div class="dd-s">'+ss.map(x => '<i'+(x.w0?' style="opacity:.45"':'')+'>' +
+        (x.w0?'W ':'')+(x.drop?'↳ ':'')+setLabel(x)+'</i>').join('')+'</div></div>';
   });
 
-  h += '<div class="row2" style="margin-top:10px">' +
+  const mm = (D.memo || {})[d];
+  h += '<div class="sec">메모</div>';
+  h += mm
+    ? '<button class="memo-btn" onclick="openMemo()"><b>'+esc(mm.length>60?mm.slice(0,60)+'…':mm)+'</b></button>'
+    : '<button class="memo-btn" onclick="openMemo()">컨디션이나 통증을 남겨두면 나중에 도움이 됩니다</button>';
+  h += '<div class="row2" style="margin-top:12px">' +
     '<button class="btn btn-g" onclick="reopenSession()">다시 열어서 수정</button>' +
     '<button class="btn btn-g" onclick="saveRoutine()">루틴으로 저장</button></div>';
   return h;
@@ -1490,6 +1622,15 @@ function sessionDoneHTML(d, slots, vol, cnt){
 function exCard(sl){
   const ex = EX[sl.exId];
   if (!ex) return '';
+  /* 묶음의 첫 종목 위에만 라벨을 얹는다 */
+  let pre = '';
+  if (sl.gid){
+    const g = slotsOn(sl.date).filter(x => x.gid === sl.gid);
+    if (g.length && g[0].id === sl.id){
+      pre = '<div class="glabel"><span>'+groupLabel(sl.gid, sl.date)+'</span>' +
+        '<em>'+g.length+'종목 · 쉬지 않고 이어서</em></div>';
+    }
+  }
   const part = partOf(ex.part);
   const ss = setsOf(sl.id);
   const open = openEx === sl.id;
@@ -1508,7 +1649,8 @@ function exCard(sl){
     sum = ss.length+'세트 · 최고 '+setLabel(top);
   }
 
-  let h = '<div class="ex'+(open?' open':'')+'">';
+  const gcls = sl.gid ? ' grouped' : '';
+  let h = pre + '<div class="ex'+(open?' open':'')+gcls+'">';
   h += '<div class="ex-hd" onclick="toggleEx(\''+sl.id+'\')">' +
     '<i class="ex-cl" style="background:'+part.color+'"></i>' +
     '<div class="ex-tt"><b>'+esc(ex.name)+'</b><span>'+part.name+' · '+KIND[ex.kind]+
@@ -1550,8 +1692,9 @@ function exCard(sl){
     if (ex.kind === 'cardio'){ c3 = (s.min||0); c4 = (s.dist||0)||''; }
     else if (ex.kind === 'hold'){ c3 = (s.sec||0); c4 = ''; }
     else { c3 = (s.w>0 ? s.w : '맨몸'); c4 = s.r; }
-    h += '<div class="st-r'+(bg?' pr':'')+(s.id===flashId?' flash':'')+'" onclick="editSet(\''+s.id+'\')">' +
-      '<span class="st-n">'+(i+1)+'</span>' +
+    const cls = (bg?' pr':'') + (s.id===flashId?' flash':'') + (s.w0?' warm':'') + (s.drop?' dropset':'');
+    h += '<div class="st-r'+cls+'" onclick="editSet(\''+s.id+'\')">' +
+      '<span class="st-n">'+(s.w0 ? 'W' : (s.drop ? '↳' : wnum(ss,i)))+'</span>' +
       '<span class="st-p">'+p+'</span>' +
       '<span class="st-v">'+c3+bg+'</span>' +
       '<span class="st-v">'+c4+'</span>' +
@@ -1572,12 +1715,25 @@ function exCard(sl){
   }
   h += '<button class="ip-go" onclick="addSet(\''+sl.id+'\')">기록</button></div>';
 
+  /* 세트 성격 — 워밍업은 통계에서 빠지고, 드랍은 앞 세트에 이어 붙는다 */
   if (ex.kind !== 'cardio'){
-    h += '<div class="rp"><em>RPE</em>' + [6,7,8,9,10].map(v =>
-      '<button aria-pressed="'+(v===dr.rpe)+'" onclick="setDr(\''+sl.id+'\',\'rpe\','+v+',1)">'+v+'</button>'
+    const prevSets = setsOf(sl.id);
+    const canDrop = prevSets.length > 0;
+    const best = bestOf(sl.exId);
+    const hint = !dr.w0 && best > 0 && dr.w > 0 && dr.w < best*0.65 && prevSets.length === 0;
+    h += '<div class="tech" id="tc-'+sl.id+'">' +
+      '<button type="button" class="tc-b'+(dr.w0?' on w':'')+'" onclick="setTech(\''+sl.id+'\',\'w0\')">워밍업</button>' +
+      (canDrop ? '<button type="button" class="tc-b'+(dr.dropOn?' on d':'')+'" onclick="setTech(\''+sl.id+'\',\'drop\')">드랍</button>' : '') +
+      (hint ? '<span class="tc-hint">가벼운 무게예요 · 워밍업?</span>' : '') +
+      '</div>';
+  }
+
+  if (ex.kind !== 'cardio'){
+    h += '<div class="rp" id="rp-'+sl.id+'"><em>RPE</em>' + [6,7,8,9,10].map(v =>
+      '<button type="button" data-v="'+v+'" aria-pressed="'+(v===dr.rpe)+'" onclick="setRpe(\''+sl.id+'\','+v+')">'+v+'</button>'
     ).join('') + '</div>';
   }
-  if (ex.kind === 'bar') h += '<div class="pls" id="pl-'+sl.id+'">'+(dr.w>0?plateHTML(dr.w):'')+'</div>';
+  if (ex.kind === 'bar') h += '<div class="pls" id="pl-'+sl.id+'">'+(dr.w>0?plateHTML(dr.w, ex.name):'')+'</div>';
   h += '</div>';
 
   /* 하단 조작 */
@@ -1594,16 +1750,27 @@ function exCard(sl){
 
   h += '<div style="display:flex;gap:7px;padding:0 13px 12px">' +
     '<button class="btn btn-g btn-sm" onclick="openTrend(\''+q(ex.name)+'\')">성장 추이</button>' +
-    '<button class="btn btn-g btn-sm" onclick="rmSlot(\''+sl.id+'\')" style="flex:0 0 62px;color:var(--tx-3);white-space:nowrap">삭제</button></div>';
+    '<button class="btn btn-g btn-sm" onclick="openLink(\''+sl.id+'\')" style="flex:0 0 74px;white-space:nowrap">'+
+      (sl.gid ? '묶음 해제' : '묶기')+'</button>' +
+    '<button class="btn btn-g btn-sm" onclick="rmSlot(\''+sl.id+'\')" style="flex:0 0 56px;color:var(--tx-3);white-space:nowrap">삭제</button></div>';
 
   return h + '</div></div>';
 }
 
+/* 세트 번호는 작업 세트만 센다. 워밍업은 W, 드랍은 ↳ 로 표시 */
+function wnum(list, i){
+  let n = 0;
+  for (let k = 0; k <= i; k++) if (!list[k].w0 && !list[k].drop) n++;
+  return n;
+}
+
 function fld(id, key, label, val, step){
   return '<div class="fd"><label>'+label+'</label><div class="fb">' +
-    '<button onclick="bump(\''+id+'\',\''+key+'\',-'+step+')" aria-label="빼기">−</button>' +
-    '<input inputmode="decimal" value="'+val+'" onchange="setDr(\''+id+'\',\''+key+'\',this.value)" oninput="setDr(\''+id+'\',\''+key+'\',this.value)">' +
-    '<button onclick="bump(\''+id+'\',\''+key+'\','+step+')" aria-label="더하기">＋</button></div></div>';
+    '<button type="button" onclick="bump(\''+id+'\',\''+key+'\',-'+step+')" aria-label="빼기">−</button>' +
+    '<input id="fd-'+id+'-'+key+'" inputmode="decimal" enterkeyhint="done" autocomplete="off" ' +
+      'autocorrect="off" autocapitalize="off" spellcheck="false" value="'+val+'" ' +
+      'oninput="setDr(\''+id+'\',\''+key+'\',this.value)">' +
+    '<button type="button" onclick="bump(\''+id+'\',\''+key+'\','+step+')" aria-label="더하기">＋</button></div></div>';
 }
 
 function mkDraft(sl){
@@ -1626,7 +1793,8 @@ function mkDraft(sl){
 function prBadge(set){
   const i = D.sets.indexOf(set);
   if (i < 0 || !set.w || !set.r) return '';
-  const prior = D.sets.slice(0,i).filter(s => s.exId === set.exId && s.w > 0);
+  if (set.w0) return '';
+  const prior = D.sets.slice(0,i).filter(s => s.exId === set.exId && s.w > 0 && isWork(s));
   if (!prior.length) return '';
   if (set.w > Math.max(...prior.map(s => s.w))) return '<span class="badge">중량</span>';
   const mE = Math.max(...prior.map(setE1));
@@ -1641,7 +1809,7 @@ function prAnalysis(sl){
   const ex = EX[sl.exId];
   if (!ex || !BIG.has(ex.name)) return null;
   const inc = ex.inc || 2.5;
-  const ts = setsOf(sl.id).filter(s => s.w > 0 && s.r > 0);
+  const ts = setsOf(sl.id).filter(s => s.w > 0 && s.r > 0 && isWork(s));
   if (!ts.length) return null;
 
   let top = null, topE = 0;
@@ -1650,7 +1818,7 @@ function prAnalysis(sl){
 
   let prW = 0, prE = 0, lastHeavy = null;
   D.slots.filter(x => x.exId === sl.exId && x.date < sl.date).forEach(x =>
-    setsOf(x.id).forEach(s => {
+    setsOf(x.id).filter(isWork).forEach(s => {
       if (s.w > prW) prW = s.w;
       const e = setE1(s); if (e > prE) prE = e;
       if (s.r <= 2 && s.w > 0 && (!lastHeavy || x.date > lastHeavy)) lastHeavy = x.date;
@@ -1866,7 +2034,7 @@ function recWeek(){
     if (info.sets){ wd++; vol += info.vol; sets += info.sets; }
     slotsOn(d).forEach(sl => {
       const ex = EX[sl.exId]; if (!ex) return;
-      byPart[ex.part] += setsOf(sl.id).length;
+      byPart[ex.part] += setsOf(sl.id).filter(isWork).length;
     });
     if (mealsOn(d).length){ kcalDays++; const e = eaten(d); kcalSum += e.kcal; protSum += e.p; }
   });
@@ -1917,6 +2085,12 @@ function recDay(){
     '<div class="stat"><b>'+info.sets+'</b><span>세트</span></div>' +
     '<div class="stat"><b>'+(info.vol>=1000?r1(info.vol/1000)+'t':Math.round(info.vol))+'</b><span>볼륨</span></div></div>';
 
+  const dd = dayDuration(d);
+  if (dd) h += '<div class="dur" style="margin:-4px 0 10px">⏱ 운동 시간 '+fmtDur(dd)+'</div>';
+  const dmemo = (D.memo || {})[d];
+  if (dmemo) h += '<div class="card" style="padding:12px 14px;margin-bottom:11px">' +
+    '<div style="font-size:12.5px;color:var(--tx-2);line-height:1.7">'+esc(dmemo)+'</div></div>';
+
   h += '<div class="card">';
   if (!info.sl.length) h += '<div class="empty">이 날 운동 기록이 없습니다.</div>';
   info.sl.forEach(sl => {
@@ -1926,7 +2100,9 @@ function recDay(){
     h += '<div class="dd"><div class="dd-h">' +
       '<i class="dd-c" style="background:'+partOf(ex.part).color+'"></i>' +
       '<b>'+esc(ex.name)+'</b><span>'+(v?Math.round(v).toLocaleString()+'kg':ss.length+'세트')+'</span></div>' +
-      '<div class="dd-s">'+ss.map(s => '<i>'+setLabel(s)+(s.rpe?' <small style="opacity:.5">@'+s.rpe+'</small>':'')+'</i>').join('')+'</div></div>';
+      '<div class="dd-s">'+ss.map(s => '<i'+(s.w0?' style="opacity:.45"':'')+'>' +
+        (s.w0?'W ':'')+(s.drop?'↳ ':'')+setLabel(s) +
+        (s.rpe?' <small style="opacity:.5">@'+s.rpe+'</small>':'')+'</i>').join('')+'</div></div>';
   });
   h += '</div>';
 
@@ -1968,7 +2144,7 @@ function recDay(){
 function sessionsOf(exId){
   return D.slots.filter(s => s.exId === exId)
     .map(sl => {
-      const ss = setsOf(sl.id).filter(x => x.w > 0 && x.r > 0);
+      const ss = setsOf(sl.id).filter(x => x.w > 0 && x.r > 0 && isWork(x));
       if (!ss.length) return null;
       const top = ss.reduce((a,x) => setE1(x) > setE1(a) ? x : a, ss[0]);
       return { date:sl.date, e:setE1(top), w:top.w, r:top.r,
@@ -2124,7 +2300,8 @@ function stallAdvice(st){
 async function saveRoutine(){
   const list = slotsOn(viewDate).map(s => s.exId);
   if (!list.length){ toast('저장할 종목이 없어요'); return; }
-  const name = prompt('루틴 이름을 정해주세요', suggestRoutineName(list));
+  const name = await askText({ title:'루틴 저장', body:'오늘 구성 '+list.length+'종목을 저장합니다.',
+    value:suggestRoutineName(list), max:16 });
   if (!name) return;
   D.routines = D.routines || [];
   D.routines.push({ id:uid(), name:name.trim(), exIds:list, created:today() });
@@ -2150,7 +2327,9 @@ async function applyRoutine(id){
   toast(added ? rt.name+' · '+added+'개 종목 추가' : '이미 다 들어있어요');
 }
 async function rmRoutine(id){
-  if (!confirm('이 루틴을 지울까요? 기록은 남습니다.')) return;
+  const rt = (D.routines||[]).find(r => r.id === id);
+  if (!await ask({ title:'루틴 삭제', danger:true, ok:'삭제',
+    body:'<b>'+esc(rt?rt.name:'이 루틴')+'</b> 을(를) 지웁니다. 기록은 그대로 남습니다.' })) return;
   bury(id);
   D.routines = (D.routines||[]).filter(r => r.id !== id);
   await saveData(); openRoutines();
@@ -2211,7 +2390,8 @@ async function loadFromDay(dt){
 async function saveRoutineFrom(dt){
   const list = slotsOn(dt).map(x => x.exId);
   if (!list.length) return;
-  const name = prompt('루틴 이름', suggestRoutineName(list));
+  const name = await askText({ title:'루틴 저장', body:fmtD(dt)+' 구성 '+list.length+'종목을 저장합니다.',
+    value:suggestRoutineName(list), max:16 });
   if (!name) return;
   D.routines = D.routines || [];
   D.routines.push({ id:uid(), name:name.trim(), exIds:list, created:today() });
@@ -2238,7 +2418,7 @@ function buildWeek(anchor){
     ds.forEach(d => {
       const sc = daySets(d);
       if (sc){ wd++; sets += sc; vol += dayVolume(d); }
-      slotsOn(d).forEach(sl => { const e=EX[sl.exId]; if(e) parts[e.part] += setsOf(sl.id).length; });
+      slotsOn(d).forEach(sl => { const e=EX[sl.exId]; if(e) parts[e.part] += setsOf(sl.id).filter(isWork).length; });
       if (mealsOn(d).length){ const e=eaten(d); mdays++; kcal+=e.kcal; prot+=e.p; caff+=e.caf; sug+=e.sug; if(t && e.p>=t.p*0.9) hitP++; }
     });
     return { vol, sets, wd, parts, kcal, prot, mdays, hitP, caff, sug };
@@ -2256,7 +2436,7 @@ function buildWeek(anchor){
   const runBest = {};
   const sd = {}; D.slots.forEach(x => sd[x.id] = x.date);
   D.sets.forEach(x => {
-    const dt = sd[x.slotId]; if (!dt || !x.w) return;
+    const dt = sd[x.slotId]; if (!dt || !x.w || !isWork(x)) return;
     if (runBest[x.exId] === undefined){ runBest[x.exId] = x.w; return; }
     if (x.w > runBest[x.exId]){
       runBest[x.exId] = x.w;
@@ -2570,8 +2750,10 @@ function catStats(){
   const rb = {};
   D.sets.forEach(s => {
     const d = sd[s.slotId]; if (!d) return;
-    const o = touch(d); o.sets++; o.vol += volumeOf(s);
-    if (s.w > 0){
+    const o = touch(d);
+    if (isWork(s)) o.sets++;
+    o.vol += volumeOf(s);
+    if (s.w > 0 && isWork(s)){
       if (rb[s.exId] === undefined) rb[s.exId] = s.w;
       else if (s.w > rb[s.exId]){ rb[s.exId] = s.w; o.pr++; }
     }
@@ -2613,7 +2795,7 @@ function catStats(){
   });
   const partSets = {}; PARTS.forEach(p => partSets[p.id] = 0);
   D.slots.filter(s => s.date > ago(7)).forEach(sl => {
-    const ex = EX[sl.exId]; if (ex) partSets[ex.part] += setsOf(sl.id).length;
+    const ex = EX[sl.exId]; if (ex) partSets[ex.part] += setsOf(sl.id).filter(isWork).length;
   });
   return { exp, idx, cur, nxt, pct, streak, noRest, since, day, volNow, volPrev,
            partSets, totalDays: wdays.length };
@@ -2876,7 +3058,7 @@ function viewMe(){
 
   /* 종목별 최고 */
   const best = {};
-  D.slots.forEach(sl => setsOf(sl.id).forEach(s => {
+  D.slots.forEach(sl => setsOf(sl.id).filter(isWork).forEach(s => {
     if (!s.w) return;
     const e = setE1(s);
     if (!best[sl.exId] || s.w > best[sl.exId].w) best[sl.exId] = Object.assign({}, best[sl.exId], { w:s.w });
@@ -2915,7 +3097,7 @@ function big3HTML(){
   const L = [{k:'백스쿼트',s:'스쿼트'},{k:'벤치프레스',s:'벤치'},{k:'데드리프트',s:'데드'}];
   const rows = L.map(l => {
     let w = 0, e = 0;
-    D.slots.filter(s => s.exId === l.k).forEach(sl => setsOf(sl.id).forEach(s => {
+    D.slots.filter(s => s.exId === l.k).forEach(sl => setsOf(sl.id).filter(isWork).forEach(s => {
       if (s.w > w) w = s.w;
       const v = setE1(s); if (v > e) e = v;
     }));
@@ -3007,13 +3189,61 @@ function openCustomList(){
   openSheet('내가 추가한 항목', h);
 }
 async function rmCustomEx(i){
-  if (!confirm('이 종목을 목록에서 지울까요?')) return;
+  if (!await ask({ title:'종목 삭제', danger:true, ok:'삭제',
+    body:'목록에서만 지워집니다. 이미 기록한 내용은 남습니다.' })) return;
   D.customEx.splice(i,1); rebuildIndex(); await saveData(); openCustomList(); render();
 }
 async function rmCustomFood(i){
-  if (!confirm('이 음식을 목록에서 지울까요?')) return;
+  if (!await ask({ title:'음식 삭제', danger:true, ok:'삭제',
+    body:'목록에서만 지워집니다. 이미 기록한 내용은 남습니다.' })) return;
   D.customFood.splice(i,1); rebuildIndex(); await saveData(); openCustomList(); render();
 }
+
+/* ═══════════════════════════════════════════════════
+   13-5. 확인 · 입력 모달
+   ───────────────────────────────────────────────────
+   브라우저 기본 confirm/prompt 창은 앱 디자인과 따로 놀아서
+   전부 이 모달로 바꿨다. 약속(Promise)을 돌려주므로
+   기존 코드에서 await 한 줄만 붙이면 그대로 쓸 수 있다.
+   ═══════════════════════════════════════════════════ */
+let mdResolve = null;
+
+function mdClose(v){
+  $('#modal').classList.remove('on');
+  $('#mask').classList.remove('on');
+  const r = mdResolve; mdResolve = null;
+  if (r) r(v);
+}
+
+function ask(opt){
+  return new Promise(res => {
+    mdResolve = res;
+    $('#mdT').textContent = opt.title || '확인';
+    $('#mdB').innerHTML = opt.body ? '<div>'+opt.body+'</div>' : '';
+    $('#mdF').innerHTML =
+      '<button class="md-no" onclick="mdClose(false)">'+(opt.no||'취소')+'</button>' +
+      '<button class="md-ok'+(opt.danger?' danger':'')+'" onclick="mdClose(true)">'+(opt.ok||'확인')+'</button>';
+    $('#modal').classList.add('on');
+    $('#mask').classList.add('on');
+    vibrate(8);
+  });
+}
+
+function askText(opt){
+  return new Promise(res => {
+    mdResolve = res;
+    $('#mdT').textContent = opt.title || '입력';
+    $('#mdB').innerHTML = (opt.body ? '<div>'+opt.body+'</div>' : '') +
+      '<input id="mdIn" maxlength="'+(opt.max||24)+'" value="'+esc(opt.value||'')+'" placeholder="'+esc(opt.ph||'')+'">';
+    $('#mdF').innerHTML =
+      '<button class="md-no" onclick="mdClose(null)">취소</button>' +
+      '<button class="md-ok" onclick="mdText()">'+(opt.ok||'저장')+'</button>';
+    $('#modal').classList.add('on');
+    $('#mask').classList.add('on');
+    setTimeout(() => { const i = $('#mdIn'); if (i){ i.focus(); i.select(); } }, 180);
+  });
+}
+function mdText(){ const i = $('#mdIn'); mdClose(i ? i.value.trim() : null); }
 
 /* ═══════════════════════════════════════════════════
    14. 시트
@@ -3038,18 +3268,23 @@ function openExPicker(){
 }
 function exPickHTML(){
   const s = shState;
-  let h = '<input class="search" id="exQ" placeholder="종목 검색 (예: 벤치, 랫풀, 레터럴)" value="'+esc(s.q)+'" oninput="exSearch(this.value)">';
+  return '<input class="search" id="exQ" autocomplete="off" autocorrect="off" autocapitalize="off" ' +
+    'spellcheck="false" enterkeyhint="search" placeholder="종목 검색 (예: 벤치, 랫풀, 레터럴)" ' +
+    'value="'+esc(s.q)+'" oninput="exSearch(this.value)">' +
+    '<div id="exResult">' + exResultHTML() + '</div>';
+}
 
+function exResultHTML(){
+  const s = shState;
   if (s.q.trim()){
     const k = s.q.trim().toLowerCase();
     const hits = Object.values(EX).filter(e => e.name.toLowerCase().includes(k));
-    h += '<div class="grp">검색 결과 '+hits.length+'개</div>';
-    h += hits.length ? hits.map(pickRow).join('')
-      : '<div class="empty">일치하는 종목이 없습니다.<br>아래에서 직접 추가할 수 있어요.</div>';
-    h += '<button class="btn btn-g btn-sm" style="margin-top:12px" onclick="openNewEx()">＋ 직접 추가하기</button>';
-    return h;
+    return '<div class="grp">검색 결과 '+hits.length+'개</div>' +
+      (hits.length ? hits.map(pickRow).join('')
+        : '<div class="empty">일치하는 종목이 없습니다.<br>아래에서 직접 추가할 수 있어요.</div>') +
+      '<button class="btn btn-g btn-sm" style="margin-top:12px" onclick="openNewEx()">＋ 직접 추가하기</button>';
   }
-
+  let h = '';
   if ((D.routines||[]).length){
     h += '<div class="grp">내 루틴</div>' + routineListHTML(true) + '<div style="height:6px"></div>';
   }
@@ -3059,7 +3294,6 @@ function exPickHTML(){
     '<button aria-pressed="'+(s.group==='free')+'" onclick="exGroup(\'free\')">' +
       (s.part==='cardio'?'야외 · 맨몸':'프리웨이트')+'</button>' +
     '<button aria-pressed="'+(s.group==='machine')+'" onclick="exGroup(\'machine\')">머신</button></div>';
-
   const list = DB[s.part][s.group];
   h += '<div class="grp">'+partOf(s.part).name+' · '+list.length+'개</div>';
   h += list.map(([n]) => pickRow(EX[n])).join('');
@@ -3074,14 +3308,18 @@ function pickRow(e){
     '<span class="pick-t"><b>'+esc(e.name)+(e.custom?' <span style="font-size:9px;color:var(--tx-3)">직접추가</span>':'')+
     '</b><span>'+p.name+' · '+KIND[e.kind]+'</span></span><span class="pick-g">›</span></button>';
 }
-function exPart(id){ shState.part = id; shState.group = 'free'; refresh(exPickHTML()); }
-function exGroup(g){ shState.group = g; refresh(exPickHTML()); }
+function exPart(id){ shState.part = id; shState.group = 'free'; $('#exResult').innerHTML = exResultHTML(); }
+function exGroup(g){ shState.group = g; $('#exResult').innerHTML = exResultHTML(); }
+/* 검색창은 그대로 두고 결과 목록만 바꾼다.
+   입력칸 자체를 다시 만들면 한글 조합이 끊기고 키보드가 튄다. */
+let exSearchTimer = null;
 function exSearch(v){
   shState.q = v;
-  const b = $('#shB'), p = b.scrollTop;
-  b.innerHTML = exPickHTML();
-  const i = $('#exQ'); if (i){ i.focus(); i.setSelectionRange(v.length, v.length); }
-  b.scrollTop = p;
+  clearTimeout(exSearchTimer);
+  exSearchTimer = setTimeout(() => {
+    const box = $('#exResult');
+    if (box) box.innerHTML = exResultHTML();
+  }, 120);
 }
 
 /* ── 종목 직접 추가 ── */
@@ -3161,16 +3399,22 @@ function foodHTML(){
     h += '<button class="btn btn-g btn-sm" style="margin-top:8px" onclick="backFood()">다른 음식 고르기</button>';
     return h;
   }
-  let h = '<input class="search" id="fdQ" placeholder="음식 검색 (예: 닭가슴, 라면)" value="'+esc(s.q)+'" oninput="foodSearch(this.value)">';
+  return '<input class="search" id="fdQ" autocomplete="off" autocorrect="off" autocapitalize="off" ' +
+    'spellcheck="false" enterkeyhint="search" placeholder="음식 검색 (예: 닭가슴, 라면)" ' +
+    'value="'+esc(s.q)+'" oninput="foodSearch(this.value)">' +
+    '<div id="fdResult">' + foodResultHTML() + '</div>';
+}
+
+function foodResultHTML(){
+  const s = shState;
   if (s.q.trim()){
     const k = s.q.trim().toLowerCase();
     const hits = Object.values(FOODMAP).filter(f => f.name.toLowerCase().includes(k));
-    h += '<div class="grp">검색 결과 '+hits.length+'개</div>';
-    h += hits.length ? hits.map(foodRow).join('') : '<div class="empty">없는 음식이네요.<br>아래에서 직접 추가할 수 있어요.</div>';
-    h += '<button class="btn btn-g btn-sm" style="margin-top:12px" onclick="openNewFood()">＋ 직접 추가하기</button>';
-    return h;
+    return '<div class="grp">검색 결과 '+hits.length+'개</div>' +
+      (hits.length ? hits.map(foodRow).join('') : '<div class="empty">없는 음식이네요.<br>아래에서 직접 추가할 수 있어요.</div>') +
+      '<button class="btn btn-g btn-sm" style="margin-top:12px" onclick="openNewFood()">＋ 직접 추가하기</button>';
   }
-  h += '<div class="chips">'+Object.keys(FOOD).map(c =>
+  let h = '<div class="chips">'+Object.keys(FOOD).map(c =>
     '<button aria-pressed="'+(c===s.cat)+'" onclick="foodCat(\''+q(c)+'\')">'+c+'</button>').join('')+'</div>';
   h += FOOD[s.cat].map(f => foodRow(FOODMAP[f[0]])).join('');
   h += '<button class="btn btn-g btn-sm" style="margin-top:14px" onclick="openNewFood()">＋ 없는 음식 직접 추가</button>';
@@ -3183,13 +3427,15 @@ function foodRow(f){
     ((f.caf||0)>0 ? ' · <b style="color:var(--warn)">☕'+f.caf+'</b>' : '')+'</span></span>' +
     '<span class="pick-k">'+f.kcal+'</span><span class="pick-g">›</span></button>';
 }
-function foodCat(c){ shState.cat = c; refresh(foodHTML()); }
+function foodCat(c){ shState.cat = c; const b = $('#fdResult'); if (b) b.innerHTML = foodResultHTML(); else refresh(foodHTML()); }
+let fdSearchTimer = null;
 function foodSearch(v){
   shState.q = v;
-  const b = $('#shB'), p = b.scrollTop;
-  b.innerHTML = foodHTML();
-  const i = $('#fdQ'); if (i){ i.focus(); i.setSelectionRange(v.length, v.length); }
-  b.scrollTop = p;
+  clearTimeout(fdSearchTimer);
+  fdSearchTimer = setTimeout(() => {
+    const box = $('#fdResult');
+    if (box) box.innerHTML = foodResultHTML();
+  }, 120);
 }
 function pickFood(n){ shState.food = n; shState.qty = 1; shState.ov = null; shState.edit = false; refresh(foodHTML()); }
 
@@ -3275,6 +3521,11 @@ function editSet(id){
          '<div><label>횟수</label><input id="eB" inputmode="numeric" value="'+(s.r||0)+'"></div>';
   }
   if (ex.kind !== 'cardio'){
+    h += '<div class="pf-w"><label>세트 성격</label><select id="eW">' +
+      '<option value=""'+(!s.w0&&!s.drop?' selected':'')+'>작업 세트 (통계 포함)</option>' +
+      '<option value="w0"'+(s.w0?' selected':'')+'>워밍업 (통계 제외)</option>' +
+      '<option value="drop"'+(s.drop?' selected':'')+'>드랍세트</option>' +
+      '</select></div>';
     h += '<div class="pf-w"><label>RPE</label><select id="eR">' +
       ['','6','7','8','9','10'].map(v => '<option value="'+v+'"'+(String(s.rpe||'')===v?' selected':'')+'>'+(v||'없음')+'</option>').join('') +
       '</select></div>';
@@ -3295,6 +3546,12 @@ async function saveEdit(){
     s.w = A; s.r = B;
   }
   const rr = $('#eR'); if (rr) s.rpe = rr.value ? parseInt(rr.value,10) : null;
+  const ww = $('#eW');
+  if (ww){
+    delete s.w0; delete s.drop;
+    if (ww.value === 'w0') s.w0 = true;
+    else if (ww.value === 'drop') s.drop = true;
+  }
   await saveData(); closeSheet(); render(); toast('수정했어요');
 }
 
@@ -3393,8 +3650,15 @@ async function addSlot(name){
   toast(name+' 추가');
 }
 async function rmSlot(id){
-  if (!confirm('이 종목과 기록한 세트를 모두 지울까요?')) return;
+  const sl = D.slots.find(x => x.id === id);
+  const n = sl ? setsOf(id).length : 0;
+  if (!await ask({ title:'종목 삭제', danger:true, ok:'삭제',
+    body:'<b>'+(sl?esc(sl.exId):'이 종목')+'</b>'+(n?' · 기록한 '+n+'세트도 함께 지워집니다.':' 을(를) 목록에서 지웁니다.') })) return;
   bury(id);
+  if (sl && sl.gid){
+    const mates = slotsOn(sl.date).filter(x => x.gid === sl.gid && x.id !== id);
+    if (mates.length === 1) delete mates[0].gid;
+  }
   setsOf(id).forEach(x => bury(x.id));
   D.slots = D.slots.filter(s => s.id !== id);
   D.sets = D.sets.filter(s => s.slotId !== id);
@@ -3402,6 +3666,28 @@ async function rmSlot(id){
   if (openEx === id) openEx = null;
   await saveData(); render();
 }
+function openMemo(){
+  const cur = (D.memo || {})[viewDate] || '';
+  const h = '<div class="note" style="margin:0 0 12px">컨디션, 통증, 폼 느낌 같은 걸 적어두면 ' +
+    '나중에 정체 원인을 찾을 때 큰 도움이 됩니다.</div>' +
+    '<textarea class="memo" id="memoIn" rows="5" placeholder="예: 오른쪽 어깨 살짝 불편. 잠 5시간.">'+esc(cur)+'</textarea>' +
+    '<button class="btn" style="margin-top:12px" onclick="saveMemo()">저장</button>' +
+    (cur ? '<button class="btn btn-g btn-sm" style="margin-top:8px" onclick="clearMemo()">메모 지우기</button>' : '');
+  openSheet(fmtD(viewDate)+' 메모', h);
+  setTimeout(() => { const i = $('#memoIn'); if (i) i.focus(); }, 220);
+}
+async function saveMemo(){
+  const el = $('#memoIn'); if (!el) return;
+  D.memo = D.memo || {};
+  const v = el.value.trim();
+  if (v) D.memo[viewDate] = v; else delete D.memo[viewDate];
+  await saveData(); closeSheet(); render(); toast('메모를 저장했어요');
+}
+async function clearMemo(){
+  D.memo = D.memo || {}; delete D.memo[viewDate];
+  await saveData(); closeSheet(); render();
+}
+
 async function finishSession(){
   const d = viewDate;
   if (!daySets(d)){ toast('기록된 세트가 없어요'); return; }
@@ -3437,13 +3723,103 @@ function setDr(id, key, val, re){
      대신 바뀐 부분(원판 그림)만 살짝 고쳐준다. */
   if (key === 'w'){
     const box = document.querySelector('#pl-' + id);
-    if (box) box.innerHTML = plateHTML(num(draft[id].w));
+    const sl0 = D.slots.find(x => x.id === id);
+    if (box) box.innerHTML = plateHTML(num(draft[id].w), sl0 ? sl0.exId : '');
   }
 }
+/* ± 버튼을 눌러도 화면 전체를 다시 그리지 않는다.
+   전체를 다시 그리면 입력칸이 새로 만들어져 포커스가 날아가고
+   키보드가 닫혔다 열리면서 화면이 튄다. 해당 칸만 고쳐준다. */
 function bump(id, key, d){
   const o = draft[id]; if (!o) return;
   o[key] = Math.max(0, Math.round((num(o[key])+d)*100)/100);
-  render();
+  const box = document.querySelector('#fd-'+id+'-'+key);
+  if (box) box.value = o[key];
+  if (key === 'w'){
+    const pl = document.querySelector('#pl-'+id);
+    const sl1 = D.slots.find(x => x.id === id);
+    if (pl) pl.innerHTML = num(o.w) > 0 ? plateHTML(num(o.w), sl1 ? sl1.exId : '') : '';
+  }
+  vibrate(5);
+}
+
+/* RPE도 마찬가지로 버튼 상태만 바꾼다 */
+/* 세트 성격 토글 — 화면 전체를 다시 그리지 않고 버튼만 바꾼다 */
+function setTech(id, kind){
+  const d = draft[id] = draft[id] || {};
+  if (kind === 'w0'){ d.w0 = !d.w0; if (d.w0) d.dropOn = false; }
+  else { d.dropOn = !d.dropOn; if (d.dropOn) d.w0 = false; }
+  const row = document.querySelector('#tc-'+id);
+  if (row){
+    const bs = row.querySelectorAll('.tc-b');
+    if (bs[0]) bs[0].className = 'tc-b' + (d.w0 ? ' on w' : '');
+    if (bs[1]) bs[1].className = 'tc-b' + (d.dropOn ? ' on d' : '');
+    const hint = row.querySelector('.tc-hint');
+    if (hint) hint.remove();
+  }
+  vibrate(6);
+}
+
+/* ── 슈퍼세트 · 컴파운드세트 묶기 ──
+   같은 묶음의 종목들은 쉬지 않고 번갈아 수행한다.
+   서로 다른 부위면 슈퍼세트, 같은 부위면 컴파운드세트로 자동 판별한다. */
+async function openLink(slotId){
+  const sl = D.slots.find(x => x.id === slotId); if (!sl) return;
+  if (sl.gid){
+    const mates = slotsOn(sl.date).filter(x => x.gid === sl.gid && x.id !== sl.id);
+    if (!await ask({ title:'묶음 해제', ok:'해제',
+      body:'<b>'+esc(sl.exId)+'</b> 을(를) 묶음에서 빼냅니다.' })) return;
+    delete sl.gid;
+    if (mates.length === 1) delete mates[0].gid;   /* 혼자 남으면 묶음 의미가 없다 */
+    await saveData(); render(); toast('묶음을 해제했어요');
+    return;
+  }
+  const others = slotsOn(sl.date).filter(x => x.id !== slotId);
+  if (!others.length){ toast('묶을 종목이 더 필요해요'); return; }
+
+  let h = '<div class="note" style="margin:0 0 14px">' +
+    '<b>'+esc(sl.exId)+'</b> 와 쉬지 않고 이어서 할 종목을 고르세요.<br><br>' +
+    '다른 부위를 고르면 <b>슈퍼세트</b>, 같은 부위를 고르면 <b>컴파운드세트</b>로 기록됩니다.</div>';
+  const myPart = EX[sl.exId] ? EX[sl.exId].part : null;
+  others.forEach(o => {
+    const e = EX[o.exId]; if (!e) return;
+    const same = e.part === myPart;
+    h += '<button class="pick" onclick="doLink(\''+slotId+'\',\''+o.id+'\')">' +
+      '<i class="pick-d" style="background:'+partOf(e.part).color+'"></i>' +
+      '<span class="pick-t"><b>'+esc(o.exId)+'</b><span>'+partOf(e.part).name+' · ' +
+      (same ? '컴파운드세트' : '슈퍼세트')+'</span></span><span class="pick-g">›</span></button>';
+  });
+  openSheet('묶기', h);
+}
+
+async function doLink(aId, bId){
+  const a = D.slots.find(x => x.id === aId), b = D.slots.find(x => x.id === bId);
+  if (!a || !b) return;
+  const gid = b.gid || a.gid || uid();
+  a.gid = gid; b.gid = gid;
+  /* 묶인 종목끼리 나란히 오도록 순서를 맞춘다 */
+  const idx = D.slots.indexOf(b);
+  D.slots.splice(D.slots.indexOf(a), 1);
+  D.slots.splice(D.slots.indexOf(b) + 1, 0, a);
+  await saveData(); closeSheet(); render();
+  toast(groupLabel(gid, a.date) + '으로 묶었어요');
+}
+
+/* 묶음의 성격 판별 */
+function groupLabel(gid, date){
+  const g = slotsOn(date).filter(x => x.gid === gid);
+  const parts = new Set(g.map(x => EX[x.exId] && EX[x.exId].part).filter(Boolean));
+  if (g.length >= 3) return '자이언트세트';
+  return parts.size === 1 ? '컴파운드세트' : '슈퍼세트';
+}
+
+function setRpe(id, v){
+  draft[id] = draft[id] || {};
+  draft[id].rpe = v;
+  const row = document.querySelector('#rp-'+id);
+  if (row) [...row.querySelectorAll('button')].forEach(b =>
+    b.setAttribute('aria-pressed', String(parseInt(b.dataset.v,10) === v)));
+  vibrate(5);
 }
 
 async function addSet(slotId){
@@ -3453,31 +3829,38 @@ async function addSet(slotId){
 
   if (ex.kind === 'cardio'){
     if (!d.min && !d.dist){ toast('시간이나 거리를 입력해주세요'); return; }
-    D.sets.push({ id:uid(), slotId, exId:sl.exId, min:num(d.min), dist:num(d.dist) });
+    D.sets.push({ id:uid(), slotId, exId:sl.exId, min:num(d.min), dist:num(d.dist), at:nowHM() });
   } else if (ex.kind === 'hold'){
     if (!d.sec){ toast('시간을 입력해주세요'); return; }
-    D.sets.push({ id:uid(), slotId, exId:sl.exId, sec:num(d.sec), rpe:d.rpe });
+    D.sets.push({ id:uid(), slotId, exId:sl.exId, sec:num(d.sec), rpe:d.rpe, at:nowHM() });
   } else {
     if (!d.r || d.r <= 0){ toast('횟수를 입력해주세요'); return; }
     const before = bestOf(sl.exId);
-    D.sets.push({ id:uid(), slotId, exId:sl.exId, w:num(d.w), r:num(d.r), rpe:d.rpe });
-    pr = num(d.w) > before && before > 0;
+    const rec = { id:uid(), slotId, exId:sl.exId, w:num(d.w), r:num(d.r), rpe:d.rpe, at:nowHM() };
+    if (d.w0) rec.w0 = true;
+    if (d.dropOn) rec.drop = true;
+    D.sets.push(rec);
+    pr = !d.w0 && num(d.w) > before && before > 0;
   }
   flashId = D.sets[D.sets.length-1].id;
   await saveData(); render();
   setTimeout(() => { flashId = null; }, 900);
 
   /* 오늘 기록일 때만 휴식 타이머 자동 시작 */
-  if (viewDate === today()){
+  /* 워밍업과 드랍세트는 쉬지 않고 이어가는 게 원칙이라 타이머를 켜지 않는다 */
+  const noRest = draft[slotId] && (draft[slotId].w0 || draft[slotId].dropOn);
+  if (viewDate === today() && !noRest){
     const rest = defaultRest(ex.name);
     if (rest) startRest(rest, ex.name);
   }
+  /* 드랍은 연속으로 이어지므로 유지, 워밍업은 한 번 쓰고 자동 해제 */
+  if (draft[slotId]) draft[slotId].w0 = false;
   vibrate(30);
   toast(pr ? '개인 최고 기록!' : '기록했어요');
 }
 
 async function rmSet(id, fromSheet){
-  if (fromSheet && !confirm('이 세트를 지울까요?')) return;
+  if (fromSheet && !await ask({ title:'세트 삭제', danger:true, ok:'삭제', body:'이 세트를 지웁니다.' })) return;
   bury(id);
   D.sets = D.sets.filter(s => s.id !== id);
   await saveData();
@@ -3486,8 +3869,10 @@ async function rmSet(id, fromSheet){
 }
 
 async function wipe(){
-  if (!confirm('모든 운동·식단 기록을 삭제합니다. 되돌릴 수 없어요.')) return;
-  if (!confirm('정말로 삭제할까요? 먼저 백업을 받아두는 걸 권합니다.')) return;
+  if (!await ask({ title:'기록 전체 삭제', danger:true, ok:'삭제',
+    body:'모든 운동·식단 기록이 지워집니다.<br><b>되돌릴 수 없습니다.</b>' })) return;
+  if (!await ask({ title:'한 번 더 확인', danger:true, ok:'네, 삭제합니다',
+    body:'먼저 백업을 받아두는 걸 권합니다.<br>정말 진행할까요?' })) return;
   D = Object.assign({}, BLANK, { profile:D.profile, customEx:D.customEx, customFood:D.customFood });
   draft = {}; openEx = null;
   rebuildIndex(); await saveData(); render();
@@ -3550,10 +3935,11 @@ Object.assign(window, {
   openFood, foodCat, foodSearch, pickFood, backFood, qtyB, pickTime, commitFood, rmMeal,
   openNewFood, saveNewFood, openProfile, saveProfile, openCustomList, rmCustomEx, rmCustomFood,
   openPR, openCat, openTimer, tmSet, tmGo, restPref, startRest, defaultRest, mmss,
-  exportData, importData, wipe, closeSheet,
+  exportData, importData, wipe, closeSheet, ask, askText, mdClose, mdText,
   openTrend, stallCheck, saveRoutine, applyRoutine, rmRoutine, openRoutines,
   openWeekReport, restAdj, finishSession, reopenSession, loadFromDay, saveRoutineFrom,
-  ovOpen, ovSet, ovAuto, ovReset, askNotify, openGuide, gSet, gToggle, applySplit
+  setBar, openMemo, saveMemo, clearMemo, wnum,
+  ovOpen, ovSet, ovAuto, ovReset, askNotify, setRpe, setTech, openLink, doLink, exResultHTML, foodResultHTML, openGuide, gSet, gToggle, applySplit
 });
 
 /* 이벤트 */
@@ -3566,6 +3952,7 @@ window.addEventListener('scroll', () => {
   scrollTimer = setTimeout(() => f.classList.remove('dim'), 700);
 }, { passive:true });
 
+$('#mask').onclick = () => mdClose(false);
 $('#scrim').onclick = closeSheet;
 $('#shX').onclick = closeSheet;
 $('#btnTimer').onclick = openTimer;
@@ -3574,7 +3961,10 @@ $('#catFab').onclick = () => { $('#catBB').classList.remove('on'); openCat(); };
 $('#catBB').onclick = () => { $('#catBB').classList.remove('on'); openCat(); };
 $('#tmrAdd').onclick = timerAdd;
 $('#tmrEnd').onclick = stopTimer;
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if (mdResolve) mdClose(false); else closeSheet();
+});
 
 $('#impFile').onchange = async ev => {
   const f = ev.target.files && ev.target.files[0];
@@ -3583,7 +3973,8 @@ $('#impFile').onchange = async ev => {
   try{
     const j = JSON.parse(await f.text());
     if (!j || !Array.isArray(j.slots) || !Array.isArray(j.sets)) throw new Error('형식 오류');
-    if (!confirm('지금 기록을 백업 파일 내용으로 바꿉니다. 계속할까요?')) return;
+    if (!await ask({ title:'백업 복원', danger:true, ok:'복원',
+      body:'지금 기기의 기록을 백업 파일 내용으로 <b>바꿉니다.</b><br>계속할까요?' })) return;
     D = Object.assign({}, BLANK, j);
     draft = {}; openEx = null;
     rebuildIndex(); await saveData(); render();
@@ -3851,7 +4242,8 @@ async function verifyCode(){
   }
 }
 async function signOut(){
-  if (!confirm('로그아웃할까요? 이 기기의 기록은 그대로 남습니다.')) return;
+  if (!await ask({ title:'로그아웃', ok:'로그아웃',
+    body:'이 기기의 기록은 그대로 남습니다.<br>다시 로그인하면 클라우드 기록과 합쳐집니다.' })) return;
   await sb.auth.signOut();
   me = null; myProfile = null; friends = [];
   closeSheet(); render(); toast('로그아웃했어요');
@@ -3940,7 +4332,7 @@ function publicStats(){
     let total = 0;
     L.forEach(([k, key]) => {
       let e = 0, w = 0;
-      D.slots.filter(s => s.exId === k).forEach(sl => setsOf(sl.id).forEach(s => {
+      D.slots.filter(s => s.exId === k).forEach(sl => setsOf(sl.id).filter(isWork).forEach(s => {
         if (s.w > w) w = s.w;
         const v = setE1(s); if (v > e) e = v;
       }));
@@ -3964,7 +4356,7 @@ function publicStats(){
   }
   if (share.detail){
     const best = {};
-    D.slots.forEach(sl => setsOf(sl.id).forEach(s => {
+    D.slots.forEach(sl => setsOf(sl.id).filter(isWork).forEach(s => {
       if (!s.w) return;
       if (!best[sl.exId] || s.w > best[sl.exId]) best[sl.exId] = s.w;
     }));
@@ -4125,7 +4517,8 @@ async function acceptFriend(id){
   catch(e){ toast('실패했어요'); }
 }
 async function removeFriend(id, name){
-  if (!confirm((name||'이 친구')+'을(를) 목록에서 지울까요?')) return;
+  if (!await ask({ title:'친구 삭제', danger:true, ok:'삭제',
+    body:'<b>'+esc(name||'이 친구')+'</b> 을(를) 목록에서 지웁니다.' })) return;
   try{ await sb.rpc('remove_friend', { p_id:id }); await loadFriends(); paintFriendBody(); }
   catch(e){ toast('실패했어요'); }
 }
