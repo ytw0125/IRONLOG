@@ -2801,24 +2801,32 @@ function catStats(){
            partSets, totalDays: wdays.length };
 }
 
-function catSVG(idx, mood){
+/* mood 뒤에 mono 를 주면 단색 강철빛 엠블럼으로 그린다.
+   ─ 엠블럼: 플로팅 버튼·친구 목록처럼 UI 부품으로 쓰이는 자리
+   ─ 컬러  : 성장 카드·헬냥이 시트처럼 캐릭터가 주인공인 자리
+   같은 형태를 두 벌로 운영해, 평소 화면은 날카롭게 유지하면서
+   캐릭터의 매력은 필요한 곳에서만 꺼낸다. */
+function catSVG(idx, mood, mono){
   const S = STAGES[Math.max(0,Math.min(STAGES.length-1,idx))];
   const SW = S.sw, AR = S.arm, BI = S.bi;
   const WW = SW*(0.7-idx*0.05);
-  /* 색을 차분하게, 윤곽선을 얇게 다듬어 덜 유치하게 */
-  const FUR='#EDE4D8', FUR2='#CDBCA8', LINE='#A99781', PINK='#F2A0A6', DARK='#1F1B16';
+  const FUR  = mono ? '#8E939D' : '#EDE4D8';
+  const FUR2 = mono ? '#6E727B' : '#CDBCA8';
+  const LINE = mono ? '#55585F' : '#A99781';
+  const PINK = mono ? '#6E727B' : '#F2A0A6';
+  const DARK = mono ? '#202226' : '#1F1B16';
   const CX = 50, ol = 'stroke="'+LINE+'" stroke-width="1" stroke-linejoin="round"';
   let g = '';
-  if (idx >= 5) g += '<g opacity=".4" stroke="#D9A93C" stroke-width="2.2" stroke-linecap="round">' +
+  if (idx >= 5 && !mono) g += '<g opacity=".4" stroke="#D9A93C" stroke-width="2.2" stroke-linecap="round">' +
     '<path d="M14 18 l-5 -4 M86 18 l5 -4 M8 44 l-6 -1 M92 44 l6 -1 M24 6 l-3 -5 M76 6 l3 -5"/></g>';
   g += '<path d="M'+(CX+WW-2)+' 78 q 17 5 13 -13" fill="none" stroke="'+LINE+'" stroke-width="7.6" stroke-linecap="round"/>' +
        '<path d="M'+(CX+WW-2)+' 78 q 17 5 13 -13" fill="none" stroke="'+FUR+'" stroke-width="6" stroke-linecap="round"/>';
   const legW = 7+idx*1.5, legX = WW*0.68;
   [-1,1].forEach(d => { g += '<rect x="'+(CX+d*legX-legW/2)+'" y="73" width="'+legW+'" height="19" rx="'+(legW/2)+'" fill="'+FUR+'" '+ol+'/>'; });
   g += '<path d="M'+(CX-SW)+' 50 Q'+(CX-SW-1)+' 66 '+(CX-WW)+' 79 Q'+CX+' 83 '+(CX+WW)+' 79 Q'+(CX+SW+1)+' 66 '+(CX+SW)+' 50 Q'+CX+' 45 '+(CX-SW)+' 50 Z" fill="'+FUR+'" '+ol+'/>';
-  if (idx >= 2) g += '<path d="M'+CX+' 53 v'+(5+idx)+'" stroke="'+FUR2+'" stroke-width="1.7" stroke-linecap="round"/>' +
+  if (idx >= 2 && !mono) g += '<path d="M'+CX+' 53 v'+(5+idx)+'" stroke="'+FUR2+'" stroke-width="1.7" stroke-linecap="round"/>' +
     '<path d="M'+(CX-SW*0.66)+' 55 Q'+CX+' '+(61+idx)+' '+(CX+SW*0.66)+' 55" fill="none" stroke="'+FUR2+'" stroke-width="1.7"/>';
-  if (idx >= 4) g += '<path d="M'+(CX-WW*0.5)+' 67 h'+WW+' M'+(CX-WW*0.45)+' 72 h'+(WW*0.9)+'" stroke="'+FUR2+'" stroke-width="1.4"/>';
+  if (idx >= 4 && !mono) g += '<path d="M'+(CX-WW*0.5)+' 67 h'+WW+' M'+(CX-WW*0.45)+' 72 h'+(WW*0.9)+'" stroke="'+FUR2+'" stroke-width="1.4"/>';
   const arm = d => {
     let path, bx, by, br;
     if (S.pose === 'flex'){
@@ -2836,18 +2844,18 @@ function catSVG(idx, mood){
     o += '<path d="'+path+'" fill="none" stroke="'+FUR+'" stroke-width="'+w+'" stroke-linecap="round" stroke-linejoin="round"/>';
     if (br){
       o += '<ellipse cx="'+bx+'" cy="'+by+'" rx="'+(br+AR*0.6)+'" ry="'+(br*1.2+AR*0.55)+'" fill="'+FUR+'"/>';
-      if (br > 3.5) o += '<path d="M'+(bx-d*br*0.15)+' '+(by-br*0.55)+' q'+(d*br*0.75)+' '+(br*0.6)+' 0 '+(br*1.15)+'" fill="none" stroke="'+FUR2+'" stroke-width="1.4" stroke-linecap="round"/>';
+      if (br > 3.5 && !mono) o += '<path d="M'+(bx-d*br*0.15)+' '+(by-br*0.55)+' q'+(d*br*0.75)+' '+(br*0.6)+' 0 '+(br*1.15)+'" fill="none" stroke="'+FUR2+'" stroke-width="1.4" stroke-linecap="round"/>';
     }
     return o;
   };
   g += arm(-1)+arm(1);
-  if (idx >= 4) g += '<rect x="'+(CX-WW-2)+'" y="69" width="'+(WW*2+4)+'" height="7" rx="1.5" fill="'+(idx>=5?'#C79A38':'#6E4B31')+'" stroke="#3E2A19" stroke-width=".9"/>' +
-    '<rect x="'+(CX-2.5)+'" y="70.3" width="5" height="4.4" rx=".8" fill="#3E2A19"/>';
+  if (idx >= 4) g += '<rect x="'+(CX-WW-2)+'" y="69" width="'+(WW*2+4)+'" height="7" rx="1.5" fill="'+(mono ? LINE : (idx>=5?'#C79A38':'#6E4B31'))+'" stroke="'+(mono?DARK:'#3E2A19')+'" stroke-width=".9"/>' +
+    '<rect x="'+(CX-2.5)+'" y="70.3" width="5" height="4.4" rx=".8" fill="'+(mono?DARK:'#3E2A19')+'"/>';
   g += '<path d="M36 23 L30.5 6.5 L46.5 14 Z" fill="'+FUR+'" '+ol+'/><path d="M36.8 19.5 L34 11.5 L42.2 15 Z" fill="'+PINK+'"/>' +
        '<path d="M64 23 L69.5 6.5 L53.5 14 Z" fill="'+FUR+'" '+ol+'/><path d="M63.2 19.5 L66 11.5 L57.8 15 Z" fill="'+PINK+'"/>';
   g += '<circle cx="50" cy="31" r="18" fill="'+FUR+'" '+ol+'/>' +
-       '<path d="M45 15.5 l-1.2 5 M50 14.8 v5 M55 15.5 l1.2 5" stroke="'+FUR2+'" stroke-width="1.5" stroke-linecap="round" opacity=".75"/>';
-  if (idx >= 3) g += '<path d="M33.5 24.5 q16.5 -7.5 33 0" fill="none" stroke="'+(idx>=5?'#D9A93C':'#D8574A')+'" stroke-width="4.6" stroke-linecap="round"/>';
+       (mono ? '' : '<path d="M45 15.5 l-1.2 5 M50 14.8 v5 M55 15.5 l1.2 5" stroke="'+FUR2+'" stroke-width="1.5" stroke-linecap="round" opacity=".75"/>');
+  if (idx >= 3) g += '<path d="M33.5 24.5 q16.5 -7.5 33 0" fill="none" stroke="'+(mono ? FUR2 : (idx>=5?'#D9A93C':'#D8574A'))+'" stroke-width="4.6" stroke-linecap="round"/>';
   g += {
     happy:'<path d="M41 31.5 q3.6 -4.4 7.2 0 M51.8 31.5 q3.6 -4.4 7.2 0" fill="none" stroke="'+DARK+'" stroke-width="2.5" stroke-linecap="round"/>',
     normal:'<circle cx="44.4" cy="31" r="2.7" fill="'+DARK+'"/><circle cx="55.6" cy="31" r="2.7" fill="'+DARK+'"/><circle cx="45.3" cy="30.1" r=".9" fill="#fff"/><circle cx="56.5" cy="30.1" r=".9" fill="#fff"/>',
@@ -2861,8 +2869,8 @@ function catSVG(idx, mood){
     : mood === 'sad'
       ? '<path d="M46.4 40.4 q3.6 -2.8 7.2 0" fill="none" stroke="'+DARK+'" stroke-width="1.9" stroke-linecap="round"/>'
       : '<path d="M50 36.2 q-2.6 3.6 -5.2 0.5 M50 36.2 q2.6 3.6 5.2 0.5" fill="none" stroke="'+DARK+'" stroke-width="1.9" stroke-linecap="round"/>';
-  g += '<g stroke="'+DARK+'" stroke-width="1" stroke-linecap="round" opacity=".3"><path d="M35.5 34 l-8 -2 M35.5 37.2 l-8 1.5 M64.5 34 l8 -2 M64.5 37.2 l8 1.5"/></g>';
-  if (mood === 'worry') g += '<path d="M70.5 20 q3.2 4.8 0 6.4 q-3.2 -1.6 0 -6.4" fill="#7DC4F5"/>';
+  if (!mono) g += '<g stroke="'+DARK+'" stroke-width="1" stroke-linecap="round" opacity=".3"><path d="M35.5 34 l-8 -2 M35.5 37.2 l-8 1.5 M64.5 34 l8 -2 M64.5 37.2 l8 1.5"/></g>';
+  if (mood === 'worry' && !mono) g += '<path d="M70.5 20 q3.2 4.8 0 6.4 q-3.2 -1.6 0 -6.4" fill="#7DC4F5"/>';
   return '<svg viewBox="-11 -3 122 106" xmlns="http://www.w3.org/2000/svg">'+g+'</svg>';
 }
 
@@ -2992,7 +3000,8 @@ function renderCat(){
   if (st.idx > (D.seenStage||0)){ lv = st.cur.name; D.seenStage = st.idx; saveData(); }
   const says = catSay(st);
   const urgent = says.some(s => s.tone === 'a');
-  $('#catFab').innerHTML = catSVG(st.idx, lv?'flex':mood) + ((urgent||lv)?'<span class="cat-dot"></span>':'');
+  /* 플로팅 버튼은 늘 떠 있는 UI 부품이므로 단색 엠블럼으로 */
+  $('#catFab').innerHTML = catSVG(st.idx, lv?'flex':mood, true) + ((urgent||lv)?'<span class="cat-dot"></span>':'');
   const b = $('#catBB');
   if (lv){
     b.innerHTML = '<span class="cb-t">LEVEL UP</span>진화했다냥!! 이제 <b>'+lv+'</b>이다냥 🎉';
@@ -4567,7 +4576,7 @@ function openLogin(){
 }
 
 function openAccount(){
-  let h = '<div class="acctbig"><div class="acctbig-c">'+catSVG(catStats().idx,'happy')+'</div>' +
+  let h = '<div class="acctbig"><div class="acctbig-c">'+catSVG(catStats().idx,'happy',true)+'</div>' +
     '<div class="acctbig-t"><b>'+esc(myProfile ? myProfile.nickname : '')+'</b>' +
     '<span>'+esc(me.email || '소셜 로그인')+'</span></div></div>';
   h += '<button class="btn btn-g btn-sm" onclick="openNickSetup()">닉네임 바꾸기</button>';
@@ -4646,7 +4655,7 @@ function friendBodyHTML(){
   if (pend.length){
     h += '<div class="grp">받은 요청 '+pend.length+'</div>';
     pend.forEach(f => {
-      h += '<div class="frow"><span class="fcat">'+catSVG(f.stage||0,'happy')+'</span>' +
+      h += '<div class="frow"><span class="fcat">'+catSVG(f.stage||0,'happy',true)+'</span>' +
         '<span class="fmid"><b>'+esc(f.nickname)+'</b><span>친구 요청을 보냈어요</span></span>' +
         '<button class="rt-b" onclick="acceptFriend(\''+f.fid+'\')">수락</button>' +
         '<button class="rt-x" onclick="removeFriend(\''+f.fid+'\',\''+q(f.nickname)+'\')">✕</button></div>';
@@ -4659,7 +4668,7 @@ function friendBodyHTML(){
     suggests.forEach(u => {
       const via = (u.via_names || []).slice(0,2).join(', ');
       const more = (u.via_names || []).length > 2 ? ' 외 '+((u.via_names.length)-2)+'명' : '';
-      h += '<div class="frow"><span class="fcat">'+catSVG(u.stage||0,'normal')+'</span>' +
+      h += '<div class="frow"><span class="fcat">'+catSVG(u.stage||0,'normal',true)+'</span>' +
         '<span class="fmid"><b>'+esc(u.nickname)+'</b>' +
         '<span class="mutual">함께 아는 친구 <b style="color:var(--tx)">'+u.mutual+'명</b>'+(via?' · '+esc(via)+more:'')+'</span></span>' +
         '<button class="rt-b" onclick="sendRequest(\''+u.uid+'\',\''+q(u.nickname)+'\')">추가</button></div>';
@@ -4670,7 +4679,7 @@ function friendBodyHTML(){
   if (sent.length){
     h += '<div class="grp">보낸 요청 '+sent.length+'</div>';
     sent.forEach(f => {
-      h += '<div class="frow"><span class="fcat">'+catSVG(f.stage||0,'normal')+'</span>' +
+      h += '<div class="frow"><span class="fcat">'+catSVG(f.stage||0,'normal',true)+'</span>' +
         '<span class="fmid"><b>'+esc(f.nickname)+'</b><span>수락 대기 중</span></span>' +
         '<button class="rt-x" onclick="removeFriend(\''+f.fid+'\',\''+q(f.nickname)+'\')">✕</button></div>';
     });
@@ -4693,7 +4702,7 @@ function friendBodyHTML(){
       if (s2.wVol) bits.push(Math.round(s2.wVol/100)/10+'t');
       h += '<div class="frow'+(r.me?' mine':'')+'">' +
         '<span class="frank'+(i<3?' top':'')+'">'+(i+1)+'</span>' +
-        '<span class="fcat">'+catSVG(r.stage||0,'happy')+'</span>' +
+        '<span class="fcat">'+catSVG(r.stage||0,'happy',true)+'</span>' +
         '<span class="fmid"><b>'+esc(r.name)+(r.me?' <em class="tagme">나</em>':'')+'</b>' +
         '<span>'+(bits.join(' · ') || '공개 항목 없음')+'</span></span>' +
         (r.me?'':'<button class="rt-x" onclick="removeFriend(\''+r.fid+'\',\''+q(r.name)+'\')">✕</button>') +
@@ -4715,7 +4724,7 @@ function friendBodyHTML(){
 
 function userRow(u, rel){
   const label = { accepted:'이미 친구', pending:'대기 중' }[rel];
-  return '<div class="frow"><span class="fcat">'+catSVG(u.stage||0,'normal')+'</span>' +
+  return '<div class="frow"><span class="fcat">'+catSVG(u.stage||0,'normal',true)+'</span>' +
     '<span class="fmid"><b>'+esc(u.nickname)+'</b>' +
     '<span'+(u.mutual?' class="mutual"':'')+'>' +
       (u.mutual ? '함께 아는 친구 '+u.mutual+'명' : STAGES[Math.min(u.stage||0,5)].name) + '</span></span>' +
