@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover,interactive-widget=resizes-content">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>IRONLOG</title>
 
 <link rel="manifest" href="./manifest.webmanifest">
@@ -30,10 +30,17 @@
   --steel:linear-gradient(180deg,#1A1B21 0%,#101116 58%,#0B0C10 100%);
   --steel-h:linear-gradient(180deg,#24262E 0%,#15161B 100%);
   --r-lg:6px; --r-md:5px; --r-sm:4px;
+  /* 하단 안전영역. 기기에 따라 값이 비정상으로 크게 잡히는 경우가 있어
+     34px 로 상한을 둔다. 아이폰 홈 인디케이터가 34px 이므로 그 이상은 불필요. */
+  --sab:0px;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+@supports (padding: env(safe-area-inset-bottom)){
+  :root{ --sab: min(env(safe-area-inset-bottom), 34px); }
+}
 html{overscroll-behavior-y:contain}
-html,body{height:100%}
+html{height:100%}
+body{min-height:100%}
 body{
   background:var(--bg);color:var(--tx);font-family:var(--sans);
   font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;
@@ -49,7 +56,7 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 
 /* ══ 헤더 ══ */
 .hdr{position:sticky;top:0;z-index:20;background:var(--bg);
-  padding:calc(14px + env(safe-area-inset-top)) 0 8px}
+  padding:calc(14px + min(env(safe-area-inset-top), 60px)) 0 8px}
 .hdr:after{content:'';position:absolute;left:-15px;right:-15px;bottom:0;height:1px;
   background:linear-gradient(90deg,transparent,var(--line-2) 18%,var(--line-2) 82%,transparent)}
 .hdr-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:11px}
@@ -199,7 +206,7 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .prl i{font-style:normal;font-size:11px;opacity:.7}
 
 /* ══ 휴식 타이머 ══ */
-.tmr{position:fixed;left:0;right:0;bottom:calc(62px + env(safe-area-inset-bottom));
+.tmr{position:fixed;left:0;right:0;bottom:calc(62px + var(--sab));
   z-index:34;max-width:520px;margin:0 auto;padding:0 15px;
   transform:translateY(120%);transition:transform .25s cubic-bezier(.32,.72,0,1)}
 .tmr.on{transform:none}
@@ -219,7 +226,7 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 
 /* ══ 탭바 ══ */
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:36;display:flex;justify-content:center;
-  padding:7px 12px calc(9px + env(safe-area-inset-bottom));
+  padding:7px 12px calc(9px + var(--sab));
   background:rgba(9,9,11,.88);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
   border-top:1px solid var(--line)}
 .tabbar-in{display:flex;width:100%;max-width:520px}
@@ -247,7 +254,7 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .sh-h{padding:7px 16px 11px;flex:none}
 .sh-h h2{font-size:18px;font-weight:900;letter-spacing:-.03em}
 .sh-b{flex:1;overflow-y:auto;overscroll-behavior:contain;
-  padding:0 16px calc(40px + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch}
+  padding:0 16px calc(40px + var(--sab));-webkit-overflow-scrolling:touch}
 .sh-x{position:absolute;right:13px;top:15px;background:var(--card-2);border:1px solid var(--line-2);
   width:29px;height:29px;border-radius:50%;color:var(--tx-2);font-size:14px;cursor:pointer;line-height:1}
 
@@ -660,24 +667,24 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .rep-btn em{font-style:normal;font-size:11px;color:var(--tx-3);font-weight:700}
 
 /* ══ 헬냥이 ══ */
-.cat-fab{position:fixed;right:13px;z-index:35;bottom:calc(74px + env(safe-area-inset-bottom));
+.cat-fab{position:fixed;right:13px;z-index:35;bottom:calc(74px + var(--sab));
   width:58px;height:58px;border-radius:50%;background:var(--card);border:1px solid var(--line-2);
   display:flex;align-items:center;justify-content:center;cursor:pointer;
   box-shadow:0 8px 22px rgba(0,0,0,.55);padding:0;transition:bottom .25s}
-.cat-fab.up{bottom:calc(148px + env(safe-area-inset-bottom))}
+.cat-fab.up{bottom:calc(148px + var(--sab))}
 .cat-fab:active{transform:scale(.94)}
 .cat-fab{transition:bottom .25s var(--e),opacity .25s var(--e),transform .1s var(--e)}
 .cat-fab.dim{opacity:.22;pointer-events:none}
 .cat-fab svg{width:49px;height:49px;display:block}
 .cat-dot{position:absolute;top:1px;right:1px;width:10px;height:10px;border-radius:50%;
   background:var(--chest);border:2px solid var(--bg)}
-.cat-bb{position:fixed;right:79px;z-index:35;bottom:calc(82px + env(safe-area-inset-bottom));
+.cat-bb{position:fixed;right:79px;z-index:35;bottom:calc(82px + var(--sab));
   max-width:min(250px,calc(100vw - 108px));background:#FFF;color:#141418;border-radius:14px;
   padding:10px 12px;font-size:12px;font-weight:600;line-height:1.6;
   box-shadow:0 10px 28px rgba(0,0,0,.5);opacity:0;transform:translateY(6px) scale(.94);
   transform-origin:bottom right;transition:.2s;pointer-events:none}
 .cat-bb.on{opacity:1;transform:none;pointer-events:auto}
-.cat-bb.up{bottom:calc(156px + env(safe-area-inset-bottom))}
+.cat-bb.up{bottom:calc(156px + var(--sab))}
 .cat-bb b{font-weight:900}
 .cat-bb:after{content:'';position:absolute;right:-5px;bottom:16px;width:11px;height:11px;
   background:#FFF;transform:rotate(45deg)}
@@ -696,7 +703,7 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .say.a{border-color:rgba(251,146,60,.35);background:rgba(251,146,60,.07)}
 .say.g{border-color:rgba(74,222,128,.32);background:rgba(74,222,128,.07)}
 
-#toast{position:fixed;left:50%;bottom:calc(148px + env(safe-area-inset-bottom));
+#toast{position:fixed;left:50%;bottom:calc(148px + var(--sab));
   transform:translateX(-50%) translateY(10px);background:var(--white);color:#09090B;
   font-size:13px;font-weight:800;padding:10px 18px;border-radius:11px;opacity:0;
   pointer-events:none;transition:.22s;z-index:50;white-space:nowrap;max-width:90vw}
