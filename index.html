@@ -33,6 +33,7 @@
   /* 하단 안전영역. 기기에 따라 값이 비정상으로 크게 잡히는 경우가 있어
      34px 로 상한을 둔다. 아이폰 홈 인디케이터가 34px 이므로 그 이상은 불필요. */
   --sab:0px;
+  --tabh:62px;   /* 탭바 실제 높이 (스크립트가 측정해 갱신) */
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 @supports (padding: env(safe-area-inset-bottom)){
@@ -40,8 +41,12 @@
 }
 html{overscroll-behavior-y:contain}
 html{height:100%}
-body{min-height:100%}
+/* 탭바를 position:fixed 로 띄우면 기기에 따라 엉뚱한 곳에 붙을 수 있다.
+   화면 전체를 위→아래 기둥으로 세우고 탭바를 '마지막 칸'으로 두면
+   어떤 기기에서도 화면 맨 아래에 정확히 놓인다. */
 body{
+  height:100vh; height:100dvh;
+  display:flex; flex-direction:column;
   background:var(--bg);color:var(--tx);font-family:var(--sans);
   font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;
   font-variant-numeric:tabular-nums;
@@ -52,7 +57,9 @@ button,input,select,textarea{font-family:inherit;font-variant-numeric:tabular-nu
 input,select,textarea{font-size:16px!important}
 input[inputmode=decimal],input[inputmode=numeric]{font-size:17px!important}
 body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
-#app{max-width:520px;margin:0 auto;padding:0 15px 150px}
+#app{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;
+  width:100%;max-width:520px;margin:0 auto;padding:0 15px 40px}
 
 /* ══ 헤더 ══ */
 .hdr{position:sticky;top:0;z-index:20;background:var(--bg);
@@ -206,7 +213,7 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .prl i{font-style:normal;font-size:11px;opacity:.7}
 
 /* ══ 휴식 타이머 ══ */
-.tmr{position:fixed;left:0;right:0;bottom:calc(62px + var(--sab));
+.tmr{position:fixed;left:0;right:0;bottom:calc(var(--tabh) + 4px);
   z-index:34;max-width:520px;margin:0 auto;padding:0 15px;
   transform:translateY(120%);transition:transform .25s cubic-bezier(.32,.72,0,1)}
 .tmr.on{transform:none}
@@ -225,9 +232,9 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .tmr.done .tmr-p i{background:var(--good)}
 
 /* ══ 탭바 ══ */
-.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:36;display:flex;justify-content:center;
+.tabbar{flex:0 0 auto;position:relative;z-index:36;display:flex;justify-content:center;
   padding:7px 12px calc(9px + var(--sab));
-  background:rgba(9,9,11,.88);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  background:rgba(9,9,11,.94);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
   border-top:1px solid var(--line)}
 .tabbar-in{display:flex;width:100%;max-width:520px}
 .tab{flex:1;background:none;border:none;cursor:pointer;color:var(--tx-3);
@@ -667,24 +674,24 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .rep-btn em{font-style:normal;font-size:11px;color:var(--tx-3);font-weight:700}
 
 /* ══ 헬냥이 ══ */
-.cat-fab{position:fixed;right:13px;z-index:35;bottom:calc(74px + var(--sab));
+.cat-fab{position:fixed;right:13px;z-index:35;bottom:calc(var(--tabh) + 14px);
   width:58px;height:58px;border-radius:50%;background:var(--card);border:1px solid var(--line-2);
   display:flex;align-items:center;justify-content:center;cursor:pointer;
   box-shadow:0 8px 22px rgba(0,0,0,.55);padding:0;transition:bottom .25s}
-.cat-fab.up{bottom:calc(148px + var(--sab))}
+.cat-fab.up{bottom:calc(var(--tabh) + 88px)}
 .cat-fab:active{transform:scale(.94)}
 .cat-fab{transition:bottom .25s var(--e),opacity .25s var(--e),transform .1s var(--e)}
 .cat-fab.dim{opacity:.22;pointer-events:none}
 .cat-fab svg{width:49px;height:49px;display:block}
 .cat-dot{position:absolute;top:1px;right:1px;width:10px;height:10px;border-radius:50%;
   background:var(--chest);border:2px solid var(--bg)}
-.cat-bb{position:fixed;right:79px;z-index:35;bottom:calc(82px + var(--sab));
+.cat-bb{position:fixed;right:79px;z-index:35;bottom:calc(var(--tabh) + 22px);
   max-width:min(250px,calc(100vw - 108px));background:#FFF;color:#141418;border-radius:14px;
   padding:10px 12px;font-size:12px;font-weight:600;line-height:1.6;
   box-shadow:0 10px 28px rgba(0,0,0,.5);opacity:0;transform:translateY(6px) scale(.94);
   transform-origin:bottom right;transition:.2s;pointer-events:none}
 .cat-bb.on{opacity:1;transform:none;pointer-events:auto}
-.cat-bb.up{bottom:calc(156px + var(--sab))}
+.cat-bb.up{bottom:calc(var(--tabh) + 96px)}
 .cat-bb b{font-weight:900}
 .cat-bb:after{content:'';position:absolute;right:-5px;bottom:16px;width:11px;height:11px;
   background:#FFF;transform:rotate(45deg)}
@@ -703,7 +710,7 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .say.a{border-color:rgba(251,146,60,.35);background:rgba(251,146,60,.07)}
 .say.g{border-color:rgba(74,222,128,.32);background:rgba(74,222,128,.07)}
 
-#toast{position:fixed;left:50%;bottom:calc(148px + var(--sab));
+#toast{position:fixed;left:50%;bottom:calc(var(--tabh) + 88px);
   transform:translateX(-50%) translateY(10px);background:var(--white);color:#09090B;
   font-size:13px;font-weight:800;padding:10px 18px;border-radius:11px;opacity:0;
   pointer-events:none;transition:.22s;z-index:50;white-space:nowrap;max-width:90vw}
@@ -3104,9 +3111,32 @@ function viewMe(){
     '<button class="btn btn-g btn-sm" style="margin-top:8px" onclick="openCustomList()">내가 추가한 종목·음식</button>' +
     '<button class="btn btn-g btn-sm" style="margin-top:8px;color:var(--chest)" onclick="wipe()">기록 전체 삭제</button></div>';
 
-  h += '<div class="note" style="text-align:center;margin-top:16px">IRONLOG v3 · 종목 '+
+  h += '<div class="note" style="text-align:center;margin-top:16px">IRONLOG v10 · 종목 '+
        Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
+  h += '<div class="note" style="text-align:center;margin-top:4px;font-size:9.5px;opacity:.55;font-family:var(--mono)">'
+       + diagLine() + '</div>';
   return h;
+}
+
+/* 화면 계산이 기기별로 어긋날 때 원인을 바로 알 수 있게 실제 수치를 적어둔다 */
+function diagLine(){
+  const tb = document.querySelector('.tabbar');
+  const r = tb ? tb.getBoundingClientRect() : { height:0, bottom:0 };
+  const cs = getComputedStyle(document.documentElement);
+  const probe = document.createElement('div');
+  probe.style.cssText = 'position:absolute;visibility:hidden;padding-bottom:env(safe-area-inset-bottom)';
+  document.body.appendChild(probe);
+  const sab = getComputedStyle(probe).paddingBottom;
+  probe.remove();
+  const gap = Math.round(window.innerHeight - r.bottom);
+  return [
+    window.innerWidth + '×' + window.innerHeight,
+    'dpr' + (window.devicePixelRatio || 1),
+    'tab' + Math.round(r.height),
+    'gap' + gap,
+    'sab' + sab,
+    (window.matchMedia('(display-mode: standalone)').matches ? 'app' : 'web')
+  ].join(' · ');
 }
 
 function big3HTML(){
@@ -3645,7 +3675,7 @@ function jumpDay(d){
   vibrate(6);
   viewDate = d; openEx = null; draft = {};
   if (tab === 'rec'){ recAnchor = d; recMode = 'day'; }
-  closeSheet(); render(); window.scrollTo(0,0);
+  closeSheet(); render(); scrollTop0();
 }
 function toggleEx(id){ vibrate(6); openEx = (openEx === id) ? null : id; render(); }
 function recSet(m){ recMode = m; render(); }
@@ -3711,7 +3741,7 @@ async function finishSession(){
   D.done[d] = true;
   openEx = null;
   stopTimer();
-  await saveData(); render(); window.scrollTo(0,0);
+  await saveData(); render(); scrollTop0();
   vibrate([40,60,40]);
   toast('오늘 운동 완료!');
 }
@@ -3934,11 +3964,14 @@ function render(){
 
   renderCat();
   paintTimer();
+  syncTabH();
 }
+function scrollTop0(){ const a = $('#app'); if (a) a.scrollTop = 0; }
+
 function go(t){
   tab = t;
   if (t === 'rec' && !recAnchor) recAnchor = viewDate;
-  window.scrollTo(0,0); render();
+  scrollTop0(); render();
   const v = $('#view');
   v.classList.remove('in'); void v.offsetWidth; v.classList.add('in');
   vibrate(8);
@@ -3961,12 +3994,23 @@ Object.assign(window, {
 /* 이벤트 */
 /* 스크롤하는 동안엔 헬냥이를 흐리게 해서 아래 버튼을 가리지 않게 한다 */
 let scrollTimer = null;
-window.addEventListener('scroll', () => {
+/* 스크롤 주체가 창(window)이 아니라 #app 이 되었으므로 여기에 붙인다 */
+$('#app').addEventListener('scroll', () => {
   const f = $('#catFab'); if (!f) return;
   f.classList.add('dim');
   clearTimeout(scrollTimer);
   scrollTimer = setTimeout(() => f.classList.remove('dim'), 700);
 }, { passive:true });
+
+/* 탭바 실제 높이를 재서 변수에 넣는다. 떠 있는 요소들이 이걸 기준으로 놓인다. */
+function syncTabH(){
+  const tb = document.querySelector('.tabbar');
+  if (!tb) return;
+  const h = Math.round(tb.getBoundingClientRect().height);
+  if (h > 0) document.documentElement.style.setProperty('--tabh', h + 'px');
+}
+window.addEventListener('resize', syncTabH);
+window.addEventListener('orientationchange', () => setTimeout(syncTabH, 300));
 
 $('#mask').onclick = () => mdClose(false);
 $('#scrim').onclick = closeSheet;
@@ -4755,6 +4799,8 @@ Object.assign(window, {
   viewDate = today();
   recAnchor = today();
   render();
+  syncTabH();
+  setTimeout(syncTabH, 400);   /* 폰트 로딩 후 한 번 더 */
   initCloud();
 })();
 </script>
