@@ -3201,6 +3201,19 @@ function viewMe(){
        Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
   h += '<div class="note" style="text-align:center;margin-top:4px;font-size:9.5px;opacity:.55;font-family:var(--mono)">'
        + diagLine() + '</div>';
+  /* 웹뷰가 화면보다 작게 잡힌 경우 — 아이콘을 다시 추가해야 해결된다 */
+  const lostPx = Math.round((window.screen.height || 0) - window.innerHeight);
+  if (lostPx > 20 && window.matchMedia('(display-mode: standalone)').matches){
+    h += '<div class="card" style="margin-top:10px;border-color:rgba(251,146,60,.35);background:rgba(251,146,60,.06)">' +
+      '<div style="font-size:13px;font-weight:800;color:#FDBA74;margin-bottom:7px">화면 아래가 잘려 보이나요?</div>' +
+      '<div class="note" style="margin:0">앱에 주어진 높이가 화면보다 <b>'+lostPx+'px</b> 작습니다. ' +
+      '홈 화면에 추가할 때의 설정이 오래된 상태로 남아 생기는 문제라 앱 안에서는 고칠 수 없어요.<br><br>' +
+      '<b>1.</b> 아래 백업을 먼저 받으세요<br>' +
+      '<b>2.</b> 홈 화면 아이콘을 삭제<br>' +
+      '<b>3.</b> 사파리로 이 주소를 열고 <b>공유 → 홈 화면에 추가</b><br>' +
+      '<b>4.</b> 기록이 비어 있으면 백업 복원<br><br>' +
+      '주소가 같으므로 대부분 기록은 그대로 유지됩니다.</div></div>';
+  }
   return h;
 }
 
@@ -3215,9 +3228,13 @@ function diagLine(){
   const sab = getComputedStyle(probe).paddingBottom;
   probe.remove();
   const gap = Math.round(window.innerHeight - r.bottom);
+  /* 화면(screen)과 앱에 주어진 영역(inner)이 다르면
+     그 차이는 CSS로 채울 수 없는 영역이다 → 홈 화면 아이콘 재설치가 필요 */
+  const lost = Math.round((window.screen.height || 0) - window.innerHeight);
   return [
-    window.innerWidth + '×' + window.innerHeight,
-    'dpr' + (window.devicePixelRatio || 1),
+    'win' + window.innerWidth + '×' + window.innerHeight,
+    'scr' + (window.screen.width || 0) + '×' + (window.screen.height || 0),
+    (lost > 4 ? '손실' + lost : '손실0'),
     'tab' + Math.round(r.height),
     'gap' + gap,
     'sab' + sab,
