@@ -1084,7 +1084,7 @@ const KEY = 'ironlog-v1';
 const BLANK = { slots:[], sets:[], meals:[], profile:null, seenStage:0,
                 customEx:[], customFood:[], weights:[], restPref:{},
                 routines:[], lastReport:null, tomb:{}, updatedAt:0,
-                done:{}, notify:false, caffLimit:400, barPref:{}, memo:{} };
+                done:{}, notify:false, caffLimit:400, barPref:{}, memo:{}, fill:false };
 
 async function loadData(){
   let raw = null;
@@ -3202,22 +3202,24 @@ function viewMe(){
     '<button class="btn btn-g btn-sm" style="margin-top:8px" onclick="openCustomList()">내가 추가한 종목·음식</button>' +
     '<button class="btn btn-g btn-sm" style="margin-top:8px;color:var(--chest)" onclick="wipe()">기록 전체 삭제</button></div>';
 
-  h += '<div class="note" style="text-align:center;margin-top:16px">IRONLOG v16 · 종목 '+
+  h += '<div class="note" style="text-align:center;margin-top:16px">IRONLOG v17 · 종목 '+
        Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
   h += '<div class="note" style="text-align:center;margin-top:4px;font-size:9.5px;opacity:.55;font-family:var(--mono)">'
        + diagLine() + '</div>';
   /* 웹뷰가 화면보다 작게 잡힌 경우 — 아이콘을 다시 추가해야 해결된다 */
   const lostPx = Math.round((window.screen.height || 0) - window.innerHeight);
-  if (lostPx > 20 && window.matchMedia('(display-mode: standalone)').matches){
+  if (lostPx > 20 || D.fill){
     h += '<div class="card" style="margin-top:10px;border-color:rgba(251,146,60,.35);background:rgba(251,146,60,.06)">' +
-      '<div style="font-size:13px;font-weight:800;color:#FDBA74;margin-bottom:7px">화면 아래가 잘려 보이나요?</div>' +
-      '<div class="note" style="margin:0">앱에 주어진 높이가 화면보다 <b>'+lostPx+'px</b> 작습니다. ' +
-      '홈 화면에 추가할 때의 설정이 오래된 상태로 남아 생기는 문제라 앱 안에서는 고칠 수 없어요.<br><br>' +
-      '<b>1.</b> 아래 백업을 먼저 받으세요<br>' +
-      '<b>2.</b> 홈 화면 아이콘을 삭제<br>' +
-      '<b>3.</b> 사파리로 이 주소를 열고 <b>공유 → 홈 화면에 추가</b><br>' +
-      '<b>4.</b> 기록이 비어 있으면 백업 복원<br><br>' +
-      '주소가 같으므로 대부분 기록은 그대로 유지됩니다.</div></div>';
+      '<div style="font-size:13px;font-weight:800;color:#FDBA74;margin-bottom:7px">화면 아래에 검은 여백이 있나요?</div>' +
+      '<div class="note" style="margin:0 0 12px">앱에 주어진 높이가 화면보다 <b>'+lostPx+'px</b> 작습니다.<br>' +
+      '아래 스위치를 켜서 그 공간을 쓸 수 있는지 <b>직접 확인해보세요.</b> ' +
+      '켠 뒤 탭이 화면 맨 아래로 내려가면 성공, 오히려 잘려 보이면 다시 끄시면 됩니다.</div>' +
+      '<button class="shrow" style="border-bottom:none;padding:11px 2px" onclick="toggleFill()">' +
+      '<span class="shbox'+(D.fill?' on':'')+'">'+(D.fill?'✓':'')+'</span>' +
+      '<span class="shtx"><b>화면 아래까지 채우기</b><span>지금 ' +
+      (D.fill ? '켜짐 · 높이 '+Math.max(window.innerHeight, window.screen.height||0)+'px 로 강제'
+              : '꺼짐 · 높이 '+window.innerHeight+'px') +
+      '</span></span></button></div>';
   }
   return h;
 }
@@ -3239,16 +3241,21 @@ function diagLine(){
   const de = document.documentElement;
   const docScroll = Math.round(Math.max(de.scrollHeight, document.body.scrollHeight) - window.innerHeight);
   const bh = Math.round(document.body.getBoundingClientRect().height);
+  const vv = window.visualViewport;
   return [
-    'v16',
+    'v17',
     'body' + bh,
-    'win' + window.innerWidth + '×' + window.innerHeight,
-    'scr' + (window.screen.width || 0) + '×' + (window.screen.height || 0),
+    'inner' + window.innerHeight,
+    'client' + document.documentElement.clientHeight,
+    'visual' + (vv ? Math.round(vv.height) : '-') + '@' + (vv ? Math.round(vv.offsetTop) : '-'),
+    'scr' + (window.screen.height || 0),
+    'avail' + (window.screen.availHeight || 0),
     (lost > 4 ? '손실' + lost : '손실0'),
     (docScroll > 4 ? '문서스크롤' + docScroll : '문서고정'),
     'tab' + Math.round(r.height),
     'gap' + gap,
     'sab' + sab,
+    (D.fill ? '채움ON' : '채움OFF'),
     (window.matchMedia('(display-mode: standalone)').matches ? 'app' : 'web')
   ].join(' · ');
 }
@@ -4096,6 +4103,26 @@ function render(){
   paintTimer();
   syncTabH();
 }
+/* 아이폰 기종·iOS 버전에 따라 앱에 주어지는 높이(innerHeight)가
+   실제 화면(screen.height)보다 작게 잡히는 경우가 있다.
+   그 여분이 실제로 쓸 수 있는 공간인지 미리 알 방법이 없으므로,
+   직접 켜보고 확인하는 스위치로 둔다. */
+function applyFill(){
+  const b = document.body;
+  if (!D.fill){ b.style.height = ''; b.style.bottom = '0'; return; }
+  const target = Math.max(window.innerHeight, window.screen.height || 0);
+  b.style.bottom = 'auto';
+  b.style.height = target + 'px';
+}
+
+async function toggleFill(){
+  D.fill = !D.fill;
+  await saveData();
+  applyFill();
+  syncTabH(); render();
+  toast(D.fill ? '화면 아래까지 채웁니다' : '기본 상태로 되돌렸어요');
+}
+
 function scrollTop0(){ const a = $('#app'); if (a) a.scrollTop = 0; }
 
 function go(t){
@@ -4117,7 +4144,7 @@ Object.assign(window, {
   exportData, importData, wipe, closeSheet, ask, askText, mdClose, mdText, storageBar,
   openTrend, stallCheck, saveRoutine, applyRoutine, rmRoutine, openRoutines,
   openWeekReport, restAdj, finishSession, reopenSession, loadFromDay, saveRoutineFrom,
-  setBar, openMemo, saveMemo, clearMemo, wnum,
+  setBar, openMemo, saveMemo, clearMemo, wnum, toggleFill, applyFill,
   ovOpen, ovSet, ovAuto, ovReset, askNotify, setRpe, setTech, openLink, doLink, exResultHTML, foodResultHTML, openGuide, gSet, gToggle, applySplit
 });
 
@@ -4139,7 +4166,7 @@ function syncTabH(){
   const h = Math.round(tb.getBoundingClientRect().height);
   if (h > 0) document.documentElement.style.setProperty('--tabh', h + 'px');
 }
-window.addEventListener('resize', syncTabH);
+window.addEventListener('resize', () => { applyFill(); syncTabH(); });
 window.addEventListener('orientationchange', () => setTimeout(syncTabH, 300));
 
 $('#mask').onclick = () => mdClose(false);
@@ -4937,6 +4964,7 @@ Object.assign(window, {
   rebuildIndex();
   viewDate = today();
   recAnchor = today();
+  applyFill();
   render();
   syncTabH();
   setTimeout(syncTabH, 400);   /* 폰트 로딩 후 한 번 더 */
