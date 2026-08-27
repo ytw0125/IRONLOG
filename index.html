@@ -33,6 +33,7 @@
   /* 하단 안전영역. 기기에 따라 값이 비정상으로 크게 잡히는 경우가 있어
      34px 로 상한을 둔다. 아이폰 홈 인디케이터가 34px 이므로 그 이상은 불필요. */
   --sab:0px;
+  --fixneg:0px;   /* 화면 높이 보정 — 고정 요소를 내리는 값 */
   --tabh:62px;   /* 탭바 실제 높이 (스크립트가 측정해 갱신) */
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -259,10 +260,11 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .tab[aria-selected=true] span{letter-spacing:.02em}
 
 /* ══ 시트 ══ */
-.scrim{position:fixed;inset:0;background:rgba(0,0,0,.66);z-index:40;opacity:0;
+.scrim{position:fixed;top:0;left:0;right:0;bottom:var(--fixneg);
+  background:rgba(0,0,0,.66);z-index:40;opacity:0;
   pointer-events:none;transition:.2s;backdrop-filter:blur(2px)}
 .scrim.on{opacity:1;pointer-events:auto}
-.sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;max-width:520px;margin:0 auto;
+.sheet{position:fixed;left:0;right:0;bottom:var(--fixneg);z-index:41;max-width:520px;margin:0 auto;
   background:#0F0F12;border:1px solid var(--line);border-bottom:none;
   border-radius:16px 16px 0 0;height:88dvh;max-height:88dvh;display:flex;flex-direction:column;
   transform:translateY(100%);transition:transform .26s cubic-bezier(.32,.72,0,1)}
@@ -384,10 +386,12 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   color:var(--tx-3);font-weight:700;font-family:var(--mono);margin-top:7px}
 
 /* ══ 확인 · 입력 모달 ══ */
-.mask{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:60;opacity:0;
+.mask{position:fixed;top:0;left:0;right:0;bottom:var(--fixneg);
+  background:rgba(0,0,0,.72);z-index:60;opacity:0;
   pointer-events:none;transition:.16s;backdrop-filter:blur(3px)}
 .mask.on{opacity:1;pointer-events:auto}
-.modal{position:fixed;inset:0;z-index:61;display:flex;align-items:center;justify-content:center;
+.modal{position:fixed;top:0;left:0;right:0;bottom:var(--fixneg);
+  z-index:61;display:flex;align-items:center;justify-content:center;
   padding:22px;pointer-events:none;opacity:0;transition:.18s var(--e)}
 .modal.on{opacity:1;pointer-events:auto}
 .md-in{width:100%;max-width:340px;background:#0E0E11;border:1px solid var(--line-2);
@@ -1084,7 +1088,7 @@ const KEY = 'ironlog-v1';
 const BLANK = { slots:[], sets:[], meals:[], profile:null, seenStage:0,
                 customEx:[], customFood:[], weights:[], restPref:{},
                 routines:[], lastReport:null, tomb:{}, updatedAt:0,
-                done:{}, notify:false, caffLimit:400, barPref:{}, memo:{}, fill:false };
+                done:{}, notify:false, caffLimit:400, barPref:{}, memo:{} };
 
 async function loadData(){
   let raw = null;
@@ -3202,29 +3206,21 @@ function viewMe(){
     '<button class="btn btn-g btn-sm" style="margin-top:8px" onclick="openCustomList()">내가 추가한 종목·음식</button>' +
     '<button class="btn btn-g btn-sm" style="margin-top:8px;color:var(--chest)" onclick="wipe()">기록 전체 삭제</button></div>';
 
-  h += '<div class="note" style="text-align:center;margin-top:16px">IRONLOG v17 · 종목 '+
-       Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
-  h += '<div class="note" style="text-align:center;margin-top:4px;font-size:9.5px;opacity:.55;font-family:var(--mono)">'
-       + diagLine() + '</div>';
-  /* 웹뷰가 화면보다 작게 잡힌 경우 — 아이콘을 다시 추가해야 해결된다 */
-  const lostPx = Math.round((window.screen.height || 0) - window.innerHeight);
-  if (lostPx > 20 || D.fill){
-    h += '<div class="card" style="margin-top:10px;border-color:rgba(251,146,60,.35);background:rgba(251,146,60,.06)">' +
-      '<div style="font-size:13px;font-weight:800;color:#FDBA74;margin-bottom:7px">화면 아래에 검은 여백이 있나요?</div>' +
-      '<div class="note" style="margin:0 0 12px">앱에 주어진 높이가 화면보다 <b>'+lostPx+'px</b> 작습니다.<br>' +
-      '아래 스위치를 켜서 그 공간을 쓸 수 있는지 <b>직접 확인해보세요.</b> ' +
-      '켠 뒤 탭이 화면 맨 아래로 내려가면 성공, 오히려 잘려 보이면 다시 끄시면 됩니다.</div>' +
-      '<button class="shrow" style="border-bottom:none;padding:11px 2px" onclick="toggleFill()">' +
-      '<span class="shbox'+(D.fill?' on':'')+'">'+(D.fill?'✓':'')+'</span>' +
-      '<span class="shtx"><b>화면 아래까지 채우기</b><span>지금 ' +
-      (D.fill ? '켜짐 · 높이 '+Math.max(window.innerHeight, window.screen.height||0)+'px 로 강제'
-              : '꺼짐 · 높이 '+window.innerHeight+'px') +
-      '</span></span></button></div>';
+  h += '<div class="note" style="text-align:center;margin-top:16px;cursor:pointer" onclick="toggleDiag()">' +
+       'IRONLOG v18 · 종목 '+Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
+  if (showDiag){
+    h += '<div class="note" style="text-align:center;margin-top:5px;font-size:9px;opacity:.5;' +
+         'font-family:var(--mono);line-height:1.7;word-break:break-all">' + diagLine() + '</div>';
   }
+
   return h;
 }
 
 /* 화면 계산이 기기별로 어긋날 때 원인을 바로 알 수 있게 실제 수치를 적어둔다 */
+/* 화면이 이상할 때만 필요한 정보라 기본은 숨긴다. 버전 글씨를 누르면 나온다. */
+let showDiag = false;
+function toggleDiag(){ showDiag = !showDiag; render(); }
+
 function diagLine(){
   const tb = document.querySelector('.tabbar');
   const r = tb ? tb.getBoundingClientRect() : { height:0, bottom:0 };
@@ -3243,7 +3239,7 @@ function diagLine(){
   const bh = Math.round(document.body.getBoundingClientRect().height);
   const vv = window.visualViewport;
   return [
-    'v17',
+    'v18',
     'body' + bh,
     'inner' + window.innerHeight,
     'client' + document.documentElement.clientHeight,
@@ -3255,7 +3251,7 @@ function diagLine(){
     'tab' + Math.round(r.height),
     'gap' + gap,
     'sab' + sab,
-    (D.fill ? '채움ON' : '채움OFF'),
+    '보정' + Math.max(0, screenH() - window.innerHeight),
     (window.matchMedia('(display-mode: standalone)').matches ? 'app' : 'web')
   ].join(' · ');
 }
@@ -4103,24 +4099,51 @@ function render(){
   paintTimer();
   syncTabH();
 }
-/* 아이폰 기종·iOS 버전에 따라 앱에 주어지는 높이(innerHeight)가
-   실제 화면(screen.height)보다 작게 잡히는 경우가 있다.
-   그 여분이 실제로 쓸 수 있는 공간인지 미리 알 방법이 없으므로,
-   직접 켜보고 확인하는 스위치로 둔다. */
-function applyFill(){
-  const b = document.body;
-  if (!D.fill){ b.style.height = ''; b.style.bottom = '0'; return; }
-  const target = Math.max(window.innerHeight, window.screen.height || 0);
-  b.style.bottom = 'auto';
-  b.style.height = target + 'px';
+/* ───────────────────────────────────────────────
+   화면 높이를 스스로 판단한다.
+
+   홈 화면 앱(standalone)에서는 브라우저 툴바가 없는데도
+   iOS 가 innerHeight 에 툴바 자리를 계속 빼놓고 알려주는 경우가 있다.
+   (아이폰 16 Pro: 실제 874 인데 812 로 보고 → 아래 62px 이 검게 남음)
+
+   그래서 이렇게 판단한다.
+   · 브라우저에서 볼 때  → innerHeight 그대로 (툴바가 실제로 있으므로)
+   · 홈 화면 앱일 때     → screen.height 까지 채움 (툴바가 없으므로)
+   기기·iOS 버전과 무관하게 동작하며, 사용자가 설정할 것이 없다.
+   ─────────────────────────────────────────────── */
+function screenH(){
+  const inner = window.innerHeight;
+  const scr = window.screen && window.screen.height || 0;
+  const standalone = window.matchMedia('(display-mode: standalone)').matches
+                  || window.navigator.standalone === true;
+
+  /* 브라우저에서 보는 중이면 innerHeight 가 정답 */
+  if (!standalone) return inner;
+
+  /* 가로 모드에서는 screen 값의 방향이 뒤집혀 오는 기기가 있어 그대로 쓰지 않는다 */
+  const landscape = window.innerWidth > inner;
+  if (landscape) return inner;
+
+  /* 차이가 비정상적으로 크면(화면 절반 이상) 다른 이유이므로 손대지 않는다 */
+  const diff = scr - inner;
+  if (diff <= 0 || diff > inner * 0.35) return inner;
+
+  return scr;
 }
 
-async function toggleFill(){
-  D.fill = !D.fill;
-  await saveData();
-  applyFill();
-  syncTabH(); render();
-  toast(D.fill ? '화면 아래까지 채웁니다' : '기본 상태로 되돌렸어요');
+function applyFill(){
+  const b = document.body;
+  const h = screenH();
+  const extra = Math.max(0, h - window.innerHeight);
+  if (extra > 1){
+    b.style.bottom = 'auto';
+    b.style.height = h + 'px';
+  } else {
+    b.style.height = '';
+    b.style.bottom = '0';
+  }
+  /* 시트·모달은 화면(innerHeight)에 고정되므로, 보정한 만큼 함께 내려준다 */
+  document.documentElement.style.setProperty('--fixneg', (-extra) + 'px');
 }
 
 function scrollTop0(){ const a = $('#app'); if (a) a.scrollTop = 0; }
@@ -4144,7 +4167,7 @@ Object.assign(window, {
   exportData, importData, wipe, closeSheet, ask, askText, mdClose, mdText, storageBar,
   openTrend, stallCheck, saveRoutine, applyRoutine, rmRoutine, openRoutines,
   openWeekReport, restAdj, finishSession, reopenSession, loadFromDay, saveRoutineFrom,
-  setBar, openMemo, saveMemo, clearMemo, wnum, toggleFill, applyFill,
+  setBar, openMemo, saveMemo, clearMemo, wnum, applyFill, screenH, toggleDiag,
   ovOpen, ovSet, ovAuto, ovReset, askNotify, setRpe, setTech, openLink, doLink, exResultHTML, foodResultHTML, openGuide, gSet, gToggle, applySplit
 });
 
@@ -4167,6 +4190,12 @@ function syncTabH(){
   if (h > 0) document.documentElement.style.setProperty('--tabh', h + 'px');
 }
 window.addEventListener('resize', () => { applyFill(); syncTabH(); });
+window.addEventListener('orientationchange', () => setTimeout(() => { applyFill(); syncTabH(); }, 350));
+if (window.visualViewport) window.visualViewport.addEventListener('resize', () => applyFill());
+/* 앱으로 돌아올 때도 한 번 더 (iOS 가 값을 늦게 갱신하는 경우가 있다) */
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) setTimeout(() => { applyFill(); syncTabH(); }, 120);
+});
 window.addEventListener('orientationchange', () => setTimeout(syncTabH, 300));
 
 $('#mask').onclick = () => mdClose(false);
