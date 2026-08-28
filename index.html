@@ -377,7 +377,11 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   animation:beat 1.8s ease-in-out infinite}
 @keyframes beat{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.8)}}
 .live>span{font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--good);font-family:var(--mono)}
-.live b{margin-left:auto;font-size:11.5px;color:var(--tx-2);font-weight:700;font-family:var(--mono)}
+  .live b{margin-left:auto;font-size:11.5px;color:var(--tx-2);font-weight:700;font-family:var(--mono)}
+.live-x{background:none;border:1px solid var(--line-2);border-radius:var(--r-sm);
+  color:var(--tx-3);font-size:10.5px;font-weight:700;padding:5px 9px;cursor:pointer;
+  flex:none;transition:transform .09s var(--e),color .15s var(--e)}
+.live-x:active{transform:scale(.92);color:var(--tx-2)}
 
 /* ══ 마친 종목 ══ */
 .ex.fin{opacity:.62;border-color:rgba(74,222,128,.18)}
@@ -1384,6 +1388,29 @@ async function startSession(){
   vibrate([30,50,30]);
 }
 
+/* 실수로 시작을 눌렀을 때 되돌린다.
+   기록한 세트는 건드리지 않고 '시작 시각'만 지운다. */
+async function cancelSession(){
+  const d = viewDate;
+  const ses = sessOf(d); if (!ses) return;
+  const hasWork = daySets(d) > 0 || slotsOn(d).length > 0;
+
+  if (hasWork){
+    if (!await ask({
+      title:'운동 시작 취소',
+      ok:'시작 기록만 지우기',
+      body:'지금까지 기록한 <b>종목과 세트는 그대로 남습니다.</b><br>' +
+           '시작 시각과 경과 시간만 지웁니다.'
+    })) return;
+  }
+
+  delete D.sess[d];
+  keepAwake(false);
+  await saveData(); render();
+  toast(hasWork ? '시작 기록을 지웠어요' : '취소했어요');
+  vibrate(10);
+}
+
 function sessMinutes(d){
   const ss = sessOf(d);
   if (!ss || !ss.start) return dayDuration(d);
@@ -1750,7 +1777,8 @@ function viewWorkout(){
   const ses = sessOf(d);
   if (ses && !ses.end){
     h += '<div class="live"><i></i><span>운동 중</span>' +
-      '<b>'+ses.start+' 시작 · '+fmtDur(sessMinutes(d))+'</b></div>';
+      '<b>'+ses.start+' 시작 · '+fmtDur(sessMinutes(d))+'</b>' +
+      '<button class="live-x" onclick="cancelSession()" aria-label="시작 취소">취소</button></div>';
   }
 
   if (!slots.length){
@@ -3344,7 +3372,7 @@ function viewMe(){
     '<button class="btn btn-g btn-sm" style="margin-top:8px;color:var(--chest)" onclick="wipe()">기록 전체 삭제</button></div>';
 
   h += '<div class="note" style="text-align:center;margin-top:16px;cursor:pointer" onclick="toggleDiag()">' +
-       'IRONLOG v19 · 종목 '+Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
+       'IRONLOG v20 · 종목 '+Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
   if (showDiag){
     h += '<div class="note" style="text-align:center;margin-top:5px;font-size:9px;opacity:.5;' +
          'font-family:var(--mono);line-height:1.7;word-break:break-all">' + diagLine() + '</div>';
@@ -3376,7 +3404,7 @@ function diagLine(){
   const bh = Math.round(document.body.getBoundingClientRect().height);
   const vv = window.visualViewport;
   return [
-    'v19',
+    'v20',
     'body' + bh,
     'inner' + window.innerHeight,
     'client' + document.documentElement.clientHeight,
@@ -3753,14 +3781,76 @@ function foodHTML(){
     '<div id="fdResult">' + foodResultHTML() + '</div>';
 }
 
+/* ═══ 식약처 공식 영양성분 조회 ═══
+   인증키는 Supabase Edge Function 안에만 있고 앱에는 없다.
+   한 번 찾은 결과는 서버에 쌓여서 다음부터는 즉시 나온다. */
+let mfdsState = { q:'', items:null, busy:false };
+
+async function mfdsSearch(){
+  const q = (shState.q || '').trim();
+  if (!q) return;
+  if (!sb){ toast('로그인하면 공식 DB를 쓸 수 있어요'); return; }
+  mfdsState = { q, items:null, busy:true };
+  const box = $('#fdResult'); if (box) box.innerHTML = foodResultHTML();
+  try{
+    const { data, error } = await sb.functions.invoke('food-lookup', { body:{ q } });
+    if (error) throw error;
+    mfdsState = { q, items: (data && data.items) || [], busy:false };
+  }catch(e){
+    mfdsState = { q, items: [], busy:false };
+    toast('공식 DB를 불러오지 못했어요');
+  }
+  const b2 = $('#fdResult'); if (b2) b2.innerHTML = foodResultHTML();
+}
+
+function mfdsRow(f){
+  const sub = [f.maker || '', f.unit, '탄 '+f.c+' 단 '+f.p+' 지 '+f.f].filter(Boolean).join(' · ');
+  return '<button class="pick" onclick="pickMfds('+esc(JSON.stringify(JSON.stringify(f)))+')">' +
+    '<i class="pick-d" style="background:var(--good)"></i>' +
+    '<span class="pick-t"><b>'+esc(f.name)+'</b><span>'+esc(sub)+'</span></span>' +
+    '<span class="food-k">'+f.kcal+'</span></button>';
+}
+
+/* 고른 항목을 내 목록에 넣고 바로 기록 화면으로 */
+async function pickMfds(raw){
+  let f; try{ f = JSON.parse(raw); }catch(e){ return; }
+  const name = f.maker ? f.name + ' (' + f.maker + ')' : f.name;
+  D.customFood = D.customFood || [];
+  if (!D.customFood.some(x => x.name === name)){
+    D.customFood.push({ name, unit:f.unit, kcal:f.kcal, c:f.c, p:f.p, f:f.f,
+                        sug:f.sug || 0, caf:f.caf || 0 });
+    await saveData();
+    rebuildIndex();
+  }
+  shState.q = '';
+  pickFood(name);
+}
+
 function foodResultHTML(){
   const s = shState;
   if (s.q.trim()){
     const k = s.q.trim().toLowerCase();
     const hits = Object.values(FOODMAP).filter(f => f.name.toLowerCase().includes(k));
-    return '<div class="grp">검색 결과 '+hits.length+'개</div>' +
-      (hits.length ? hits.map(foodRow).join('') : '<div class="empty">없는 음식이네요.<br>아래에서 직접 추가할 수 있어요.</div>') +
-      '<button class="btn btn-g btn-sm" style="margin-top:12px" onclick="openNewFood()">＋ 직접 추가하기</button>';
+    let r = '<div class="grp">검색 결과 '+hits.length+'개</div>' +
+      (hits.length ? hits.map(foodRow).join('') : '<div class="empty">기본 목록에 없는 음식이네요.</div>');
+
+    /* 식약처 공식 DB — 제품마다 다른 실제 영양성분을 가져온다 */
+    r += '<div class="grp" style="margin-top:16px">공식 영양성분 DB</div>';
+    if (mfdsState.busy){
+      r += '<div class="empty" style="padding:18px">찾는 중…</div>';
+    } else if (mfdsState.q === s.q.trim() && mfdsState.items){
+      r += mfdsState.items.length
+        ? mfdsState.items.map(mfdsRow).join('') +
+          '<div class="hint">식품의약품안전처 공식 데이터입니다. 제품·업체별 실제 값이라 정확해요.<br>제품 중량이 있으면 <b>1개 기준</b>으로 환산해 보여줍니다.</div>'
+        : '<div class="empty" style="padding:18px">공식 DB에도 없습니다.<br>직접 추가해주세요.</div>';
+    } else {
+      r += '<button class="btn btn-g btn-sm" onclick="mfdsSearch()">' +
+        '🔎 «'+esc(s.q.trim())+'» 공식 DB에서 찾기</button>' +
+        '<div class="hint">제품마다 영양성분이 다를 때, 식약처 공식 데이터에서 정확한 값을 가져옵니다.</div>';
+    }
+
+    r += '<button class="btn btn-g btn-sm" style="margin-top:14px" onclick="openNewFood()">＋ 직접 추가하기</button>';
+    return r;
   }
   let h = '';
   const tf = topFoods(8);
@@ -3784,6 +3874,7 @@ function foodCat(c){ shState.cat = c; const b = $('#fdResult'); if (b) b.innerHT
 let fdSearchTimer = null;
 function foodSearch(v){
   shState.q = v;
+  if (mfdsState.q && mfdsState.q !== v.trim()) mfdsState = { q:'', items:null, busy:false };
   clearTimeout(fdSearchTimer);
   fdSearchTimer = setTimeout(() => {
     const box = $('#fdResult');
@@ -4395,7 +4486,8 @@ Object.assign(window, {
   addSlot, rmSlot, copyLast, addSet, rmSet, editSet, saveEdit, bump, setDr,
   openFood, foodCat, foodSearch, pickFood, backFood, qtyB, pickTime, commitFood, rmMeal,
   editMeal, saveMeal, delMeal, doneSlot, undoneSlot, startSession, sessOf, sessMinutes, keepAwake,
-  moveSlot, topExercises, topFoods, avgRest,
+  moveSlot, topExercises, topFoods, avgRest, cancelSession,
+  mfdsSearch, pickMfds, mfdsRow,
   openNewFood, saveNewFood, openProfile, saveProfile, openCustomList, rmCustomEx, rmCustomFood,
   openPR, openCat, openTimer, tmSet, tmGo, restPref, startRest, defaultRest, mmss,
   exportData, importData, wipe, closeSheet, ask, askText, mdClose, mdText, storageBar,
