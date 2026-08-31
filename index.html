@@ -352,6 +352,15 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .ai-note{font-size:10.5px;color:var(--tx-3);line-height:1.6;
   padding:0 4px 10px 26px;margin-top:-4px}
 
+/* ══ 불러오는 중 ══ */
+.skel{display:flex;flex-direction:column;gap:9px;padding:4px 0 8px}
+.skel i{display:block;height:44px;border-radius:var(--r-md);
+  background:linear-gradient(90deg,var(--card) 25%,var(--card-2) 37%,var(--card) 63%);
+  background-size:400% 100%;animation:shim 1.3s ease-in-out infinite}
+.skel i:nth-child(2){animation-delay:.12s;opacity:.75}
+.skel i:nth-child(3){animation-delay:.24s;opacity:.5}
+@keyframes shim{0%{background-position:100% 0}100%{background-position:0 0}}
+
 /* ══ AI 추정 표식 ══ */
 .aitag{font-style:normal;font-size:9px;font-weight:900;letter-spacing:.04em;
   background:rgba(251,146,60,.18);color:#FDBA74;border:1px solid rgba(251,146,60,.35);
@@ -3385,7 +3394,7 @@ function viewMe(){
     '<button class="btn btn-g btn-sm" style="margin-top:8px;color:var(--chest)" onclick="wipe()">기록 전체 삭제</button></div>';
 
   h += '<div class="note" style="text-align:center;margin-top:16px;cursor:pointer" onclick="toggleDiag()">' +
-       'IRONLOG v22 · 종목 '+Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
+       'IRONLOG v23 · 종목 '+Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
   if (showDiag){
     h += '<div class="note" style="text-align:center;margin-top:5px;font-size:9px;opacity:.5;' +
          'font-family:var(--mono);line-height:1.7;word-break:break-all">' + diagLine() + '</div>';
@@ -3417,7 +3426,7 @@ function diagLine(){
   const bh = Math.round(document.body.getBoundingClientRect().height);
   const vv = window.visualViewport;
   return [
-    'v22',
+    'v23',
     'body' + bh,
     'inner' + window.innerHeight,
     'client' + document.documentElement.clientHeight,
@@ -3913,7 +3922,8 @@ function foodResultHTML(){
     /* 식약처 공식 DB — 제품마다 다른 실제 영양성분을 가져온다 */
     r += '<div class="grp" style="margin-top:16px">공식 영양성분 DB</div>';
     if (mfdsState.busy){
-      r += '<div class="empty" style="padding:18px">찾는 중…</div>';
+      r += '<div class="skel"><i></i><i></i><i></i></div>' +
+           '<div class="hint" style="text-align:center">공식 DB에서 찾는 중…</div>';
     } else if (mfdsState.q === s.q.trim() && mfdsState.items){
       const anyAI = mfdsState.items.some(x => x.src === 'AI');
       const anyGov = mfdsState.items.some(x => x.src !== 'AI');
@@ -3982,15 +3992,25 @@ function foodRow(f){
 }
 function foodCat(c){ shState.cat = c; const b = $('#fdResult'); if (b) b.innerHTML = foodResultHTML(); else refresh(foodHTML()); }
 let fdSearchTimer = null;
+let mfdsAuto = null;
 function foodSearch(v){
   shState.q = v;
   if (mfdsState.q && mfdsState.q !== v.trim()) mfdsState = { q:'', items:null, busy:false, dbg:'' };
   if (aiState.q && aiState.q !== v.trim()) aiState = { q:'', item:null, busy:false, dbg:'' };
   clearTimeout(fdSearchTimer);
+  clearTimeout(mfdsAuto);
   fdSearchTimer = setTimeout(() => {
     const box = $('#fdResult');
     if (box) box.innerHTML = foodResultHTML();
   }, 120);
+
+  /* 기본 목록에 없으면 버튼을 누르기 전에 미리 조회를 시작한다.
+     타이핑이 멈춘 순간부터 서버가 일하므로 체감 시간이 크게 준다. */
+  const k = v.trim();
+  if (typeof sb === 'undefined' || !sb || k.length < 2) return;
+  const kl = k.toLowerCase();
+  if (Object.values(FOODMAP).some(f => f.name.toLowerCase().includes(kl))) return;
+  mfdsAuto = setTimeout(() => { if (shState.q.trim() === k) mfdsSearch(); }, 600);
 }
 function pickFood(n){ shState.food = n; shState.qty = 1; shState.ov = null; shState.edit = false; refresh(foodHTML()); }
 
