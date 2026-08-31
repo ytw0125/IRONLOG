@@ -344,6 +344,19 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   color:var(--tx-2);font-size:12.5px;font-weight:700;padding:10px 0;cursor:pointer}
 .mpick button[aria-pressed=true]{background:var(--white);color:#09090B;border-color:var(--white)}
 
+/* ══ AI 추정 ══ */
+.pick.ai{border-left:2px solid var(--warn)}
+.ai-tag{font-style:normal;font-size:9px;font-weight:900;letter-spacing:.06em;
+  background:rgba(251,146,60,.18);color:#FDBA74;border-radius:3px;padding:2px 5px;
+  vertical-align:2px;margin-left:5px}
+.ai-note{font-size:10.5px;color:var(--tx-3);line-height:1.6;
+  padding:0 4px 10px 26px;margin-top:-4px}
+
+/* ══ AI 추정 표식 ══ */
+.aitag{font-style:normal;font-size:9px;font-weight:900;letter-spacing:.04em;
+  background:rgba(251,146,60,.18);color:#FDBA74;border:1px solid rgba(251,146,60,.35);
+  border-radius:4px;padding:1px 5px;vertical-align:1px;margin-left:4px}
+
 /* ══ 빠른 추가 칩 ══ */
 .quick{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
 .quick button{background:var(--steel);border:1px solid var(--line-2);border-radius:var(--r-sm);
@@ -3372,7 +3385,7 @@ function viewMe(){
     '<button class="btn btn-g btn-sm" style="margin-top:8px;color:var(--chest)" onclick="wipe()">기록 전체 삭제</button></div>';
 
   h += '<div class="note" style="text-align:center;margin-top:16px;cursor:pointer" onclick="toggleDiag()">' +
-       'IRONLOG v20 · 종목 '+Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
+       'IRONLOG v21 · 종목 '+Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
   if (showDiag){
     h += '<div class="note" style="text-align:center;margin-top:5px;font-size:9px;opacity:.5;' +
          'font-family:var(--mono);line-height:1.7;word-break:break-all">' + diagLine() + '</div>';
@@ -3404,7 +3417,7 @@ function diagLine(){
   const bh = Math.round(document.body.getBoundingClientRect().height);
   const vv = window.visualViewport;
   return [
-    'v20',
+    'v21',
     'body' + bh,
     'inner' + window.innerHeight,
     'client' + document.documentElement.clientHeight,
@@ -3811,17 +3824,21 @@ async function mfdsSearch(){
 }
 
 function mfdsRow(f){
-  const sub = [f.maker || '', f.unit, '탄 '+f.c+' 단 '+f.p+' 지 '+f.f].filter(Boolean).join(' · ');
+  const isAI = f.src === 'AI';
+  const sub = [isAI ? '' : (f.maker || ''), f.unit, '탄 '+f.c+' 단 '+f.p+' 지 '+f.f]
+    .filter(Boolean).join(' · ');
   return '<button class="pick" onclick="pickMfds('+esc(JSON.stringify(JSON.stringify(f)))+')">' +
-    '<i class="pick-d" style="background:var(--good)"></i>' +
-    '<span class="pick-t"><b>'+esc(f.name)+'</b><span>'+esc(sub)+'</span></span>' +
+    '<i class="pick-d" style="background:'+(isAI?'var(--warn)':'var(--good)')+'"></i>' +
+    '<span class="pick-t"><b>'+esc(f.name)+
+      (isAI?' <em class="aitag">AI 추정</em>':'')+'</b><span>'+esc(sub)+'</span></span>' +
     '<span class="food-k">'+f.kcal+'</span></button>';
 }
 
 /* 고른 항목을 내 목록에 넣고 바로 기록 화면으로 */
 async function pickMfds(raw){
   let f; try{ f = JSON.parse(raw); }catch(e){ return; }
-  const name = f.maker ? f.name + ' (' + f.maker + ')' : f.name;
+  const name = (f.src === 'AI') ? f.name
+             : (f.maker ? f.name + ' (' + f.maker + ')' : f.name);
   D.customFood = D.customFood || [];
   if (!D.customFood.some(x => x.name === name)){
     D.customFood.push({ name, unit:f.unit, kcal:f.kcal, c:f.c, p:f.p, f:f.f,
@@ -3831,6 +3848,58 @@ async function pickMfds(raw){
   }
   shState.q = '';
   pickFood(name);
+  /* AI 추정값은 틀릴 수 있으므로 고치기 쉽게 영양소 입력을 미리 펼쳐둔다 */
+  if (f.src === 'AI'){ shState.edit = true; refresh(foodHTML()); }
+}
+
+/* ═══ AI 영양성분 추정 ═══
+   공식 DB에 없는 식당 메뉴·집밥용. 값은 '추정'이라 화면에 그렇게 표시한다. */
+let aiState = { q:'', item:null, busy:false, dbg:'' };
+
+async function aiSearch(){
+  const q = (shState.q || '').trim();
+  if (!q) return;
+  if (!sb){ toast('로그인하면 쓸 수 있어요'); return; }
+  aiState = { q, item:null, busy:true, dbg:'' };
+  const box = $('#fdResult'); if (box) box.innerHTML = foodResultHTML();
+  try{
+    const { data, error } = await sb.functions.invoke('food-ai', { body:{ q } });
+    if (error) throw error;
+    let dbg = '';
+    if (!(data && data.item) && data && data.debug){
+      dbg = Object.keys(data.debug).map(k => k+'='+String(data.debug[k]).slice(0,160)).join(' · ');
+    }
+    aiState = { q, item: (data && data.item) || null, busy:false, dbg };
+  }catch(e){
+    aiState = { q, item:null, busy:false, dbg:'호출 실패: '+String(e).slice(0,160) };
+  }
+  const b2 = $('#fdResult'); if (b2) b2.innerHTML = foodResultHTML();
+}
+
+function aiRow(f){
+  const conf = f.conf || '보통';
+  const tone = conf === '높음' ? 'var(--good)' : (conf === '낮음' ? 'var(--chest)' : 'var(--warn)');
+  return '<button class="pick ai" onclick="pickAi('+esc(JSON.stringify(JSON.stringify(f)))+')">' +
+    '<i class="pick-d" style="background:var(--warn)"></i>' +
+    '<span class="pick-t"><b>'+esc(f.name)+' <em class="ai-tag">추정</em></b>' +
+    '<span>'+esc(f.unit)+' · 탄 '+f.c+' 단 '+f.p+' 지 '+f.f+'</span></span>' +
+    '<span class="food-k">'+f.kcal+'</span></button>' +
+    (f.note ? '<div class="ai-note"><b style="color:'+tone+'">신뢰도 '+esc(conf)+'</b> · '+esc(f.note)+'</div>' : '');
+}
+
+async function pickAi(raw){
+  let f; try{ f = JSON.parse(raw); }catch(e){ return; }
+  const name = f.name + ' (추정)';
+  D.customFood = D.customFood || [];
+  if (!D.customFood.some(x => x.name === name)){
+    D.customFood.push({ name, unit:f.unit, kcal:f.kcal, c:f.c, p:f.p, f:f.f,
+                        sug:f.sug || 0, caf:f.caf || 0 });
+    await saveData();
+    rebuildIndex();
+  }
+  shState.q = '';
+  pickFood(name);
+  setTimeout(() => toast('추정값이에요. 다르면 영양소를 고쳐주세요'), 400);
 }
 
 function foodResultHTML(){
@@ -3846,9 +3915,14 @@ function foodResultHTML(){
     if (mfdsState.busy){
       r += '<div class="empty" style="padding:18px">찾는 중…</div>';
     } else if (mfdsState.q === s.q.trim() && mfdsState.items){
+      const anyAI = mfdsState.items.some(x => x.src === 'AI');
       r += mfdsState.items.length
         ? mfdsState.items.map(mfdsRow).join('') +
-          '<div class="hint">식품의약품안전처 공식 데이터입니다. 제품·업체별 실제 값이라 정확해요.<br>제품 중량이 있으면 <b>1개 기준</b>으로 환산해 보여줍니다.</div>'
+          (anyAI
+            ? '<div class="hint">공식 DB에 없어 <b style="color:var(--warn)">AI가 추정</b>한 값입니다. ' +
+              '실제와 다를 수 있으니, 아는 값이 있으면 다음 화면에서 고쳐주세요.</div>'
+            : '<div class="hint">식품의약품안전처 공식 데이터입니다. 제품·업체별 실제 값이라 정확해요.<br>' +
+              '제품 중량이 있으면 <b>1개 기준</b>으로 환산해 보여줍니다.</div>')
         : '<div class="empty" style="padding:18px">공식 DB에도 없습니다.<br>직접 추가해주세요.</div>' +
           (mfdsState.dbg ? '<div class="hint" style="opacity:.55;word-break:break-all">' +
             esc(mfdsState.dbg) + '</div>' : '');
@@ -3856,6 +3930,26 @@ function foodResultHTML(){
       r += '<button class="btn btn-g btn-sm" onclick="mfdsSearch()">' +
         '🔎 «'+esc(s.q.trim())+'» 공식 DB에서 찾기</button>' +
         '<div class="hint">제품마다 영양성분이 다를 때, 식약처 공식 데이터에서 정확한 값을 가져옵니다.</div>';
+    }
+
+    /* 공식 DB에도 없는 식당 메뉴·집밥은 AI 가 추정한다 */
+    const askedOfficial = mfdsState.q === s.q.trim() && mfdsState.items;
+    const noneFound = hits.length === 0 && askedOfficial && mfdsState.items.length === 0;
+    if (noneFound || aiState.q === s.q.trim()){
+      r += '<div class="grp" style="margin-top:16px">AI 추정</div>';
+      if (aiState.busy){
+        r += '<div class="empty" style="padding:18px">추정하는 중…</div>';
+      } else if (aiState.q === s.q.trim() && aiState.item){
+        r += aiRow(aiState.item);
+      } else if (aiState.q === s.q.trim()){
+        r += '<div class="empty" style="padding:18px">추정하지 못했어요.<br>직접 추가해주세요.</div>' +
+          (aiState.dbg ? '<div class="hint" style="opacity:.55;word-break:break-all">'+esc(aiState.dbg)+'</div>' : '');
+      } else {
+        r += '<button class="btn btn-g btn-sm" onclick="aiSearch()">' +
+          '✨ «'+esc(s.q.trim())+'» 영양성분 추정하기</button>' +
+          '<div class="hint">식당 메뉴처럼 공식 DB에 없는 음식을 AI가 추정합니다. ' +
+          '<b>정확한 값이 아니라 참고용</b>이며, 기록 전에 수정할 수 있어요.</div>';
+      }
     }
 
     r += '<button class="btn btn-g btn-sm" style="margin-top:14px" onclick="openNewFood()">＋ 직접 추가하기</button>';
@@ -3884,6 +3978,7 @@ let fdSearchTimer = null;
 function foodSearch(v){
   shState.q = v;
   if (mfdsState.q && mfdsState.q !== v.trim()) mfdsState = { q:'', items:null, busy:false, dbg:'' };
+  if (aiState.q && aiState.q !== v.trim()) aiState = { q:'', item:null, busy:false, dbg:'' };
   clearTimeout(fdSearchTimer);
   fdSearchTimer = setTimeout(() => {
     const box = $('#fdResult');
@@ -4496,7 +4591,7 @@ Object.assign(window, {
   openFood, foodCat, foodSearch, pickFood, backFood, qtyB, pickTime, commitFood, rmMeal,
   editMeal, saveMeal, delMeal, doneSlot, undoneSlot, startSession, sessOf, sessMinutes, keepAwake,
   moveSlot, topExercises, topFoods, avgRest, cancelSession,
-  mfdsSearch, pickMfds, mfdsRow,
+  mfdsSearch, pickMfds, mfdsRow, aiSearch, pickAi, aiRow,
   openNewFood, saveNewFood, openProfile, saveProfile, openCustomList, rmCustomEx, rmCustomFood,
   openPR, openCat, openTimer, tmSet, tmGo, restPref, startRest, defaultRest, mmss,
   exportData, importData, wipe, closeSheet, ask, askText, mdClose, mdText, storageBar,
