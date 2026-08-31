@@ -3385,7 +3385,7 @@ function viewMe(){
     '<button class="btn btn-g btn-sm" style="margin-top:8px;color:var(--chest)" onclick="wipe()">기록 전체 삭제</button></div>';
 
   h += '<div class="note" style="text-align:center;margin-top:16px;cursor:pointer" onclick="toggleDiag()">' +
-       'IRONLOG v21 · 종목 '+Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
+       'IRONLOG v22 · 종목 '+Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
   if (showDiag){
     h += '<div class="note" style="text-align:center;margin-top:5px;font-size:9px;opacity:.5;' +
          'font-family:var(--mono);line-height:1.7;word-break:break-all">' + diagLine() + '</div>';
@@ -3417,7 +3417,7 @@ function diagLine(){
   const bh = Math.round(document.body.getBoundingClientRect().height);
   const vv = window.visualViewport;
   return [
-    'v21',
+    'v22',
     'body' + bh,
     'inner' + window.innerHeight,
     'client' + document.documentElement.clientHeight,
@@ -3916,13 +3916,20 @@ function foodResultHTML(){
       r += '<div class="empty" style="padding:18px">찾는 중…</div>';
     } else if (mfdsState.q === s.q.trim() && mfdsState.items){
       const anyAI = mfdsState.items.some(x => x.src === 'AI');
+      const anyGov = mfdsState.items.some(x => x.src !== 'AI');
+      let note;
+      if (anyAI && anyGov)
+        note = '위쪽 <b style="color:var(--warn)">주황색</b>은 AI 추정값, ' +
+               '아래 초록색은 식약처 공식 데이터입니다.<br>' +
+               '검색어와 딱 맞는 공식 자료가 없어 둘 다 보여드려요.';
+      else if (anyAI)
+        note = '공식 DB에 없어 <b style="color:var(--warn)">AI가 추정</b>한 값입니다. ' +
+               '실제와 다를 수 있으니, 아는 값이 있으면 다음 화면에서 고쳐주세요.';
+      else
+        note = '식품의약품안전처 공식 데이터입니다. 제품·업체별 실제 값이라 정확해요.<br>' +
+               '제품 중량이 있으면 <b>1개 기준</b>으로 환산해 보여줍니다.';
       r += mfdsState.items.length
-        ? mfdsState.items.map(mfdsRow).join('') +
-          (anyAI
-            ? '<div class="hint">공식 DB에 없어 <b style="color:var(--warn)">AI가 추정</b>한 값입니다. ' +
-              '실제와 다를 수 있으니, 아는 값이 있으면 다음 화면에서 고쳐주세요.</div>'
-            : '<div class="hint">식품의약품안전처 공식 데이터입니다. 제품·업체별 실제 값이라 정확해요.<br>' +
-              '제품 중량이 있으면 <b>1개 기준</b>으로 환산해 보여줍니다.</div>')
+        ? mfdsState.items.map(mfdsRow).join('') + '<div class="hint">'+note+'</div>'
         : '<div class="empty" style="padding:18px">공식 DB에도 없습니다.<br>직접 추가해주세요.</div>' +
           (mfdsState.dbg ? '<div class="hint" style="opacity:.55;word-break:break-all">' +
             esc(mfdsState.dbg) + '</div>' : '');
