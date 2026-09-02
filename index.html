@@ -352,6 +352,94 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .ai-note{font-size:10.5px;color:var(--tx-3);line-height:1.6;
   padding:0 4px 10px 26px;margin-top:-4px}
 
+/* ══ 낱개 나누기 안내 ══ */
+.split-hint{display:block;width:100%;background:rgba(74,222,128,.07);
+  border:1px solid rgba(74,222,128,.28);border-radius:var(--r-md);
+  color:var(--tx-2);font-size:12px;font-weight:600;padding:12px 14px;
+  margin-bottom:12px;cursor:pointer;text-align:left;line-height:1.5}
+.split-hint b{color:var(--good);font-weight:800}
+.split-hint:active{background:rgba(74,222,128,.12)}
+
+/* ══ 달력 부위 띠 ══ */
+.cal-bar{position:absolute;left:5px;right:5px;bottom:5px;height:3px;
+  display:flex;gap:1px;border-radius:2px;overflow:hidden}
+.cal-bar i{display:block;height:100%}
+.lg-t{width:100%;background:none;border:none;color:var(--tx-3);font-size:10.5px;
+  font-weight:700;padding:9px 0 2px;cursor:pointer}
+.lg-t:active{color:var(--tx-2)}
+
+/* ══ 한 줄 헤더 ══ */
+.hdr-row{display:flex;align-items:center;gap:7px}
+.hb-a{flex:0 0 34px;height:38px;background:var(--steel);border:1px solid var(--line-2);
+  border-radius:var(--r-md);color:var(--tx-2);font-size:17px;cursor:pointer;
+  box-shadow:var(--edge2);transition:transform .1s var(--e)}
+.hb-a:active{transform:scale(.92)}
+.hb-d{flex:1;min-width:0;height:38px;background:var(--steel);border:1px solid var(--line-2);
+  border-radius:var(--r-md);color:var(--tx);cursor:pointer;box-shadow:var(--edge2);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 6px}
+.hb-d:active{background:var(--card-2)}
+.hb-d b{font-size:14px;font-weight:800;letter-spacing:-.03em;white-space:nowrap;line-height:1.1}
+.hb-d b em{font-style:normal;color:var(--tx-3);font-weight:700;font-size:12px}
+.hb-d span{font-size:9px;color:var(--warn);font-weight:700;letter-spacing:.04em;margin-top:1px}
+.hb-d.past b{color:var(--tx-2)}
+
+.ibtn.cat{padding:3px;overflow:visible;position:relative}
+.ibtn.cat svg{width:100%;height:100%;display:block}
+.ibtn-dot{position:absolute;top:-2px;right:-2px;width:8px;height:8px;border-radius:50%;
+  background:var(--chest);border:2px solid var(--bg)}
+
+/* ══ 매크로 카드 안 얇은 줄 (당류·카페인) ══ */
+.mini-w{border-top:1px solid var(--line);margin-top:13px;padding-top:11px;
+  display:flex;flex-direction:column;gap:8px}
+.mini{display:flex;align-items:center;gap:9px}
+.mini>span{flex:0 0 44px;font-size:10.5px;color:var(--tx-3);font-weight:700}
+.mini>i{flex:1;height:4px;background:#191920;border-radius:2px;overflow:hidden}
+.mini>i>s{display:block;height:100%;border-radius:2px}
+.mini>b{flex:0 0 auto;font-size:10.5px;font-weight:800;color:var(--tx-2);font-family:var(--mono)}
+.mini>b em{font-style:normal;color:var(--tx-3);font-weight:600}
+
+/* ══ 링 카드 ══ */
+.ring-c{position:relative;flex-direction:column;align-items:stretch}
+.ring-top{display:flex;align-items:center;gap:16px}
+.goal-row{display:flex;align-items:center;justify-content:space-between;width:100%;
+  background:none;border:none;border-top:1px solid var(--line);
+  margin-top:12px;padding:11px 0 0;cursor:pointer}
+.goal-row span{font-size:11px;color:var(--tx-3);font-weight:700}
+.goal-row i{font-style:normal;font-size:11px;color:var(--tx-2);font-weight:700}
+.goal-row:active span{color:var(--tx-2)}
+.ring-set:active{color:var(--tx-2)}
+
+/* ══ 카드 하단 한 줄 ══ */
+.foot{display:flex;gap:8px;padding:2px 13px 13px}
+.foot>button{border-radius:var(--r-sm);font-size:13px;font-weight:800;cursor:pointer;
+  transition:transform .1s var(--e),filter .1s var(--e)}
+.foot>button:active{transform:scale(.97)}
+.done-b{flex:1;border:none;padding:13px;
+  background:linear-gradient(180deg,#3B8A55,#256B3C);color:#EAFBF0;
+  box-shadow:0 1px 0 rgba(255,255,255,.14) inset,0 2px 10px rgba(0,0,0,.35)}
+.done-b:active{filter:brightness(.93)}
+.foot-g{flex:1;background:var(--steel);border:1px solid var(--line-2);color:var(--tx-2);padding:13px}
+.foot-m{flex:0 0 46px;background:var(--steel);border:1px solid var(--line-2);
+  color:var(--tx-3);font-size:17px;letter-spacing:.06em;padding:13px 0}
+
+/* ══ 더보기 메뉴 ══ */
+.mrow{display:flex;align-items:center;gap:12px;width:100%;background:none;border:none;
+  border-bottom:1px solid var(--line);padding:15px 2px;cursor:pointer;text-align:left}
+.mrow:last-child{border-bottom:none}
+.mrow:active{background:var(--card)}
+.mrow-i{flex:0 0 24px;font-size:15px;text-align:center}
+.mrow-t{flex:1;min-width:0}
+.mrow-t b{display:block;font-size:14.5px;font-weight:700;color:var(--tx);letter-spacing:-.02em}
+.mrow-t span{display:block;font-size:11.5px;color:var(--tx-3);margin-top:2px}
+.mrow-g{color:var(--tx-3);font-size:16px}
+.mrow.danger .mrow-t b{color:var(--chest)}
+
+/* ══ 세트 성격 칩 (RPE 줄 안) ══ */
+.rp-tag{flex:0 0 auto;min-width:42px;background:#0A0A0C;border:1px solid var(--line-2);
+  border-radius:var(--r-sm);color:var(--tx-3);font-size:11px;font-weight:800;
+  padding:7px 9px;cursor:pointer;font-family:var(--mono)}
+.rp-tag.on{background:var(--card-3);border-color:var(--tx-3);color:var(--tx)}
+
 /* ══ 불러오는 중 ══ */
 .skel{display:flex;flex-direction:column;gap:9px;padding:4px 0 8px}
 .skel i{display:block;height:44px;border-radius:var(--r-md);
@@ -773,13 +861,13 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .cat-fab svg{width:49px;height:49px;display:block}
 .cat-dot{position:absolute;top:1px;right:1px;width:10px;height:10px;border-radius:50%;
   background:var(--chest);border:2px solid var(--bg)}
-.cat-bb{position:absolute;right:79px;z-index:35;bottom:24px;
+.cat-bb{position:absolute;right:13px;z-index:35;top:8px;
   max-width:min(250px,calc(100vw - 108px));background:#FFF;color:#141418;border-radius:14px;
   padding:10px 12px;font-size:12px;font-weight:600;line-height:1.6;
   box-shadow:0 10px 28px rgba(0,0,0,.5);opacity:0;transform:translateY(6px) scale(.94);
   transform-origin:bottom right;transition:.2s;pointer-events:none}
 .cat-bb.on{opacity:1;transform:none;pointer-events:auto}
-.cat-bb.up{bottom:24px}
+.cat-bb.up{top:8px}
 .cat-bb b{font-weight:900}
 .cat-bb:after{content:'';position:absolute;right:-5px;bottom:16px;width:11px;height:11px;
   background:#FFF;transform:rotate(45deg)}
@@ -835,23 +923,11 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 <div id="app">
   <div class="hdr">
     <div class="knurl"></div>
-    <div class="hdr-row">
-      <div class="brand">IRONLOG</div>
-      <div class="hdr-btns">
-        <button class="ibtn" id="btnTimer" aria-label="타이머">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg>
-        </button>
-        <button class="ibtn" id="btnToday" aria-label="오늘로">
-          <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
-        </button>
-      </div>
-    </div>
-    <div id="hdrExtra"></div>
+    <div class="hdr-row" id="hdrRow"></div>
   </div>
   <div id="view"></div>
 </div>
 
-<button class="cat-fab" id="catFab" aria-label="헬냥이"></button>
 <div class="cat-bb" id="catBB" role="status"></div>
 <div id="toast"></div>
 </div>
@@ -1286,11 +1362,8 @@ function barOf(exName){
 
 function plateHTML(total, exName){
   const bw = barOf(exName);
-  const foot = '<div class="pl-bw">' +
-    [20,15,10,25].map(v => '<button type="button" onclick="setBar(\''+q(exName||'')+'\','+v+')"' +
-      (v===bw?' style="background:var(--white);color:#09090B;border-color:var(--white)"':'') +
-      '>'+v+'kg 봉</button>').join('') + '</div>';
-  if (total < bw) return '<div class="pl-t">빈 봉이 '+bw+'kg입니다</div>' + foot;
+  /* 봉 무게 선택은 ⋯ 메뉴로 옮겼다. 매 세트 볼 필요가 없는 설정이다. */
+  if (total < bw) return '<div class="pl-t">빈 봉이 '+bw+'kg입니다</div>';
   let side = (total-bw)/2;
   const out = [], cnt = {};
   for (const [kg,color,h] of PLATE){
@@ -1305,7 +1378,7 @@ function plateHTML(total, exName){
     : '빈 봉';
   return '<div class="pl-bar"><i class="pl-s" style="width:22px"></i>'+out.join('')+
          '<i class="pl-s" style="width:40px"></i></div>' +
-         '<div class="pl-t">'+bw+'kg 봉 + 한쪽에 '+txt+'</div>' + foot;
+         '<div class="pl-t">'+bw+'kg 봉 + 한쪽에 '+txt+'</div>';
 }
 
 async function setBar(exName, v){
@@ -1650,7 +1723,7 @@ function paintTimer(){
 }
 function syncFab(){
   const up = T.on;
-  $('#catFab').classList.toggle('up', up);
+
   $('#catBB').classList.toggle('up', up);
 }
 
@@ -1773,6 +1846,39 @@ async function restPref(name, d){
    9. 화면 · 운동
    ═══════════════════════════════════════════════════ */
 const KIND = { bar:'바벨', db:'덤벨', body:'맨몸', hold:'버티기', mach:'머신', cardio:'유산소' };
+
+/* 한 줄 헤더.
+   앱을 이미 열었는데 브랜드 이름이 매 화면 상단을 차지할 이유가 없다.
+   날짜 이동과 도구 버튼을 한 줄에 넣어 세로 공간을 돌려받는다. */
+function headerHTML(isDated){
+  const st = catStats();
+  const mood = catMood(st);
+  const alert = mood === 'worry' || (st.idx > (D.seenStage||0));
+
+  let left;
+  if (isDated){
+    const dow = DAYS[new Date(viewDate).getDay()];
+    const isT = viewDate === today();
+    left = '<button class="hb-a" onclick="goDay(-1)" aria-label="이전 날">‹</button>' +
+      '<button class="hb-d'+(isT?'':' past')+'" onclick="pickDate()">' +
+        '<b>'+fmtD(viewDate)+' <em>('+dow+')</em></b>' +
+        (isT ? '' : '<span>'+(viewDate < today() ? '지난 기록' : '예정일')+'</span>') +
+      '</button>' +
+      '<button class="hb-a" onclick="goDay(1)" aria-label="다음 날">›</button>';
+  } else {
+    left = '<div class="brand">IRONLOG</div>';
+  }
+
+  return left +
+    '<div class="hdr-btns">' +
+      (isDated ? '<button class="ibtn" onclick="jumpDay(today())" aria-label="오늘로">' +
+        '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></button>' : '') +
+      '<button class="ibtn" onclick="openTimer()" aria-label="타이머">' +
+        '<svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg></button>' +
+      '<button class="ibtn cat" id="catBtn" onclick="openCat()" aria-label="헬냥이">' +
+        catSVG(st.idx, mood, true) + (alert?'<span class="ibtn-dot"></span>':'') + '</button>' +
+    '</div>';
+}
 
 function dateNav(){
   const isT = viewDate === today();
@@ -1998,25 +2104,20 @@ function exCard(sl){
   }
   h += '<button class="ip-go" onclick="addSet(\''+sl.id+'\')">기록</button></div>';
 
-  /* 세트 성격 — 워밍업은 통계에서 빠지고, 드랍은 앞 세트에 이어 붙는다 */
+  /* RPE 와 세트 성격을 한 줄에 담는다.
+     예전에는 워밍업·드랍이 따로 한 줄, RPE 가 또 한 줄이라 화면이 길어졌다. */
   if (ex.kind !== 'cardio'){
-    const prevSets = setsOf(sl.id);
-    const canDrop = prevSets.length > 0;
-    const best = bestOf(sl.exId);
-    const hint = !dr.w0 && best > 0 && dr.w > 0 && dr.w < best*0.65 && prevSets.length === 0;
-    h += '<div class="tech" id="tc-'+sl.id+'">' +
-      '<button type="button" class="tc-b'+(dr.w0?' on w':'')+'" onclick="setTech(\''+sl.id+'\',\'w0\')">워밍업</button>' +
-      (canDrop ? '<button type="button" class="tc-b'+(dr.dropOn?' on d':'')+'" onclick="setTech(\''+sl.id+'\',\'drop\')">드랍</button>' : '') +
-      (hint ? '<span class="tc-hint">가벼운 무게예요 · 워밍업?</span>' : '') +
-      '</div>';
+    const canDrop = ss.length > 0;
+    const tag = dr.w0 ? 'W' : (dr.dropOn ? '↳' : '');
+    h += '<div class="rp" id="rp-'+sl.id+'">' +
+      '<button type="button" class="rp-tag'+(tag?' on':'')+'" onclick="cycleTech(\''+sl.id+'\','+canDrop+')" ' +
+        'aria-label="세트 성격">'+(tag || '일반')+'</button>' +
+      '<em>RPE</em>' + [6,7,8,9,10].map(v =>
+        '<button type="button" data-v="'+v+'" aria-pressed="'+(v===dr.rpe)+'" onclick="setRpe(\''+sl.id+'\','+v+')">'+v+'</button>'
+      ).join('') + '</div>';
   }
-
-  if (ex.kind !== 'cardio'){
-    h += '<div class="rp" id="rp-'+sl.id+'"><em>RPE</em>' + [6,7,8,9,10].map(v =>
-      '<button type="button" data-v="'+v+'" aria-pressed="'+(v===dr.rpe)+'" onclick="setRpe(\''+sl.id+'\','+v+')">'+v+'</button>'
-    ).join('') + '</div>';
-  }
-  if (ex.kind === 'bar') h += '<div class="pls" id="pl-'+sl.id+'">'+(dr.w>0?plateHTML(dr.w, ex.name):'')+'</div>';
+  if (ex.kind === 'bar' && dr.w > 0)
+    h += '<div class="pls" id="pl-'+sl.id+'">'+plateHTML(dr.w, ex.name)+'</div>';
   h += '</div>';
 
   /* 하단 조작 */
@@ -2031,18 +2132,14 @@ function exCard(sl){
       '<span>'+(isMine ? '휴식 중 · 눌러 재시작' : '휴식 시간'+(custom?' · 직접 설정':''))+'</span></button>' +
     '<button class="rest-pm" onclick="restAdj(\''+q(ex.name)+'\',15)" aria-label="휴식 시간 늘리기">+15</button></div>';
 
-  /* 이 종목을 끝내면 카드를 접어 목록을 정리한다. 세트가 있을 때만 의미가 있다. */
+  /* 하단은 한 줄만. 자주 안 쓰는 것은 ⋯ 안으로 넣었다. */
+  h += '<div class="foot">';
   if (ss.length && !sl.done){
-    h += '<div style="padding:0 13px 10px">' +
-      '<button class="btn done-b" onclick="doneSlot(\''+sl.id+'\')">✓ 이 종목 마치기</button></div>';
+    h += '<button class="done-b" onclick="doneSlot(\''+sl.id+'\')">✓ 이 종목 마치기</button>';
+  } else {
+    h += '<button class="foot-g" onclick="openTrend(\''+q(ex.name)+'\')">성장 추이</button>';
   }
-  h += '<div style="display:flex;gap:7px;padding:0 13px 12px">' +
-    '<button class="btn btn-g btn-sm" onclick="openTrend(\''+q(ex.name)+'\')">성장 추이</button>' +
-    '<button class="btn btn-g btn-sm" onclick="openLink(\''+sl.id+'\')" style="flex:0 0 74px;white-space:nowrap">'+
-      (sl.gid ? '묶음 해제' : '묶기')+'</button>' +
-    '<button class="btn btn-g btn-sm" onclick="rmSlot(\''+sl.id+'\')" style="flex:0 0 56px;color:var(--tx-3);white-space:nowrap">삭제</button></div>';
-  h += '<div class="ord"><button onclick="moveSlot(\''+sl.id+'\',-1)">▲ 위로</button>' +
-       '<button onclick="moveSlot(\''+sl.id+'\',1)">▼ 아래로</button></div>';
+  h += '<button class="foot-m" onclick="openExMenu(\''+sl.id+'\')" aria-label="더보기">⋯</button></div>';
 
   return h + '</div></div>';
 }
@@ -2158,7 +2255,7 @@ function viewDiet(){
   const left = t.kcal - e.kcal;
   const C = 2*Math.PI*44, dash = C * Math.min(1, e.kcal/t.kcal);
 
-  let h = '<div class="ring-c"><div class="ring">' +
+  let h = '<div class="ring-c"><div class="ring-top"><div class="ring">' +
     '<svg width="104" height="104" viewBox="0 0 104 104">' +
     '<circle cx="52" cy="52" r="44" stroke="#1B1B20" stroke-width="9" fill="none"/>' +
     '<circle cx="52" cy="52" r="44" stroke="'+(left<0?'var(--warn)':'var(--white)')+
@@ -2167,31 +2264,41 @@ function viewDiet(){
   h += '<div class="macros">' +
     mac('단백질', e.p, t.p, 'var(--chest)') +
     mac('탄수화물', e.c, t.c, 'var(--back)') +
-    mac('지방', e.f, t.f, 'var(--shoulder)') + '</div></div>';
+    mac('지방', e.f, t.f, 'var(--shoulder)') + '</div>';
 
-  /* 당류 — 탄수화물의 하위 항목이라 매크로 카드 바로 아래 */
-  if (e.sug > 0 || e.c > 0){
+  /* 당류·카페인은 매크로와 같은 카드 안에 얇은 줄로 넣는다.
+     따로 카드를 만들면 화면 절반이 요약으로만 차버린다. */
+  let mini = '';
+  if (e.sug > 0){
     const over = e.sug > t.sug;
-    h += '<div class="sub-row"><span class="sub-n">당류</span>' +
-      '<span class="sub-t"><i style="width:'+Math.min(100, t.sug? e.sug/t.sug*100 : 0)+
-        '%;background:'+(over?'var(--warn)':'var(--back)')+'"></i></span>' +
-      '<span class="sub-v"'+(over?' style="color:var(--warn)"':'')+'>'+e.sug+' / '+t.sug+'g</span></div>';
+    mini += '<div class="mini"><span>당류</span>' +
+      '<i><s style="width:'+Math.min(100, t.sug ? e.sug/t.sug*100 : 0)+
+        '%;background:'+(over?'var(--warn)':'var(--back)')+'"></s></i>' +
+      '<b'+(over?' style="color:var(--warn)"':'')+'>'+e.sug+'<em>/'+t.sug+'g</em></b></div>';
   }
-
-  /* 카페인 — 먹은 날에만 나타난다. 채우는 목표가 아니라 넘지 말 한도 */
   if (e.caf > 0){
-    const pct = Math.min(100, e.caf/t.caf*100);
     const over = e.caf > t.caf;
-    h += '<div class="caff'+(over?' over':'')+'">' +
-      '<div class="caff-h"><span>☕ 카페인</span>' +
-      '<b'+(over?' style="color:var(--warn)"':'')+'>'+e.caf+' <em>/ '+t.caf+'mg</em></b></div>' +
-      '<div class="caff-t"><i style="width:'+pct+'%"></i></div>' +
-      caffNote(e, t) + '</div>';
+    mini += '<div class="mini"><span>카페인</span>' +
+      '<i><s style="width:'+Math.min(100, e.caf/t.caf*100)+
+        '%;background:'+(over?'var(--warn)':'#8B7355')+'"></s></i>' +
+      '<b'+(over?' style="color:var(--warn)"':'')+'>'+e.caf+'<em>/'+t.caf+'mg</em></b></div>';
   }
+  h += '</div>';   /* 링 + 매크로 한 줄 끝 */
 
-  h += '<div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:11px 14px">' +
-    '<span style="font-size:12.5px;color:var(--tx-2)">목표 '+t.kcal+' · 섭취 '+e.kcal+' kcal</span>' +
-    '<button class="tmr-b" onclick="openProfile()">목표 수정</button></div>';
+  /* 당류·카페인은 같은 카드 안이지만 전체 폭을 쓴다.
+     매크로 옆에 붙이면 '단백질' 같은 글자가 두 줄로 깨진다. */
+  if (mini) h += '<div class="mini-w">'+mini+'</div>';
+
+  /* 목표 수정은 카드 맨 아래 얇은 줄로. 우상단에 두면 숫자를 가린다. */
+  h += '<button class="goal-row" onclick="openProfile()">' +
+       '<span>하루 목표 '+t.kcal+' kcal · 단백질 '+t.p+'g</span><i>수정 ›</i></button>';
+  h += '</div>';   /* 카드 끝 */
+
+  /* 카페인 경고는 한도를 넘겼을 때만 따로 알린다 */
+  if (e.caf > t.caf){
+    const nt = caffNote(e, t);
+    if (nt) h += '<div class="caff over" style="padding:11px 14px">'+nt+'</div>';
+  }
 
   MEALTIME.forEach(mt => {
     const list = mealsOn(d).filter(m => m.time === mt);
@@ -2256,6 +2363,9 @@ function viewRec(){
   return h;
 }
 
+let showLg = false;
+function toggleLegend(){ showLg = !showLg; render(); }
+
 function recMonth(){
   const a = new Date(recAnchor);
   const y = a.getFullYear(), m = a.getMonth();
@@ -2276,15 +2386,25 @@ function recMonth(){
     const info = dayInfo(ds);
     const lv = info.sets === 0 ? '' : info.vol > 6000 ? ' l3' : info.vol > 2500 ? ' l2' : ' l1';
     if (info.sets){ mDays++; mVol += info.vol; mSets += info.sets; }
-    const dots = info.parts.slice(0,4).map(p =>
-      '<i style="background:'+partOf(p).color+'"></i>').join('');
+    /* 점 여러 개를 찍으면 색 범례를 매번 대조해야 한다.
+       대신 칸 밑에 부위 색을 이어 붙인 얇은 띠 하나로 보여준다. */
+    const ps = info.parts.slice(0,4);
+    const bar = ps.length
+      ? '<span class="cal-bar">' + ps.map(pp =>
+          '<i style="flex:1;background:'+partOf(pp).color+'"></i>').join('') + '</span>'
+      : '';
     h += '<button class="cal-d'+lv+(ds===today()?' today':'')+(ds===viewDate?' sel':'')+'" ' +
-      'onclick="jumpDay(\''+ds+'\')"><b>'+day+'</b><span class="cal-dots">'+dots+'</span></button>';
+      'onclick="jumpDay(\''+ds+'\')"><b>'+day+'</b>'+bar+'</button>';
   }
   h += '</div>';
 
-  h += '<div class="cal-lg">' + PARTS.map(p =>
-    '<span><i style="background:'+p.color+'"></i>'+p.name+'</span>').join('') + '</div>';
+  /* 범례는 필요할 때만 펼친다. 7개를 늘 띄우면 시선을 뺏는다. */
+  h += '<button class="lg-t" onclick="toggleLegend()">' +
+       (showLg ? '색 설명 접기' : '색 설명 보기') + '</button>';
+  if (showLg){
+    h += '<div class="cal-lg">' + PARTS.map(p =>
+      '<span><i style="background:'+p.color+'"></i>'+p.name+'</span>').join('') + '</div>';
+  }
 
   h += '<div class="stats" style="margin-top:14px">' +
     '<div class="stat"><b>'+mDays+'</b><span>운동한 날</span></div>' +
@@ -3295,8 +3415,7 @@ function renderCat(){
   if (st.idx > (D.seenStage||0)){ lv = st.cur.name; D.seenStage = st.idx; saveData(); }
   const says = catSay(st);
   const urgent = says.some(s => s.tone === 'a');
-  /* 플로팅 버튼은 늘 떠 있는 UI 부품이므로 단색 엠블럼으로 */
-  $('#catFab').innerHTML = catSVG(st.idx, lv?'flex':mood, true) + ((urgent||lv)?'<span class="cat-dot"></span>':'');
+  /* 헬냥이는 헤더 버튼 안에 있다. headerHTML 이 이미 그려두므로 여기서는 손대지 않는다. */
   const b = $('#catBB');
   if (lv){
     b.innerHTML = '<span class="cb-t">LEVEL UP</span>진화했다냥!! 이제 <b>'+lv+'</b>이다냥 🎉';
@@ -3394,7 +3513,7 @@ function viewMe(){
     '<button class="btn btn-g btn-sm" style="margin-top:8px;color:var(--chest)" onclick="wipe()">기록 전체 삭제</button></div>';
 
   h += '<div class="note" style="text-align:center;margin-top:16px;cursor:pointer" onclick="toggleDiag()">' +
-       'IRONLOG v23 · 종목 '+Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
+       'IRONLOG v25 · 종목 '+Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
   if (showDiag){
     h += '<div class="note" style="text-align:center;margin-top:5px;font-size:9px;opacity:.5;' +
          'font-family:var(--mono);line-height:1.7;word-break:break-all">' + diagLine() + '</div>';
@@ -3426,7 +3545,7 @@ function diagLine(){
   const bh = Math.round(document.body.getBoundingClientRect().height);
   const vv = window.visualViewport;
   return [
-    'v23',
+    'v25',
     'body' + bh,
     'inner' + window.innerHeight,
     'client' + document.documentElement.clientHeight,
@@ -3777,8 +3896,26 @@ function foodHTML(){
         '<button class="btn btn-g btn-sm" onclick="ovAuto()">탄단지로 칼로리 계산</button>' +
         '<button class="btn btn-g btn-sm" onclick="ovReset()">기본값으로</button></div>';
     } else {
-      h += '<button class="btn btn-g btn-sm" style="margin-bottom:12px" onclick="ovOpen()">' +
-        '영양소가 다른가요? 직접 입력</button>';
+      /* 식약처 데이터는 봉지·박스 전체 중량으로 오는 경우가 많다.
+         낱개로 먹었을 때 기록이 부풀지 않도록 나누는 길을 열어둔다. */
+      const cf = (D.customFood||[]).find(x => x.name === s.food);
+      const guess = cf ? guessCount(f) : 0;
+      h += '<div class="row2" style="margin-bottom:12px">' +
+        '<button class="btn btn-g btn-sm" onclick="ovOpen()">영양소 직접 입력</button>' +
+        (cf ? '<button class="btn btn-g btn-sm" onclick="openSplit()">낱개로 나누기</button>' : '') +
+        '</div>';
+      if (cf && guess > 1){
+        h += '<button class="split-hint" onclick="openSplit()">' +
+          '📦 ' + guess + '개입 제품 같아요 · <b>1개 기준으로 나누기</b></button>';
+      } else if (cf && looksBulk(f)){
+        h += '<button class="split-hint" onclick="openSplit()">' +
+          '📦 ' + esc(f.unit) + ' 전체 기준이에요 (' + Math.round(f.kcal) + 'kcal)<br>' +
+          '낱개로 드셨다면 <b>몇 개입인지 정해주세요</b></button>';
+      }
+      if (cf && cf.splitBy){
+        h += '<div class="hint" style="margin:-6px 0 12px">' +
+          cf.splitBy + '개로 나눈 값입니다 · 1개 기준</div>';
+      }
     }
 
     h += '<div class="mpick">'+MEALTIME.map(m =>
@@ -4058,6 +4195,114 @@ async function delMeal(){
   closeSheet(); await rmMeal(id);
 }
 
+/* 이름이나 중량에서 '몇 개입'인지 짐작한다.
+   12개입, 12입, 12P, x12, 6매 같은 표기를 찾는다. */
+function guessCount(f){
+  const src = (f.name||'') + ' ' + (f.unit||'');
+  const m = src.match(/(\d+)\s*(?:개입|개들이|입|매|P\b|EA\b)/i)
+        || src.match(/[x×]\s*(\d+)/i);
+  if (m){ const n = parseInt(m[1],10); if (n >= 2 && n <= 60) return n; }
+  return 0;
+}
+
+/* 개수 표기가 없어도 '한 개로 먹기엔 너무 큰' 값이면 안내를 띄운다.
+   과자 한 개가 400kcal 넘는 경우는 드물다. */
+function looksBulk(f){
+  if (!f) return false;
+  if (f.splitBy) return false;                 /* 이미 나눈 것 */
+  const g = parseFloat(String(f.unit||'').replace(/[^0-9.]/g,'')) || 0;
+  return f.kcal >= 400 || g >= 200;
+}
+
+/* 낱개로 나누기 시트 */
+function openSplit(){
+  splitN = 0;
+  openSheet('낱개로 나누기', splitHTML());
+}
+
+function splitHTML(){
+  const f0 = FOODMAP[shState.food]; if (!f0) return '';
+  const cf = (D.customFood||[]).find(x => x.name === shState.food);
+  const n = splitN || guessCount(f0) || 2;
+  const per = k => Math.round((f0[k]||0) / n * 10) / 10;
+  const g = parseFloat(String(f0.unit||'').replace(/[^0-9.]/g,'')) || 0;
+
+  let h = '<div class="note" style="margin:0 0 14px">공식 DB는 <b>봉지·박스 전체</b> 기준으로 ' +
+    '들어 있는 경우가 많습니다. 몇 개가 들어 있는지 정하면 <b>1개 기준</b>으로 바꿔드려요.</div>';
+
+  h += '<div class="card" style="text-align:center;padding:16px 14px;margin-bottom:14px">' +
+    '<div style="font-size:11px;color:var(--tx-3)">지금 · '+esc(f0.unit)+'</div>' +
+    '<div style="font-size:20px;font-weight:900;margin:3px 0 10px">'+Math.round(f0.kcal)+' kcal</div>' +
+    '<div style="font-size:11px;color:var(--tx-3)">↓ '+n+'개로 나누면</div>' +
+    '<div style="font-size:28px;font-weight:900;letter-spacing:-.04em;margin-top:4px;color:var(--good)">' +
+      Math.round(f0.kcal/n)+'<span style="font-size:12px;color:var(--tx-3)"> kcal</span></div>' +
+    '<div style="font-size:11.5px;color:var(--tx-2);margin-top:5px">' +
+      (g ? '1개 '+Math.round(g/n)+'g · ' : '') +
+      '탄 '+per('c')+'g · 단 '+per('p')+'g · 지 '+per('f')+'g</div></div>';
+
+  h += '<div class="grp">몇 개 들이인가요?</div>';
+  h += '<div class="quick">' + [2,3,4,5,6,8,10,12,16,20,24,30].map(v =>
+    '<button' + (v===n ? ' style="background:var(--white);color:#09090B;border-color:var(--white)"' : '') +
+    ' onclick="setSplitN('+v+')">'+v+'개</button>').join('') + '</div>';
+  h += '<div class="pf" style="margin-top:4px"><div><label>직접 입력</label>' +
+    '<input id="spN" inputmode="numeric" value="'+n+'" oninput="setSplitN(this.value,1)"></div></div>';
+
+  h += '<button class="btn" onclick="applySplit()">1개 기준으로 바꾸기</button>';
+  if (cf && cf.orig)
+    h += '<button class="btn btn-g btn-sm" style="margin-top:8px" onclick="undoSplit()">원래대로 되돌리기</button>';
+  return h;
+}
+
+let splitN = 0;
+function setSplitN(v, typed){
+  splitN = Math.max(2, Math.min(99, parseInt(v,10) || 2));
+  if (!typed){ refresh(splitHTML()); return; }
+  /* 타이핑 중에 화면을 다시 그리면 입력이 끊긴다. 잠시 기다린 뒤 갱신한다. */
+  clearTimeout(setSplitN._t);
+  setSplitN._t = setTimeout(() => refresh(splitHTML()), 600);
+}
+
+/* 실제로 나눈다 — 되돌릴 수 있게 원본을 남긴다 */
+async function applySplit(){
+  const name = shState.food;
+  const cf = (D.customFood||[]).find(x => x.name === name);
+  if (!cf){ toast('기본 음식은 나눌 수 없어요'); return; }
+  const n = splitN || guessCount(FOODMAP[name]) || 2;
+
+  if (!cf.orig) cf.orig = { unit:cf.unit, kcal:cf.kcal, c:cf.c, p:cf.p, f:cf.f, sug:cf.sug||0, caf:cf.caf||0 };
+  const o = cf.orig;
+  const g = parseFloat(String(o.unit||'').replace(/[^0-9.]/g,'')) || 0;
+
+  cf.kcal = Math.round(o.kcal / n);
+  cf.c = Math.round(o.c / n * 10) / 10;
+  cf.p = Math.round(o.p / n * 10) / 10;
+  cf.f = Math.round(o.f / n * 10) / 10;
+  cf.sug = Math.round((o.sug||0) / n * 10) / 10;
+  cf.caf = Math.round((o.caf||0) / n);
+  cf.unit = g ? ('1개 ' + Math.round(g/n) + 'g') : '1개';
+  cf.splitBy = n;
+
+  await saveData();
+  rebuildIndex();
+  splitN = 0;
+  closeSheet();
+  refresh(foodHTML());
+  toast(n + '개로 나눴어요 · 1개 ' + cf.kcal + 'kcal');
+}
+
+async function undoSplit(){
+  const cf = (D.customFood||[]).find(x => x.name === shState.food);
+  if (!cf || !cf.orig) return;
+  Object.assign(cf, cf.orig);
+  delete cf.orig; delete cf.splitBy;
+  await saveData();
+  rebuildIndex();
+  splitN = 0;
+  closeSheet();
+  refresh(foodHTML());
+  toast('원래 값으로 되돌렸어요');
+}
+
 async function commitFood(){
   if (shState.edit) ovSet();
   const now = new Date();
@@ -4324,6 +4569,45 @@ async function moveSlot(id, dir){
   await saveData(); render(); vibrate(8);
 }
 
+/* 자주 쓰지 않는 조작을 한곳에 모았다.
+   카드 하단에 버튼을 늘어놓으면 매 세트마다 시선이 분산된다. */
+function openExMenu(id){
+  const sl = D.slots.find(x => x.id === id); if (!sl) return;
+  const ex = EX[sl.exId]; if (!ex) return;
+  const day = slotsOn(sl.date);
+  const i = day.findIndex(x => x.id === id);
+  const row = (icon, label, sub, act, danger) =>
+    '<button class="mrow'+(danger?' danger':'')+'" onclick="'+act+'">' +
+    '<span class="mrow-i">'+icon+'</span>' +
+    '<span class="mrow-t"><b>'+label+'</b>'+(sub?'<span>'+sub+'</span>':'')+'</span>' +
+    '<span class="mrow-g">›</span></button>';
+
+  let h = row('📈','성장 추이','이 종목의 기록 변화','closeSheet();openTrend(\''+q(ex.name)+'\')');
+  if (sl.done)
+    h += row('↩︎','다시 진행하기','마친 표시를 없앱니다','closeSheet();undoneSlot(\''+id+'\')');
+  h += row(sl.gid ? '🔗' : '⛓︎', sl.gid ? '묶음 해제' : '다른 종목과 묶기',
+        sl.gid ? groupLabel(sl.gid, sl.date)+' 에서 빼냅니다' : '슈퍼세트 · 컴파운드세트',
+        'closeSheet();openLink(\''+id+'\')');
+  if (i > 0)            h += row('▲','위로 옮기기','', 'closeSheet();moveSlot(\''+id+'\',-1)');
+  if (i < day.length-1) h += row('▼','아래로 옮기기','', 'closeSheet();moveSlot(\''+id+'\',1)');
+  if (ex.kind === 'bar')
+    h += row('🏋︎','봉 무게 바꾸기', barOf(ex.name)+'kg 봉으로 계산 중', 'closeSheet();openBar(\''+q(ex.name)+'\')');
+  h += row('✕','종목 삭제','기록한 세트도 함께 지웁니다','closeSheet();rmSlot(\''+id+'\')', true);
+
+  openSheet(ex.name, h);
+}
+
+/* 봉 무게를 고르는 작은 시트 */
+function openBar(exName){
+  const cur = barOf(exName);
+  const h = '<div class="note" style="margin:0 0 14px">원판 계산에 쓸 봉 무게입니다. ' +
+    '올림픽 바 20kg, 여성용 15kg, EZ바 10kg 가 일반적입니다.</div>' +
+    '<div class="seg">' + [20,15,10,25].map(v =>
+      '<button aria-pressed="'+(v===cur)+'" onclick="closeSheet();setBar(\''+q(exName)+'\','+v+')">'+v+'kg</button>'
+    ).join('') + '</div>';
+  openSheet('봉 무게', h);
+}
+
 async function doneSlot(id){
   const sl = D.slots.find(x => x.id === id); if (!sl) return;
   sl.done = true;
@@ -4377,6 +4661,27 @@ function bump(id, key, d){
 }
 
 /* RPE도 마찬가지로 버튼 상태만 바꾼다 */
+/* 일반 → 워밍업 → 드랍 → 일반 순으로 돌린다.
+   버튼 두 개를 따로 두면 줄이 길어져서 하나로 합쳤다. */
+function cycleTech(id, canDrop){
+  const d = draft[id] = draft[id] || {};
+  if (!d.w0 && !d.dropOn){ d.w0 = true; }
+  else if (d.w0){ d.w0 = false; if (canDrop) d.dropOn = true; }
+  else { d.dropOn = false; }
+
+  const row = document.querySelector('#rp-'+id);
+  const btn = row && row.querySelector('.rp-tag');
+  if (btn){
+    const tag = d.w0 ? 'W' : (d.dropOn ? '↳' : '');
+    btn.textContent = tag || '일반';
+    btn.classList.toggle('on', !!tag);
+  }
+  vibrate(6);
+  toast(d.w0 ? '워밍업 — 통계에서 빠집니다'
+      : d.dropOn ? '드랍세트 — 쉬지 않고 이어서'
+      : '일반 세트');
+}
+
 /* 세트 성격 토글 — 화면 전체를 다시 그리지 않고 버튼만 바꾼다 */
 function setTech(id, kind){
   const d = draft[id] = draft[id] || {};
@@ -4537,8 +4842,7 @@ const TABNAME = { workout:'운동', diet:'식단', rec:'기록실', me:'내 정�
 
 function render(){
   const isDated = tab === 'workout' || tab === 'diet';
-  $('#hdrExtra').innerHTML = isDated ? dateNav() : '';
-  $('#btnToday').style.display = isDated ? '' : 'none';
+  $('#hdrRow').innerHTML = headerHTML(isDated);
 
   if (tab === 'workout') $('#view').innerHTML = viewWorkout();
   else if (tab === 'diet') $('#view').innerHTML = viewDiet();
@@ -4618,6 +4922,8 @@ Object.assign(window, {
   openFood, foodCat, foodSearch, pickFood, backFood, qtyB, pickTime, commitFood, rmMeal,
   editMeal, saveMeal, delMeal, doneSlot, undoneSlot, startSession, sessOf, sessMinutes, keepAwake,
   moveSlot, topExercises, topFoods, avgRest, cancelSession,
+  cycleTech, openExMenu, openBar, toggleLegend,
+  guessCount, looksBulk, openSplit, splitHTML, setSplitN, applySplit, undoSplit,
   mfdsSearch, pickMfds, mfdsRow, aiSearch, pickAi, aiRow,
   openNewFood, saveNewFood, openProfile, saveProfile, openCustomList, rmCustomEx, rmCustomFood,
   openPR, openCat, openTimer, tmSet, tmGo, restPref, startRest, defaultRest, mmss,
@@ -4633,10 +4939,7 @@ Object.assign(window, {
 let scrollTimer = null;
 /* 스크롤 주체가 창(window)이 아니라 #app 이 되었으므로 여기에 붙인다 */
 $('#app').addEventListener('scroll', () => {
-  const f = $('#catFab'); if (!f) return;
-  f.classList.add('dim');
-  clearTimeout(scrollTimer);
-  scrollTimer = setTimeout(() => f.classList.remove('dim'), 700);
+  /* 헬냥이가 헤더로 옮겨져 콘텐츠를 가리지 않으므로 흐리게 할 필요가 없다 */
 }, { passive:true });
 
 /* 탭바 실제 높이를 재서 변수에 넣는다. 떠 있는 요소들이 이걸 기준으로 놓인다. */
@@ -4666,9 +4969,8 @@ window.addEventListener('orientationchange', () => setTimeout(syncTabH, 300));
 $('#mask').onclick = () => mdClose(false);
 $('#scrim').onclick = closeSheet;
 $('#shX').onclick = closeSheet;
-$('#btnTimer').onclick = openTimer;
-$('#btnToday').onclick = () => jumpDay(today());
-$('#catFab').onclick = () => { $('#catBB').classList.remove('on'); openCat(); };
+/* 헤더 버튼은 headerHTML 안에서 직접 연결한다 */
+/* 헬냥이 버튼은 headerHTML 안에서 연결한다 */
 $('#catBB').onclick = () => { $('#catBB').classList.remove('on'); openCat(); };
 $('#tmrAdd').onclick = timerAdd;
 $('#tmrEnd').onclick = stopTimer;
