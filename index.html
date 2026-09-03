@@ -352,13 +352,59 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .ai-note{font-size:10.5px;color:var(--tx-3);line-height:1.6;
   padding:0 4px 10px 26px;margin-top:-4px}
 
+/* ══ 리포트 신뢰도 안내 ══ */
+.rep-warn{background:rgba(251,146,60,.07);border:1px solid rgba(251,146,60,.25);
+  border-radius:var(--r-md);padding:11px 13px;margin-bottom:12px;
+  font-size:11.5px;color:var(--tx-2);line-height:1.65}
+.rep-warn b{color:#FDBA74;font-weight:800}
+
+/* ══ 빈 날 확인 카드 ══ */
+.gapc{background:var(--card);border:1px solid rgba(251,146,60,.28);
+  border-radius:var(--r-md);padding:13px 14px;margin-bottom:11px;box-shadow:var(--edge)}
+.gapc-t{font-size:13px;color:var(--tx-2);font-weight:600;margin-bottom:11px}
+.gapc-t b{color:var(--tx);font-weight:800}
+.gapc-t em{font-style:normal;color:var(--tx-3);font-size:11.5px}
+.gapc-b{display:flex;gap:7px}
+.gapc-b button{flex:1;background:var(--steel);border:1px solid var(--line-2);
+  border-radius:var(--r-sm);color:var(--tx-2);font-size:12px;font-weight:700;
+  padding:11px 0;cursor:pointer}
+.gapc-b button:active{transform:scale(.97);color:var(--tx)}
+.gapc-go{width:100%;background:none;border:none;color:var(--tx-3);font-size:11px;
+  font-weight:700;padding:10px 0 0;cursor:pointer}
+
+/* 지난 날짜에서 직접 표시 */
+.daymark{display:flex;gap:7px;margin-top:9px}
+.daymark button{flex:1;background:var(--card);border:1px solid var(--line);
+  border-radius:var(--r-sm);color:var(--tx-3);font-size:12px;font-weight:700;
+  padding:11px 0;cursor:pointer}
+.daymark button.on{background:var(--card-3);border-color:var(--tx-3);color:var(--tx)}
+
+/* 달력 표식 */
+.cal-mk{position:absolute;left:0;right:0;bottom:6px;font-size:8.5px;font-weight:800;
+  letter-spacing:.02em;font-family:var(--mono)}
+.cal-mk.rest{color:var(--tx-3)}
+.cal-mk.skip{color:#3A3A42;font-size:12px}
+.cal-d.skipd{opacity:.45}
+
 /* ══ 낱개 나누기 안내 ══ */
-.split-hint{display:block;width:100%;background:rgba(74,222,128,.07);
+.pack-on{display:block;width:100%;background:rgba(74,222,128,.07);
   border:1px solid rgba(74,222,128,.28);border-radius:var(--r-md);
   color:var(--tx-2);font-size:12px;font-weight:600;padding:12px 14px;
-  margin-bottom:12px;cursor:pointer;text-align:left;line-height:1.5}
-.split-hint b{color:var(--good);font-weight:800}
-.split-hint:active{background:rgba(74,222,128,.12)}
+  margin-top:12px;cursor:pointer;text-align:center;line-height:1.5}
+.pack-on b{color:var(--good);font-weight:800}
+.pack-on:active{background:rgba(74,222,128,.12)}
+
+/* 개입 수 · 먹은 개수 */
+.pack{margin-top:14px;border-top:1px solid var(--line);padding-top:13px}
+.pack-r{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+.pack-r label{flex:1;text-align:left;font-size:12px;color:var(--tx-3);font-weight:700}
+.pack-r button{flex:0 0 38px;height:38px;background:var(--steel);border:1px solid var(--line-2);
+  border-radius:var(--r-sm);color:var(--tx);font-size:18px;font-weight:700;cursor:pointer}
+.pack-r button:active{transform:scale(.93)}
+.pack-r b{flex:0 0 54px;text-align:center;font-size:17px;font-weight:900;font-family:var(--mono)}
+.pack-r.hi b{color:var(--good);font-size:20px}
+.pack-off{width:100%;background:none;border:none;color:var(--tx-3);font-size:10.5px;
+  font-weight:700;padding:6px 0 0;cursor:pointer}
 
 /* ══ 달력 부위 띠 ══ */
 .cal-bar{position:absolute;left:5px;right:5px;bottom:5px;height:3px;
@@ -1238,7 +1284,7 @@ const KEY = 'ironlog-v1';
 const BLANK = { slots:[], sets:[], meals:[], profile:null, seenStage:0,
                 customEx:[], customFood:[], weights:[], restPref:{},
                 routines:[], lastReport:null, tomb:{}, updatedAt:0,
-                done:{}, notify:false, caffLimit:400, barPref:{}, memo:{}, sess:{} };
+                done:{}, notify:false, caffLimit:400, barPref:{}, memo:{}, sess:{}, rest:{}, skip:{} };
 
 async function loadData(){
   let raw = null;
@@ -1470,6 +1516,45 @@ function volumeOf(s){
 /* 첫 세트부터 마지막 세트까지 걸린 시간 */
 /* 운동 시작 시각을 직접 기록하면 총 운동 시간이 정확해진다.
    (세트 기록만으로 재면 준비운동·이동 시간이 빠진다) */
+/* ───────────────────────────────────────────────
+   기록이 없는 날의 뜻은 세 가지로 갈린다.
+
+     쉼    계획한 휴식일 — 정상이므로 흐름을 끊지 않는다
+     빠짐  기록을 깜빡한 날 — 평균·연속에서 아예 빼야 한다
+     비었음 아직 무엇인지 모르는 날 — 사용자에게 물어본다
+
+   이 셋을 0 으로 뭉뚱그리면 지표가 실제보다 나쁘게 나온다.
+   ─────────────────────────────────────────────── */
+function dayState(d){
+  if (daySets(d) > 0) return 'work';
+  if (D.rest && D.rest[d]) return 'rest';
+  if (D.skip && D.skip[d]) return 'skip';
+  return 'none';
+}
+
+/* 통계에서 빼야 하는 날인가 (기록을 안 한 날) */
+const isSkip = d => dayState(d) === 'skip';
+
+async function markDay(d, kind){
+  D.rest = D.rest || {}; D.skip = D.skip || {};
+  delete D.rest[d]; delete D.skip[d];
+  if (kind === 'rest') D.rest[d] = true;
+  else if (kind === 'skip') D.skip[d] = true;
+  await saveData(); render();
+  toast(kind === 'rest' ? '쉬는 날로 표시했어요'
+      : kind === 'skip' ? '통계에서 제외합니다' : '표시를 지웠어요');
+}
+
+/* 최근 며칠 중 아직 정하지 않은 빈 날을 찾는다 (오늘 제외) */
+function pendingGaps(n){
+  const out = [];
+  for (let i = 1; i <= (n||10); i++){
+    const d = shift(today(), -i);
+    if (dayState(d) === 'none' && mealsOn(d).length === 0) out.push(d);
+  }
+  return out;
+}
+
 function sessOf(d){ return (D.sess || {})[d] || null; }
 
 async function startSession(){
@@ -1902,6 +1987,24 @@ function viewWorkout(){
     '<div class="stat"><b>'+cnt+'</b><span>세트</span></div>' +
     '<div class="stat"><b>'+(vol>=1000 ? r1(vol/1000)+'t' : vol)+'</b><span>볼륨</span></div></div>';
 
+  /* 최근에 비어 있는 날이 있으면 무엇이었는지 물어본다.
+     묻지 않으면 '안 한 날'로 굳어져 지표가 실제보다 나빠진다. */
+  if (d === today()){
+    const gaps = pendingGaps(7);
+    if (gaps.length){
+      const g = gaps[0];
+      h += '<div class="gapc">' +
+        '<div class="gapc-t"><b>'+fmtD(g)+'</b> 기록이 비어 있어요' +
+        (gaps.length > 1 ? ' <em>외 '+(gaps.length-1)+'일</em>' : '') + '</div>' +
+        '<div class="gapc-b">' +
+          '<button onclick="markDay(\''+g+'\',\'rest\')">쉬는 날이었어요</button>' +
+          '<button onclick="markDay(\''+g+'\',\'skip\')">기록을 깜빡했어요</button>' +
+        '</div>' +
+        '<button class="gapc-go" onclick="jumpDay(\''+g+'\')">그날로 가서 입력하기 ›</button>' +
+        '</div>';
+    }
+  }
+
   const ses = sessOf(d);
   if (ses && !ses.end){
     h += '<div class="live"><i></i><span>운동 중</span>' +
@@ -1924,9 +2027,18 @@ function viewWorkout(){
       h += '<button class="quiet" onclick="openExPicker()">시간 재지 않고 그냥 기록하기</button>';
       return h;   /* 시작 전에는 버튼을 하나만 보여준다 */
     } else {
-      h += '<div class="card"><div class="empty">' +
-        (d === today() ? '기록이 비어 있습니다.' : fmtD(d)+' 기록이 없습니다.') +
-        '<br>아래에서 종목을 추가하세요.</div></div>';
+      const st = dayState(d);
+      const label = st === 'rest' ? '쉬는 날로 표시한 날입니다.'
+                  : st === 'skip' ? '기록하지 않은 날입니다.<br><span style="color:var(--tx-3)">통계에서 제외됩니다.</span>'
+                  : (d === today() ? '기록이 비어 있습니다.' : fmtD(d)+' 기록이 없습니다.');
+      h += '<div class="card"><div class="empty">' + label +
+        (st === 'none' ? '<br>아래에서 종목을 추가하세요.' : '') + '</div></div>';
+      if (d !== today()){
+        h += '<div class="daymark">' +
+          '<button'+(st==='rest'?' class="on"':'')+' onclick="markDay(\''+d+'\',\''+(st==='rest'?'':'rest')+'\')">쉬는 날</button>' +
+          '<button'+(st==='skip'?' class="on"':'')+' onclick="markDay(\''+d+'\',\''+(st==='skip'?'':'skip')+'\')">기록 안 함</button>' +
+          '</div>';
+      }
     }
     /* 아직 기록이 거의 없는 사람에게는 무엇부터 할지 알려준다 */
     if (D.slots.length < 3){
@@ -2389,11 +2501,14 @@ function recMonth(){
     /* 점 여러 개를 찍으면 색 범례를 매번 대조해야 한다.
        대신 칸 밑에 부위 색을 이어 붙인 얇은 띠 하나로 보여준다. */
     const ps = info.parts.slice(0,4);
+    const st = dayState(ds);
     const bar = ps.length
       ? '<span class="cal-bar">' + ps.map(pp =>
           '<i style="flex:1;background:'+partOf(pp).color+'"></i>').join('') + '</span>'
-      : '';
-    h += '<button class="cal-d'+lv+(ds===today()?' today':'')+(ds===viewDate?' sel':'')+'" ' +
+      : (st === 'rest' ? '<span class="cal-mk rest">쉼</span>'
+       : st === 'skip' ? '<span class="cal-mk skip">–</span>' : '');
+    h += '<button class="cal-d'+lv+(ds===today()?' today':'')+(ds===viewDate?' sel':'')+
+      (st==='skip'?' skipd':'')+'" ' +
       'onclick="jumpDay(\''+ds+'\')"><b>'+day+'</b>'+bar+'</button>';
   }
   h += '</div>';
@@ -2826,15 +2941,17 @@ function buildWeek(anchor){
   const agg = ds => {
     let vol=0, sets=0, wd=0;
     const parts={}; PARTS.forEach(p => parts[p.id]=0);
-    let kcal=0, prot=0, mdays=0, hitP=0, caff=0, sug=0;
+    let kcal=0, prot=0, mdays=0, hitP=0, caff=0, sug=0, skipped=0, rested=0;
     const t = targets();
     ds.forEach(d => {
       const sc = daySets(d);
       if (sc){ wd++; sets += sc; vol += dayVolume(d); }
       slotsOn(d).forEach(sl => { const e=EX[sl.exId]; if(e) parts[e.part] += setsOf(sl.id).filter(isWork).length; });
       if (mealsOn(d).length){ const e=eaten(d); mdays++; kcal+=e.kcal; prot+=e.p; caff+=e.caf; sug+=e.sug; if(t && e.p>=t.p*0.9) hitP++; }
+      const st = dayState(d);
+      if (st === 'skip') skipped++; else if (st === 'rest') rested++;
     });
-    return { vol, sets, wd, parts, kcal, prot, mdays, hitP, caff, sug };
+    return { vol, sets, wd, parts, kcal, prot, mdays, hitP, caff, sug, skipped, rested };
   };
   /* 진행 중인 주라면 지난주도 같은 일수만큼만 잘라서 비교한다.
      월요일에 지난주 7일치와 비교하면 항상 "폭락"으로 보이기 때문. */
@@ -2871,7 +2988,14 @@ function openWeekReport(anchor){
   const t = targets();
 
   if (R.empty){
-    openSheet('주간 리포트', '<div class="empty">이 주에는 기록이 없습니다.<br>운동이나 식단을 기록하면 리포트가 만들어져요.</div>');
+    /* 기록을 못 한 것과 안 한 것을 구분해서 알려준다 */
+    const msg = n.skipped > 0
+      ? '이 주는 <b>'+n.skipped+'일</b>을 기록하지 않으셨네요.<br>' +
+        '남은 날이라도 기록하면 리포트가 만들어져요.'
+      : n.rested > 0
+      ? '이 주는 쉬는 날로만 채워져 있어요.<br>회복도 훈련의 일부입니다.'
+      : '이 주에는 기록이 없습니다.<br>운동이나 식단을 기록하면 리포트가 만들어져요.';
+    openSheet('주간 리포트', '<div class="empty">'+msg+'</div>');
     return;
   }
 
@@ -2890,6 +3014,12 @@ function openWeekReport(anchor){
     cmp(n.vol, pv.vol) +
     (R.isNow ? '<div class="note" style="margin-top:7px">지난주 같은 요일까지와 비교한 값입니다.</div>' : '') +
     '</div>';
+
+  /* 기록이 빠진 날이 있으면 숫자를 그대로 믿으면 안 된다고 먼저 알린다 */
+  if (n.skipped > 0){
+    h += '<div class="rep-warn">📋 이번 주 <b>'+n.skipped+'일</b>은 기록하지 않아 통계에서 빠졌어요.<br>' +
+      '아래 숫자는 <b>기록한 날 기준</b>입니다.</div>';
+  }
 
   /* 부위 균형 */
   const maxP = Math.max(1, ...Object.values(n.parts));
@@ -3193,15 +3323,34 @@ function _catStats(){
   const pct = nxt ? Math.min(100,(exp-cur.exp)/(nxt.exp-cur.exp)*100) : 100;
 
   const has = d => day[d] && day[d].sets > 0;
+  /* 기록을 깜빡한 날은 '안 한 날'이 아니므로 흐름을 끊지 않고 건너뛴다 */
+  const skipped = d => D.skip && D.skip[d];
+
   let streak = 0; const c0 = new Date(today());
   if (!has(today())) c0.setDate(c0.getDate()-1);
-  while (has(iso(c0))){ streak++; c0.setDate(c0.getDate()-1); }
+  while (true){
+    const ds = iso(c0);
+    if (has(ds)){ streak++; }
+    else if (skipped(ds)){ /* 건너뛴다 */ }
+    else break;
+    c0.setDate(c0.getDate()-1);
+  }
+
   let noRest = 0; const c2 = new Date(today());
   while (has(iso(c2))){ noRest++; c2.setDate(c2.getDate()-1); }
 
   const wdays = Object.keys(day).filter(has).sort();
   const last = wdays[wdays.length-1] || null;
-  const since = last ? Math.round((new Date(today())-new Date(last))/864e5) : null;
+  /* '며칠 쉬었나' 를 셀 때도 기록 못 한 날은 빼고 센다 */
+  let since = null;
+  if (last){
+    let n = 0; const c3 = new Date(today());
+    while (iso(c3) > last){
+      if (!skipped(iso(c3))) n++;
+      c3.setDate(c3.getDate()-1);
+    }
+    since = n;
+  }
 
   const ago = k => shift(today(), -k);
   let volNow = 0, volPrev = 0;
@@ -3513,7 +3662,7 @@ function viewMe(){
     '<button class="btn btn-g btn-sm" style="margin-top:8px;color:var(--chest)" onclick="wipe()">기록 전체 삭제</button></div>';
 
   h += '<div class="note" style="text-align:center;margin-top:16px;cursor:pointer" onclick="toggleDiag()">' +
-       'IRONLOG v25 · 종목 '+Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
+       'IRONLOG v27 · 종목 '+Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
   if (showDiag){
     h += '<div class="note" style="text-align:center;margin-top:5px;font-size:9px;opacity:.5;' +
          'font-family:var(--mono);line-height:1.7;word-break:break-all">' + diagLine() + '</div>';
@@ -3545,7 +3694,7 @@ function diagLine(){
   const bh = Math.round(document.body.getBoundingClientRect().height);
   const vv = window.visualViewport;
   return [
-    'v25',
+    'v27',
     'body' + bh,
     'inner' + window.innerHeight,
     'client' + document.documentElement.clientHeight,
@@ -3871,15 +4020,20 @@ function foodHTML(){
   if (s.food){
     const base = FOODMAP[s.food];
     const f = s.ov ? Object.assign({}, base, s.ov) : base;
+    /* 개입 수가 정해졌으면 '먹은 개수 ÷ 개입 수' 가 실제 배수다 */
+    const mul = (s.pack||1) > 1 ? (s.pieces||1) / s.pack : s.qty;
     let h = '<div class="card" style="text-align:center;padding:20px 15px">' +
       '<div style="font-size:18px;font-weight:900;letter-spacing:-.03em">'+esc(f.name)+'</div>' +
-      '<div style="font-size:11.5px;color:var(--tx-3);margin-top:3px">'+esc(f.unit)+' 기준</div>' +
+      '<div style="font-size:11.5px;color:var(--tx-3);margin-top:3px">' +
+        ((s.pack||1) > 1
+          ? esc(f.unit)+' · '+s.pack+'개입 기준'
+          : esc(f.unit)+' 기준') + '</div>' +
       '<div style="font-size:32px;font-weight:900;letter-spacing:-.04em;margin-top:12px">' +
-        Math.round(f.kcal*s.qty)+'<span style="font-size:13px;color:var(--tx-3)"> kcal</span></div>' +
-      '<div style="font-size:11.5px;color:var(--tx-2);margin-top:5px">탄 '+r1(f.c*s.qty)+'g · 단 '+r1(f.p*s.qty)+'g · 지 '+r1(f.f*s.qty)+'g</div>' +
-      '<div style="font-size:11px;color:var(--tx-3);margin-top:3px">당류 '+r1((f.sug||0)*s.qty)+'g' +
-        ((f.caf||0)>0 ? ' · <b style="color:var(--warn)">카페인 '+Math.round(f.caf*s.qty)+'mg</b>' : '')+'</div>' +
-      '<div class="qty"><button onclick="qtyB(-0.5)">−</button><div>'+s.qty+'인분</div><button onclick="qtyB(0.5)">＋</button></div></div>';
+        Math.round(f.kcal*mul)+'<span style="font-size:13px;color:var(--tx-3)"> kcal</span></div>' +
+      '<div style="font-size:11.5px;color:var(--tx-2);margin-top:5px">탄 '+r1(f.c*mul)+'g · 단 '+r1(f.p*mul)+'g · 지 '+r1(f.f*mul)+'g</div>' +
+      '<div style="font-size:11px;color:var(--tx-3);margin-top:3px">당류 '+r1((f.sug||0)*mul)+'g' +
+        ((f.caf||0)>0 ? ' · <b style="color:var(--warn)">카페인 '+Math.round(f.caf*mul)+'mg</b>' : '')+'</div>' +
+      qtyUI(s, f) + '</div>';
 
     /* 실제로 먹은 양이 기본값과 다를 때 직접 고칠 수 있게 */
     if (s.edit){
@@ -3896,26 +4050,8 @@ function foodHTML(){
         '<button class="btn btn-g btn-sm" onclick="ovAuto()">탄단지로 칼로리 계산</button>' +
         '<button class="btn btn-g btn-sm" onclick="ovReset()">기본값으로</button></div>';
     } else {
-      /* 식약처 데이터는 봉지·박스 전체 중량으로 오는 경우가 많다.
-         낱개로 먹었을 때 기록이 부풀지 않도록 나누는 길을 열어둔다. */
-      const cf = (D.customFood||[]).find(x => x.name === s.food);
-      const guess = cf ? guessCount(f) : 0;
-      h += '<div class="row2" style="margin-bottom:12px">' +
-        '<button class="btn btn-g btn-sm" onclick="ovOpen()">영양소 직접 입력</button>' +
-        (cf ? '<button class="btn btn-g btn-sm" onclick="openSplit()">낱개로 나누기</button>' : '') +
-        '</div>';
-      if (cf && guess > 1){
-        h += '<button class="split-hint" onclick="openSplit()">' +
-          '📦 ' + guess + '개입 제품 같아요 · <b>1개 기준으로 나누기</b></button>';
-      } else if (cf && looksBulk(f)){
-        h += '<button class="split-hint" onclick="openSplit()">' +
-          '📦 ' + esc(f.unit) + ' 전체 기준이에요 (' + Math.round(f.kcal) + 'kcal)<br>' +
-          '낱개로 드셨다면 <b>몇 개입인지 정해주세요</b></button>';
-      }
-      if (cf && cf.splitBy){
-        h += '<div class="hint" style="margin:-6px 0 12px">' +
-          cf.splitBy + '개로 나눈 값입니다 · 1개 기준</div>';
-      }
+      h += '<button class="btn btn-g btn-sm" style="margin-bottom:12px" onclick="ovOpen()">' +
+        '영양소가 다른가요? 직접 입력</button>';
     }
 
     h += '<div class="mpick">'+MEALTIME.map(m =>
@@ -4149,7 +4285,14 @@ function foodSearch(v){
   if (Object.values(FOODMAP).some(f => f.name.toLowerCase().includes(kl))) return;
   mfdsAuto = setTimeout(() => { if (shState.q.trim() === k) mfdsSearch(); }, 600);
 }
-function pickFood(n){ shState.food = n; shState.qty = 1; shState.ov = null; shState.edit = false; refresh(foodHTML()); }
+function pickFood(n){
+  shState.food = n; shState.qty = 1; shState.ov = null; shState.edit = false;
+  /* 전에 개입 수를 정해둔 음식이면 그대로 불러온다 */
+  const cf = (D.customFood||[]).find(x => x.name === n);
+  shState.pack = (cf && cf.pack) || 1;
+  shState.pieces = 1;
+  refresh(foodHTML());
+}
 
 /* 영양소 직접 입력 — 다시 그리지 않고 값만 읽어 보관한다 (커서 튐 방지) */
 function ovOpen(){ shState.edit = true; refresh(foodHTML()); }
@@ -4178,15 +4321,21 @@ function pickTime(t){ shState.time = t; refresh(foodHTML()); }
 function editMeal(id){
   const m = D.meals.find(x => x.id === id); if (!m) return;
   const b0 = FOODMAP[m.food]; if (!b0){ toast('없는 음식이에요'); return; }
+  const cf = (D.customFood||[]).find(x => x.name === m.food);
+  const pack = (cf && cf.pack) || 1;
   shState = { edit:false, mealId:id, food:m.food, qty:m.qty, time:m.time,
-              ov:m.ov ? Object.assign({}, m.ov) : null, cat:b0.cat, q:'' };
+              ov:m.ov ? Object.assign({}, m.ov) : null, cat:b0.cat, q:'',
+              pack, pieces: pack > 1 ? Math.max(1, Math.round(m.qty * pack)) : 1 };
   openSheet('기록 수정', foodHTML());
 }
 async function saveMeal(){
   const m = D.meals.find(x => x.id === shState.mealId); if (!m) return;
   if (shState.edit) ovSet();
-  m.qty = shState.qty; m.time = shState.time;
-  if (shState.ov) m.ov = shState.ov; else delete m.ov;
+  const s = shState;
+  await rememberPack();
+  m.qty = (s.pack||1) > 1 ? Math.round((s.pieces||1)/s.pack * 10000)/10000 : s.qty;
+  m.time = s.time;
+  if (s.ov) m.ov = s.ov; else delete m.ov;
   await saveData(); closeSheet(); render(); toast('수정했어요');
 }
 async function delMeal(){
@@ -4195,118 +4344,83 @@ async function delMeal(){
   closeSheet(); await rmMeal(id);
 }
 
+/* 수량 입력.
+   봉지 전체로 등록된 제품은 '개입 수'와 '먹은 개수'를 함께 물어야
+   한 개 먹은 것을 정확히 기록할 수 있다. */
+function qtyUI(s, f){
+  if ((s.pack||1) <= 1){
+    return '<div class="qty"><button onclick="qtyB(-0.5)">−</button>' +
+      '<div>'+s.qty+'인분</div><button onclick="qtyB(0.5)">＋</button></div>' +
+      (looksBulk(f) ? '<button class="pack-on" onclick="packOn()">' +
+        '📦 봉지·박스 전체 값이에요 · <b>낱개로 기록하기</b></button>' : '');
+  }
+  return '<div class="pack">' +
+    '<div class="pack-r"><label>봉지에 몇 개?</label>' +
+      '<button onclick="packB(-1)">−</button><b>'+s.pack+'</b><button onclick="packB(1)">＋</button></div>' +
+    '<div class="pack-r hi"><label>몇 개 먹었나?</label>' +
+      '<button onclick="pieceB(-1)">−</button><b>'+s.pieces+'</b><button onclick="pieceB(1)">＋</button></div>' +
+    '<button class="pack-off" onclick="packOff()">전체 기준으로 되돌리기</button></div>';
+}
+
+function packOn(){
+  const f = FOODMAP[shState.food];
+  shState.pack = guessCount(f) || 12;
+  shState.pieces = 1;
+  refresh(foodHTML());
+}
+function packOff(){
+  shState.pack = 1; shState.pieces = 1; shState.qty = 1;
+  refresh(foodHTML());
+}
+
 /* 이름이나 중량에서 '몇 개입'인지 짐작한다.
    12개입, 12입, 12P, x12, 6매 같은 표기를 찾는다. */
 function guessCount(f){
   const src = (f.name||'') + ' ' + (f.unit||'');
   const m = src.match(/(\d+)\s*(?:개입|개들이|입|매|P\b|EA\b)/i)
-        || src.match(/[x×]\s*(\d+)/i);
+        || src.match(/[x\u00d7]\s*(\d+)/i);
   if (m){ const n = parseInt(m[1],10); if (n >= 2 && n <= 60) return n; }
   return 0;
 }
 
-/* 개수 표기가 없어도 '한 개로 먹기엔 너무 큰' 값이면 안내를 띄운다.
-   과자 한 개가 400kcal 넘는 경우는 드물다. */
+/* 한 개로 먹기엔 너무 큰 값이면 '봉지 전체'로 본다.
+   과자 한 개가 400kcal 를 넘는 일은 드물다. */
 function looksBulk(f){
   if (!f) return false;
-  if (f.splitBy) return false;                 /* 이미 나눈 것 */
   const g = parseFloat(String(f.unit||'').replace(/[^0-9.]/g,'')) || 0;
   return f.kcal >= 400 || g >= 200;
 }
 
-/* 낱개로 나누기 시트 */
-function openSplit(){
-  splitN = 0;
-  openSheet('낱개로 나누기', splitHTML());
-}
-
-function splitHTML(){
-  const f0 = FOODMAP[shState.food]; if (!f0) return '';
-  const cf = (D.customFood||[]).find(x => x.name === shState.food);
-  const n = splitN || guessCount(f0) || 2;
-  const per = k => Math.round((f0[k]||0) / n * 10) / 10;
-  const g = parseFloat(String(f0.unit||'').replace(/[^0-9.]/g,'')) || 0;
-
-  let h = '<div class="note" style="margin:0 0 14px">공식 DB는 <b>봉지·박스 전체</b> 기준으로 ' +
-    '들어 있는 경우가 많습니다. 몇 개가 들어 있는지 정하면 <b>1개 기준</b>으로 바꿔드려요.</div>';
-
-  h += '<div class="card" style="text-align:center;padding:16px 14px;margin-bottom:14px">' +
-    '<div style="font-size:11px;color:var(--tx-3)">지금 · '+esc(f0.unit)+'</div>' +
-    '<div style="font-size:20px;font-weight:900;margin:3px 0 10px">'+Math.round(f0.kcal)+' kcal</div>' +
-    '<div style="font-size:11px;color:var(--tx-3)">↓ '+n+'개로 나누면</div>' +
-    '<div style="font-size:28px;font-weight:900;letter-spacing:-.04em;margin-top:4px;color:var(--good)">' +
-      Math.round(f0.kcal/n)+'<span style="font-size:12px;color:var(--tx-3)"> kcal</span></div>' +
-    '<div style="font-size:11.5px;color:var(--tx-2);margin-top:5px">' +
-      (g ? '1개 '+Math.round(g/n)+'g · ' : '') +
-      '탄 '+per('c')+'g · 단 '+per('p')+'g · 지 '+per('f')+'g</div></div>';
-
-  h += '<div class="grp">몇 개 들이인가요?</div>';
-  h += '<div class="quick">' + [2,3,4,5,6,8,10,12,16,20,24,30].map(v =>
-    '<button' + (v===n ? ' style="background:var(--white);color:#09090B;border-color:var(--white)"' : '') +
-    ' onclick="setSplitN('+v+')">'+v+'개</button>').join('') + '</div>';
-  h += '<div class="pf" style="margin-top:4px"><div><label>직접 입력</label>' +
-    '<input id="spN" inputmode="numeric" value="'+n+'" oninput="setSplitN(this.value,1)"></div></div>';
-
-  h += '<button class="btn" onclick="applySplit()">1개 기준으로 바꾸기</button>';
-  if (cf && cf.orig)
-    h += '<button class="btn btn-g btn-sm" style="margin-top:8px" onclick="undoSplit()">원래대로 되돌리기</button>';
-  return h;
-}
-
-let splitN = 0;
-function setSplitN(v, typed){
-  splitN = Math.max(2, Math.min(99, parseInt(v,10) || 2));
-  if (!typed){ refresh(splitHTML()); return; }
-  /* 타이핑 중에 화면을 다시 그리면 입력이 끊긴다. 잠시 기다린 뒤 갱신한다. */
-  clearTimeout(setSplitN._t);
-  setSplitN._t = setTimeout(() => refresh(splitHTML()), 600);
-}
-
-/* 실제로 나눈다 — 되돌릴 수 있게 원본을 남긴다 */
-async function applySplit(){
-  const name = shState.food;
-  const cf = (D.customFood||[]).find(x => x.name === name);
-  if (!cf){ toast('기본 음식은 나눌 수 없어요'); return; }
-  const n = splitN || guessCount(FOODMAP[name]) || 2;
-
-  if (!cf.orig) cf.orig = { unit:cf.unit, kcal:cf.kcal, c:cf.c, p:cf.p, f:cf.f, sug:cf.sug||0, caf:cf.caf||0 };
-  const o = cf.orig;
-  const g = parseFloat(String(o.unit||'').replace(/[^0-9.]/g,'')) || 0;
-
-  cf.kcal = Math.round(o.kcal / n);
-  cf.c = Math.round(o.c / n * 10) / 10;
-  cf.p = Math.round(o.p / n * 10) / 10;
-  cf.f = Math.round(o.f / n * 10) / 10;
-  cf.sug = Math.round((o.sug||0) / n * 10) / 10;
-  cf.caf = Math.round((o.caf||0) / n);
-  cf.unit = g ? ('1개 ' + Math.round(g/n) + 'g') : '1개';
-  cf.splitBy = n;
-
-  await saveData();
-  rebuildIndex();
-  splitN = 0;
-  closeSheet();
+/* 봉지에 몇 개 들었는지 / 몇 개 먹었는지 */
+function packB(d){
+  const n = Math.max(1, Math.min(99, (shState.pack||1) + d));
+  shState.pack = n;
+  if (shState.pieces > n) shState.pieces = n;
   refresh(foodHTML());
-  toast(n + '개로 나눴어요 · 1개 ' + cf.kcal + 'kcal');
+}
+function pieceB(d){
+  const step = shState.pack > 1 ? 1 : 0.5;
+  const n = Math.max(step, Math.round((( shState.pieces||1) + d*step) * 100) / 100);
+  shState.pieces = n;
+  refresh(foodHTML());
 }
 
-async function undoSplit(){
+/* 개입 수를 음식에 기억시켜 다음에도 그대로 쓴다 */
+async function rememberPack(){
   const cf = (D.customFood||[]).find(x => x.name === shState.food);
-  if (!cf || !cf.orig) return;
-  Object.assign(cf, cf.orig);
-  delete cf.orig; delete cf.splitBy;
-  await saveData();
-  rebuildIndex();
-  splitN = 0;
-  closeSheet();
-  refresh(foodHTML());
-  toast('원래 값으로 되돌렸어요');
+  if (!cf) return;
+  const n = shState.pack || 1;
+  if (n > 1) cf.pack = n; else delete cf.pack;
 }
 
 async function commitFood(){
   if (shState.edit) ovSet();
   const now = new Date();
-  const rec = { id:uid(), date:viewDate, time:shState.time, food:shState.food, qty:shState.qty,
+  /* 개입 수가 정해졌으면 '먹은 개수 ÷ 개입 수' 를 배수로 저장한다 */
+  const s = shState;
+  const mul = (s.pack||1) > 1 ? Math.round((s.pieces||1)/s.pack * 10000)/10000 : s.qty;
+  await rememberPack();
+  const rec = { id:uid(), date:viewDate, time:s.time, food:s.food, qty:mul,
     at: String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0') };
   if (shState.ov) rec.ov = shState.ov;
   D.meals.push(rec);
@@ -4923,7 +5037,8 @@ Object.assign(window, {
   editMeal, saveMeal, delMeal, doneSlot, undoneSlot, startSession, sessOf, sessMinutes, keepAwake,
   moveSlot, topExercises, topFoods, avgRest, cancelSession,
   cycleTech, openExMenu, openBar, toggleLegend,
-  guessCount, looksBulk, openSplit, splitHTML, setSplitN, applySplit, undoSplit,
+  guessCount, looksBulk, qtyUI, packOn, packOff, packB, pieceB, rememberPack,
+  dayState, markDay, pendingGaps,
   mfdsSearch, pickMfds, mfdsRow, aiSearch, pickAi, aiRow,
   openNewFood, saveNewFood, openProfile, saveProfile, openCustomList, rmCustomEx, rmCustomFood,
   openPR, openCat, openTimer, tmSet, tmGo, restPref, startRest, defaultRest, mmss,
