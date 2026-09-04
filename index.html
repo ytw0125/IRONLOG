@@ -102,12 +102,6 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .ibtn:active{background:var(--card-2)}
 
 /* 날짜 네비게이션 */
-.dnav{display:flex;align-items:center;gap:8px;margin-bottom:12px}
-.dnav button{background:var(--steel);border:1px solid var(--line-2);border-radius:var(--r-md);
-  color:var(--tx-2);cursor:pointer;height:42px;flex:none;width:42px;font-size:17px;
-  box-shadow:var(--edge2);transition:transform .1s var(--e)}
-.dnav button:active{transform:scale(.93)}
-.dnav button:active{background:var(--card-2)}
 .dnav-mid{flex:1;min-width:0;text-align:center;background:var(--steel);
   border:1px solid var(--line-2);border-radius:var(--r-md);height:42px;box-shadow:var(--edge2);
   display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer}
@@ -234,8 +228,7 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .tmr-n{font-size:25px;font-weight:900;letter-spacing:-.05em;font-variant-numeric:tabular-nums;min-width:70px;font-family:var(--mono)}
 .tmr-l{flex:1;min-width:0;font-size:11px;color:var(--tx-3);font-weight:700;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tmr-b{background:var(--card-3);border:1px solid var(--line-2);border-radius:8px;
-  color:var(--tx);font-size:11.5px;font-weight:800;padding:7px 10px;cursor:pointer;flex:none}
+.tmr-b{background:var(--card-3);border:1px solid var(--line-2);border-radius:var(--r-sm);color:var(--tx-2);font-size:12px;font-weight:800;padding:0 14px;height:42px;min-width:56px;cursor:pointer;transition:transform .1s var(--e)}
 .tmr-b.w{background:var(--white);color:#09090B;border-color:var(--white)}
 .tmr-p{height:3px;background:var(--card-3);border-radius:2px;margin-top:8px;overflow:hidden}
 .tmr-p i{display:block;height:100%;background:var(--white);border-radius:2px;transition:width .95s linear}
@@ -369,8 +362,8 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   border-radius:var(--r-sm);color:var(--tx-2);font-size:12px;font-weight:700;
   padding:11px 0;cursor:pointer}
 .gapc-b button:active{transform:scale(.97);color:var(--tx)}
-.gapc-go{width:100%;background:none;border:none;color:var(--tx-3);font-size:11px;
-  font-weight:700;padding:10px 0 0;cursor:pointer}
+.gapc-go{width:100%;background:none;border:none;color:var(--tx-3);font-size:11.5px;
+  font-weight:700;padding:13px 0 4px;cursor:pointer}
 
 /* 지난 날짜에서 직접 표시 */
 .daymark{display:flex;gap:7px;margin-top:9px}
@@ -553,14 +546,6 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .food-g{color:var(--tx-3);font-size:16px;flex:none;padding-left:2px}
 
 /* ══ 세트 성격 (워밍업 · 드랍) ══ */
-.tech{display:flex;align-items:center;gap:6px;margin-top:9px;flex-wrap:wrap}
-.tc-b{background:#0A0A0C;border:1px solid var(--line-2);border-radius:var(--r-sm);
-  color:var(--tx-3);font-size:11px;font-weight:800;padding:6px 11px;cursor:pointer;
-  letter-spacing:.02em;transition:transform .09s var(--e)}
-.tc-b:active{transform:scale(.94)}
-.tc-b.on.w{background:var(--card-3);border-color:var(--tx-3);color:var(--tx)}
-.tc-b.on.d{background:rgba(167,139,250,.16);border-color:var(--leg);color:#C4B5FD}
-.tc-hint{font-size:10px;color:var(--tx-3);margin-left:2px}
 
 .st-r.warm{opacity:.5}
 .st-r.warm .st-v{font-weight:600}
@@ -576,10 +561,6 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .ex.grouped + .ex.grouped{margin-top:-1px}
 
 /* ══ 바벨 무게 ══ */
-.pl-bw{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:5px}
-.pl-bw button{background:var(--card-3);border:1px solid var(--line-2);border-radius:var(--r-sm);
-  color:var(--tx-3);font-size:9.5px;font-weight:800;padding:3px 7px;cursor:pointer;font-family:var(--mono)}
-.pl-bw button:active{transform:scale(.94)}
 
 /* ══ 메모 ══ */
 .memo{width:100%;background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);
@@ -619,22 +600,10 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .md-ok.danger{background:linear-gradient(180deg,#F0554A,#C93A31);color:#fff}
 
 /* ══ 당류 · 카페인 ══ */
-.sub-row{display:flex;align-items:center;gap:10px;padding:9px 14px;margin-bottom:11px;
-  background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);box-shadow:var(--edge)}
-.sub-n{font-size:11.5px;font-weight:700;color:var(--tx-2);width:38px;flex:none}
-.sub-t{flex:1;height:5px;background:var(--card-2);border-radius:3px;overflow:hidden}
-.sub-t i{display:block;height:100%;border-radius:3px;transition:width .3s}
-.sub-v{font-size:11px;color:var(--tx-3);font-weight:700;flex:none;font-family:var(--mono)}
 
 .caff{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);
   padding:12px 14px;margin-bottom:11px;box-shadow:var(--edge)}
 .caff.over{border-color:rgba(251,146,60,.4);background:rgba(251,146,60,.06)}
-.caff-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:8px}
-.caff-h span{font-size:12px;font-weight:700;color:var(--tx-2)}
-.caff-h b{font-size:15px;font-weight:900;letter-spacing:-.02em;font-family:var(--mono)}
-.caff-h em{font-style:normal;font-size:10.5px;color:var(--tx-3);font-weight:700}
-.caff-t{height:5px;background:var(--card-2);border-radius:3px;overflow:hidden}
-.caff-t i{display:block;height:100%;background:#8B6F47;border-radius:3px;transition:width .3s}
 .caff.over .caff-t i{background:var(--warn)}
 .caff-n{font-size:10.5px;color:var(--tx-3);line-height:1.75;margin-top:9px}
 .caff-n b{color:var(--tx-2)}
@@ -654,8 +623,6 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .cal-d.today{border-color:var(--white)}
 .cal-d.sel{background:var(--white)}
 .cal-d.sel b{color:#09090B}
-.cal-dots{display:flex;gap:2px;height:4px}
-.cal-dots i{width:4px;height:4px;border-radius:50%;display:block}
 .cal-d.l1{background:rgba(255,255,255,.07)}
 .cal-d.l2{background:rgba(255,255,255,.13)}
 .cal-d.l3{background:rgba(255,255,255,.21)}
@@ -896,17 +863,6 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .rep-btn em{font-style:normal;font-size:11px;color:var(--tx-3);font-weight:700}
 
 /* ══ 헬냥이 ══ */
-.cat-fab{position:absolute;right:13px;z-index:35;bottom:16px;
-  width:58px;height:58px;border-radius:50%;background:var(--card);border:1px solid var(--line-2);
-  display:flex;align-items:center;justify-content:center;cursor:pointer;
-  box-shadow:0 8px 22px rgba(0,0,0,.55);padding:0;transition:bottom .25s}
-.cat-fab.up{bottom:16px}
-.cat-fab:active{transform:scale(.94)}
-.cat-fab{transition:bottom .25s var(--e),opacity .25s var(--e),transform .1s var(--e)}
-.cat-fab.dim{opacity:.22;pointer-events:none}
-.cat-fab svg{width:49px;height:49px;display:block}
-.cat-dot{position:absolute;top:1px;right:1px;width:10px;height:10px;border-radius:50%;
-  background:var(--chest);border:2px solid var(--bg)}
 .cat-bb{position:absolute;right:13px;z-index:35;top:8px;
   max-width:min(250px,calc(100vw - 108px));background:#FFF;color:#141418;border-radius:14px;
   padding:10px 12px;font-size:12px;font-weight:600;line-height:1.6;
@@ -1255,7 +1211,12 @@ function rebuildIndex(){
     DB[p.id] = { free: BASE_DB[p.id].free.slice(), machine: BASE_DB[p.id].machine.slice() };
   });
   (D.customEx || []).forEach(c => {
-    if (DB[c.part]) DB[c.part][c.group].push([c.name, c.kind, c.inc]);
+    /* 백업 파일이 손상됐거나 예전 형식이면 part·group 이 없을 수 있다.
+       그대로 두면 앱 전체가 멈추므로 빠진 값은 기본값으로 메운다. */
+    const part = DB[c.part] ? c.part : 'chest';
+    const grp = (c.group === 'machine' || c.group === 'free') ? c.group
+              : (c.kind === 'machine' || c.kind === 'cable') ? 'machine' : 'free';
+    DB[part][grp].push([c.name, c.kind || 'machine', c.inc]);
   });
   EX = {};
   PARTS.forEach(p => ['free','machine'].forEach(g =>
@@ -3662,7 +3623,7 @@ function viewMe(){
     '<button class="btn btn-g btn-sm" style="margin-top:8px;color:var(--chest)" onclick="wipe()">기록 전체 삭제</button></div>';
 
   h += '<div class="note" style="text-align:center;margin-top:16px;cursor:pointer" onclick="toggleDiag()">' +
-       'IRONLOG v27 · 종목 '+Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
+       'IRONLOG v28 · 종목 '+Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
   if (showDiag){
     h += '<div class="note" style="text-align:center;margin-top:5px;font-size:9px;opacity:.5;' +
          'font-family:var(--mono);line-height:1.7;word-break:break-all">' + diagLine() + '</div>';
@@ -3694,7 +3655,7 @@ function diagLine(){
   const bh = Math.round(document.body.getBoundingClientRect().height);
   const vv = window.visualViewport;
   return [
-    'v27',
+    'v28',
     'body' + bh,
     'inner' + window.innerHeight,
     'client' + document.documentElement.clientHeight,
@@ -4763,7 +4724,8 @@ function setDr(id, key, val, re){
    키보드가 닫혔다 열리면서 화면이 튄다. 해당 칸만 고쳐준다. */
 function bump(id, key, d){
   const o = draft[id]; if (!o) return;
-  o[key] = Math.max(0, Math.round((num(o[key])+d)*100)/100);
+  const cap = key === 'w' ? 600 : key === 'r' ? 200 : key === 'sec' ? 3600 : 999;
+  o[key] = Math.min(cap, Math.max(0, Math.round((num(o[key])+d)*100)/100));
   const box = document.querySelector('#fd-'+id+'-'+key);
   if (box) box.value = o[key];
   if (key === 'w'){
@@ -4881,12 +4843,18 @@ async function addSet(slotId){
 
   if (ex.kind === 'cardio'){
     if (!d.min && !d.dist){ toast('시간이나 거리를 입력해주세요'); return; }
+    if (num(d.min) > 600 || num(d.dist) > 300){ toast('값이 너무 큽니다'); return; }
     D.sets.push({ id:uid(), slotId, exId:sl.exId, min:num(d.min), dist:num(d.dist), at:nowHM() });
   } else if (ex.kind === 'hold'){
     if (!d.sec){ toast('시간을 입력해주세요'); return; }
+    if (num(d.sec) > 3600){ toast('시간이 너무 깁니다 · 60분 이하로'); return; }
     D.sets.push({ id:uid(), slotId, exId:sl.exId, sec:num(d.sec), rpe:d.rpe, at:nowHM() });
   } else {
     if (!d.r || d.r <= 0){ toast('횟수를 입력해주세요'); return; }
+    /* 오타로 0 을 더 누르면 통계가 통째로 망가진다.
+       사람이 들 수 있는 범위를 벗어나면 되묻는다. */
+    if (num(d.w) > 600){ toast('중량이 너무 큽니다 · 600kg 이하로'); return; }
+    if (num(d.r) > 200){ toast('횟수가 너무 많습니다 · 200회 이하로'); return; }
     const before = bestOf(sl.exId);
     const rec = { id:uid(), slotId, exId:sl.exId, w:num(d.w), r:num(d.r), rpe:d.rpe, at:nowHM() };
     if (d.w0) rec.w0 = true;
