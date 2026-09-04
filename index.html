@@ -863,15 +863,15 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .rep-btn em{font-style:normal;font-size:11px;color:var(--tx-3);font-weight:700}
 
 /* ══ 헬냥이 ══ */
-.cat-bb{position:absolute;right:13px;z-index:35;top:8px;
+.cat-bb{position:absolute;right:13px;z-index:35;top:calc(var(--hdrh, 96px) + 6px);
   max-width:min(250px,calc(100vw - 108px));background:#FFF;color:#141418;border-radius:14px;
   padding:10px 12px;font-size:12px;font-weight:600;line-height:1.6;
-  box-shadow:0 10px 28px rgba(0,0,0,.5);opacity:0;transform:translateY(6px) scale(.94);
-  transform-origin:bottom right;transition:.2s;pointer-events:none}
+  box-shadow:0 12px 34px rgba(0,0,0,.62);opacity:0;transform:translateY(-6px) scale(.94);
+  transform-origin:top right;transition:.2s;pointer-events:none}
 .cat-bb.on{opacity:1;transform:none;pointer-events:auto}
-.cat-bb.up{top:8px}
+.cat-bb.up{top:calc(var(--hdrh, 96px) + 6px)}
 .cat-bb b{font-weight:900}
-.cat-bb:after{content:'';position:absolute;right:-5px;bottom:16px;width:11px;height:11px;
+.cat-bb:after{content:'';position:absolute;right:16px;top:-5px;width:11px;height:11px;
   background:#FFF;transform:rotate(45deg)}
 .cb-t{display:block;font-size:9px;font-weight:900;letter-spacing:.1em;color:#8A8A93;margin-bottom:3px}
 .cs-t{display:flex;align-items:center;gap:13px;margin-bottom:15px}
@@ -3527,16 +3527,29 @@ function renderCat(){
   const urgent = says.some(s => s.tone === 'a');
   /* 헬냥이는 헤더 버튼 안에 있다. headerHTML 이 이미 그려두므로 여기서는 손대지 않는다. */
   const b = $('#catBB');
+  /* 말풍선은 내용을 가리므로 짧게 보여주고 아무 데나 누르면 바로 닫는다 */
+  const show = (html, ms) => {
+    b.innerHTML = html;
+    b.classList.add('on'); bubbleShown = true;
+    clearTimeout(bubbleT);
+    bubbleT = setTimeout(() => b.classList.remove('on'), ms);
+  };
   if (lv){
-    b.innerHTML = '<span class="cb-t">LEVEL UP</span>진화했다냥!! 이제 <b>'+lv+'</b>이다냥 🎉';
-    b.classList.add('on'); bubbleShown = true;
-    setTimeout(() => b.classList.remove('on'), 11000);
+    show('<span class="cb-t">LEVEL UP</span>진화했다냥!! 이제 <b>'+lv+'</b>이다냥 🎉', 7000);
   } else if (!bubbleShown && says.length){
-    b.innerHTML = '<span class="cb-t">헬냥이</span>'+says[0].t;
-    b.classList.add('on'); bubbleShown = true;
-    setTimeout(() => b.classList.remove('on'), 9000);
+    show('<span class="cb-t">헬냥이</span>'+says[0].t, 5000);
   }
 }
+let bubbleT = null;
+
+/* 화면 어디를 눌러도 말풍선을 닫는다 */
+document.addEventListener('pointerdown', e => {
+  const b = document.querySelector('#catBB');
+  if (!b || !b.classList.contains('on')) return;
+  if (e.target.closest('#catBB') || e.target.closest('#catBtn')) return;
+  b.classList.remove('on');
+  clearTimeout(bubbleT);
+}, true);
 
 /* ═══════════════════════════════════════════════════
    13. 화면 · 내 정보
@@ -3623,7 +3636,7 @@ function viewMe(){
     '<button class="btn btn-g btn-sm" style="margin-top:8px;color:var(--chest)" onclick="wipe()">기록 전체 삭제</button></div>';
 
   h += '<div class="note" style="text-align:center;margin-top:16px;cursor:pointer" onclick="toggleDiag()">' +
-       'IRONLOG v28 · 종목 '+Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
+       'IRONLOG v29 · 종목 '+Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
   if (showDiag){
     h += '<div class="note" style="text-align:center;margin-top:5px;font-size:9px;opacity:.5;' +
          'font-family:var(--mono);line-height:1.7;word-break:break-all">' + diagLine() + '</div>';
@@ -3655,7 +3668,7 @@ function diagLine(){
   const bh = Math.round(document.body.getBoundingClientRect().height);
   const vv = window.visualViewport;
   return [
-    'v28',
+    'v29',
     'body' + bh,
     'inner' + window.innerHeight,
     'client' + document.documentElement.clientHeight,
@@ -4938,6 +4951,7 @@ function render(){
   renderCat();
   paintTimer();
   syncTabH();
+  syncHdrH();
 }
 /* ───────────────────────────────────────────────
    화면 높이를 스스로 판단한다.
@@ -5006,7 +5020,7 @@ Object.assign(window, {
   moveSlot, topExercises, topFoods, avgRest, cancelSession,
   cycleTech, openExMenu, openBar, toggleLegend,
   guessCount, looksBulk, qtyUI, packOn, packOff, packB, pieceB, rememberPack,
-  dayState, markDay, pendingGaps,
+  dayState, markDay, pendingGaps, syncHdrH,
   mfdsSearch, pickMfds, mfdsRow, aiSearch, pickAi, aiRow,
   openNewFood, saveNewFood, openProfile, saveProfile, openCustomList, rmCustomEx, rmCustomFood,
   openPR, openCat, openTimer, tmSet, tmGo, restPref, startRest, defaultRest, mmss,
@@ -5034,13 +5048,21 @@ setInterval(() => {
   if (el) el.textContent = ses.start + ' 시작 · ' + fmtDur(sessMinutes(viewDate));
 }, 30000);
 
+/* 말풍선이 상태바를 침범하지 않도록 헤더 높이를 재서 알려준다 */
+function syncHdrH(){
+  const hd = document.querySelector('.hdr');
+  if (!hd) return;
+  const h = Math.round(hd.getBoundingClientRect().height);
+  if (h > 0) document.documentElement.style.setProperty('--hdrh', h + 'px');
+}
+
 function syncTabH(){
   const tb = document.querySelector('.tabbar');
   if (!tb) return;
   const h = Math.round(tb.getBoundingClientRect().height);
   if (h > 0) document.documentElement.style.setProperty('--tabh', h + 'px');
 }
-window.addEventListener('resize', () => { applyFill(); syncTabH(); });
+window.addEventListener('resize', () => { applyFill(); syncTabH(); syncHdrH(); });
 window.addEventListener('orientationchange', () => setTimeout(() => { applyFill(); syncTabH(); }, 350));
 if (window.visualViewport) window.visualViewport.addEventListener('resize', () => applyFill());
 /* 앱으로 돌아올 때도 한 번 더 (iOS 가 값을 늦게 갱신하는 경우가 있다) */
@@ -5846,6 +5868,8 @@ Object.assign(window, {
   applyFill();
   render();
   syncTabH();
+  syncHdrH();
+  setTimeout(syncHdrH, 400);
   setTimeout(syncTabH, 400);   /* 폰트 로딩 후 한 번 더 */
   initCloud();
 })();
