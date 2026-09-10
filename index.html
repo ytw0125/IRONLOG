@@ -475,6 +475,17 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .goal-row:active span{color:var(--tx-2)}
 .ring-set:active{color:var(--tx-2)}
 
+/* ══ 워밍업 안내 ══ */
+.wnote{font-size:var(--f-micro);color:var(--tx-3);padding:var(--s2) var(--s3) 0;
+  letter-spacing:.01em}
+
+/* ══ 보조 기구 실효 부하 ══ */
+.eff{display:flex;align-items:baseline;gap:var(--s2);padding:var(--s3) 0 var(--s1);
+  border-top:1px dashed var(--line);margin-top:var(--s3);
+  font-size:var(--f-label);color:var(--tx-3)}
+.eff b{font-size:var(--f-title);color:var(--good);font-weight:900;font-family:var(--mono)}
+.eff span{margin-left:auto;font-size:var(--f-micro);color:var(--tx-3);font-family:var(--mono)}
+
 /* ══ 카드 하단 한 줄 ══ */
 .foot{display:flex;gap:8px;padding:2px 12px 12px}
 .foot>button{border-radius:var(--r-sm);font-size:var(--f-body);font-weight:800;cursor:pointer;
@@ -687,9 +698,9 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   border-radius:6px;padding:4px 8px;color:var(--tx-2)}
 
 /* ══ 내 정보 ══ */
-.grow{background:var(--card);border:1px solid var(--line);border-radius:17px;
-  padding:16px 16px;margin-bottom:12px;text-align:center}
-.grow-a{width:120px;height:120px;margin:0 auto 4px}
+.grow{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);
+  padding:var(--s4);margin-bottom:var(--s3);text-align:center}
+.grow-a{width:84px;height:84px;margin:0 auto var(--s1)}
 .grow-a svg{width:100%;height:100%}
 .grow-n{font-size:var(--f-num);font-weight:900;letter-spacing:-.04em}
 .grow-l{font-size:var(--f-label);color:var(--tx-3);font-weight:800;letter-spacing:.09em;margin-top:2px}
@@ -1030,7 +1041,7 @@ machine:[
 ['펙덱 플라이','mach',5],['케이블 크로스오버','mach',2.5],['로우 케이블 플라이','mach',2.5],
 ['하이 케이블 플라이','mach',2.5],['케이블 체스트 프레스','mach',2.5],
 ['스미스 벤치프레스','mach',2.5],['스미스 인클라인 프레스','mach',2.5],
-['스미스 디클라인 프레스','mach',2.5],['어시스트 딥스 머신','mach',5],['딥스 머신 (가슴)','mach',5]
+['스미스 디클라인 프레스','mach',2.5],['어시스트 딥스 머신','assist',5],['딥스 머신 (가슴)','mach',5]
 ]},
 
 back:{
@@ -1050,7 +1061,7 @@ machine:[
 ['시티드 케이블로우','mach',5],['언더그립 시티드로우','mach',5],['로우로우 머신','mach',5],
 ['하이로우 머신','mach',5],['아이소레터럴 로우','mach',5],['티바로우 머신','mach',5],
 ['풀오버 머신','mach',5],['스트레이트암 풀다운','mach',2.5],['케이블 풀오버','mach',2.5],
-['어시스트 풀업 머신','mach',5],['스미스 바벨로우','mach',2.5],
+['어시스트 풀업 머신','assist',5],['스미스 바벨로우','mach',2.5],
 ['백 익스텐션 머신','mach',5],['슈러그 머신','mach',5]
 ]},
 
@@ -1432,7 +1443,7 @@ function e1rm(w, r){
   if (r > 12) return 0;
   return (w*(1+r/30) + w/(1.0278-0.0278*r))/2;
 }
-const setE1 = s => e1rm(s.w, s.r);
+const setE1 = s => isAssist(s.exId) ? 0 : e1rm(s.w, s.r);
 const roundTo = (v, i) => Math.round(v/i)*i;
 function repsNeeded(w, t){ for (let r=1;r<=12;r++) if (e1rm(w,r) > t) return r; return null; }
 function weightNeeded(r, t, i){ const per = e1rm(1,r); return per ? Math.ceil(t/per/i)*i : null; }
@@ -1650,6 +1661,13 @@ function prevSession(exId, before){
 }
 function bestOf(exId){ return memo('b'+exId, () => _bestOf(exId)); }
 function _bestOf(exId){
+  /* 보조 기구는 '가장 적은 보조' 가 최고 기록이다 */
+  if (isAssist(exId)){
+    let m = Infinity;
+    D.slots.filter(s => s.exId === exId).forEach(sl =>
+      setsOf(sl.id).filter(isWork).forEach(s => { if (s.w > 0 && s.w < m) m = s.w; }));
+    return m === Infinity ? 0 : m;
+  }
   let m = 0;
   D.slots.filter(s => s.exId === exId).forEach(sl =>
     setsOf(sl.id).filter(isWork).forEach(s => { if ((s.w||0) > m) m = s.w; }));
@@ -1919,7 +1937,31 @@ async function restPref(name, d){
 /* ═══════════════════════════════════════════════════
    9. 화면 · 운동
    ═══════════════════════════════════════════════════ */
-const KIND = { bar:'바벨', db:'덤벨', body:'맨몸', hold:'버티기', mach:'머신', cardio:'유산소' };
+const KIND = { bar:'바벨', db:'덤벨', body:'맨몸', hold:'버티기', mach:'머신',
+               assist:'보조 머신', cardio:'유산소' };
+
+/* ───────────────────────────────────────────────
+   보조 기구 종목 (어시스트 풀업·딥스 머신 등)
+
+   보조 무게가 '줄어들수록' 강해진 것이다.
+   일반 종목과 같은 잣대로 보면 모든 판정이 거꾸로 나온다.
+     · 보조를 늘렸는데 신기록으로 표시
+     · 최고 기록이 사실은 가장 약했던 날
+     · 성장 그래프의 상승이 곧 퇴보
+   그래서 아래 함수로 방향을 뒤집어 다룬다.
+   ─────────────────────────────────────────────── */
+const isAssist = exId => { const e = EX[exId]; return !!(e && (e.kind === 'assist' || e.assist)); };
+
+/* 실제로 든 무게. 보조 기구는 '체중 − 보조무게' 가 실효 부하다. */
+function effLoad(exId, w){
+  if (!isAssist(exId)) return w;
+  const bw = (D.profile && D.profile.kg) || 0;
+  return Math.max(0, Math.round((bw - (w||0)) * 10) / 10);
+}
+
+/* 두 값 중 '더 나은' 쪽. 보조 기구는 작을수록 좋다. */
+const betterW = (exId, a, b) => isAssist(exId) ? Math.min(a, b) : Math.max(a, b);
+const isBetter = (exId, cur, prev) => isAssist(exId) ? cur < prev : cur > prev;
 
 /* 한 줄 헤더.
    앱을 이미 열었는데 브랜드 이름이 매 화면 상단을 차지할 이유가 없다.
@@ -2135,8 +2177,10 @@ function exCard(sl){
   } else if (ex.kind === 'hold'){
     sum = ss.length+'세트 · 최고 '+Math.max(...ss.map(s => s.sec||0))+'초';
   } else {
-    const top = ss.reduce((a,s) => (s.w>a.w?s:a), ss[0]);
-    sum = ss.length+'세트 · 최고 '+setLabel(top);
+    /* 보조 기구는 가장 적은 보조가 최고 기록이다 */
+    const asst = isAssist(sl.exId);
+    const top = ss.reduce((a,s) => (asst ? (s.w < a.w ? s : a) : (s.w > a.w ? s : a)), ss[0]);
+    sum = ss.length+'세트 · '+(asst ? '최저 보조 ' : '최고 ')+setLabel(top);
   }
 
   const gcls = (sl.gid ? ' grouped' : '') + (sl.done ? ' fin' : '');
@@ -2194,13 +2238,19 @@ function exCard(sl){
 
   /* 입력 바 */
   const dr = draft[sl.id] || (draft[sl.id] = mkDraft(sl));
+  /* 워밍업이 통계에서 빠진다는 걸 표 바로 아래에서 알려준다 */
+  if (ss.some(x => x.w0)){
+    h += '<div class="wnote">W 표시된 세트는 볼륨·신기록 계산에서 빠집니다</div>';
+  }
   h += '<div class="ip"><div class="ip-r">';
   if (ex.kind === 'cardio'){
     h += fld(sl.id,'min','시간 (분)',dr.min,5) + fld(sl.id,'dist','거리 (km)',dr.dist,0.5);
   } else if (ex.kind === 'hold'){
     h += fld(sl.id,'sec','시간 (초)',dr.sec,10);
   } else {
-    h += fld(sl.id,'w', ex.kind==='body'?'추가 kg':'중량 kg', dr.w, ex.inc||2.5) +
+    h += fld(sl.id,'w',
+      ex.kind==='body' ? '추가 kg' : isAssist(sl.exId) ? '보조 kg' : '중량 kg',
+      dr.w, ex.inc||2.5) +
          fld(sl.id,'r','횟수',dr.r,1);
   }
   h += '<button class="ip-go" onclick="addSet(\''+sl.id+'\')">기록</button></div>';
@@ -2219,6 +2269,11 @@ function exCard(sl){
   }
   if (ex.kind === 'bar' && dr.w > 0)
     h += '<div class="pls" id="pl-'+sl.id+'">'+plateHTML(dr.w, ex.name)+'</div>';
+  /* 보조 기구는 '체중 − 보조' 가 실제로 든 무게다 */
+  if (isAssist(sl.exId) && dr.w >= 0 && D.profile && D.profile.kg){
+    h += '<div class="eff">실제 드는 무게 <b>'+effLoad(sl.exId, num(dr.w))+'kg</b>' +
+      '<span>체중 '+D.profile.kg+'kg − 보조 '+(num(dr.w)||0)+'kg</span></div>';
+  }
   h += '</div>';
 
   /* 하단 조작 */
@@ -2284,6 +2339,11 @@ function prBadge(set){
   if (set.w0) return '';
   const prior = D.sets.slice(0,i).filter(s => s.exId === set.exId && s.w > 0 && isWork(s));
   if (!prior.length) return '';
+  if (isAssist(set.exId)){
+    /* 보조가 줄었으면 발전이다 */
+    if (set.w < Math.min(...prior.map(s => s.w))) return '<span class="badge">보조↓</span>';
+    return '';   /* 1RM 추정은 보조 기구에서 의미가 없다 */
+  }
   if (set.w > Math.max(...prior.map(s => s.w))) return '<span class="badge">중량</span>';
   const mE = Math.max(...prior.map(setE1));
   if (mE > 0 && setE1(set) > mE) return '<span class="badge">1RM</span>';
@@ -2662,9 +2722,17 @@ function _sessionsOf(exId){
     .map(sl => {
       const ss = setsOf(sl.id).filter(x => x.w > 0 && x.r > 0 && isWork(x));
       if (!ss.length) return null;
-      const top = ss.reduce((a,x) => setE1(x) > setE1(a) ? x : a, ss[0]);
-      return { date:sl.date, e:setE1(top), w:top.w, r:top.r,
-               vol:ss.reduce((a,x) => a + x.w*x.r, 0), n:ss.length };
+      const top = isAssist(sl.exId)
+      ? ss.reduce((a,x) => (x.w||Infinity) < (a.w||Infinity) ? x : a, ss[0])
+      : ss.reduce((a,x) => setE1(x) > setE1(a) ? x : a, ss[0]);
+      /* 보조 기구는 1RM 이 없으므로 '실효 부하 × 횟수' 로 성장을 본다.
+         보조가 줄면 실효 부하가 커지므로 방향이 자연스럽게 맞는다. */
+      const e = isAssist(sl.exId)
+        ? e1rm(effLoad(sl.exId, top.w), top.r)
+        : setE1(top);
+      return { date:sl.date, e, w:top.w, r:top.r, asst:isAssist(sl.exId),
+               vol:ss.reduce((a,x) => a + (isAssist(sl.exId) ? effLoad(sl.exId,x.w) : x.w) * x.r, 0),
+               n:ss.length };
     })
     .filter(Boolean)
     .sort((a,b) => a.date.localeCompare(b.date));
@@ -3667,7 +3735,7 @@ function viewMe(){
     '<button class="btn btn-g btn-sm" style="margin-top:8px;color:var(--chest)" onclick="wipe()">기록 전체 삭제</button></div>';
 
   h += '<div class="note" style="text-align:center;margin-top:16px;cursor:pointer" onclick="toggleDiag()">' +
-       'IRONLOG v30 · 종목 '+Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
+       'IRONLOG v31 · 종목 '+Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
   if (showDiag){
     h += '<div class="note" style="text-align:center;margin-top:5px;font-size:9px;opacity:.5;' +
          'font-family:var(--mono);line-height:1.7;word-break:break-all">' + diagLine() + '</div>';
@@ -3699,7 +3767,7 @@ function diagLine(){
   const bh = Math.round(document.body.getBoundingClientRect().height);
   const vv = window.visualViewport;
   return [
-    'v30',
+    'v31',
     'body' + bh,
     'inner' + window.innerHeight,
     'client' + document.documentElement.clientHeight,
@@ -3993,6 +4061,7 @@ function openNewEx(){
       '<option value="free">프리웨이트</option><option value="machine"'+(shState.group==='machine'?' selected':'')+'>머신</option></select></div>' +
     '<div class="pf-w"><label>기록 방식</label><select id="nKind">' +
       '<option value="mach">머신 · 케이블 (무게 × 횟수)</option>' +
+      '<option value="assist">보조 머신 (무게가 낮을수록 강함)</option>' +
       '<option value="bar">바벨 (무게 × 횟수 + 원판 계산)</option>' +
       '<option value="db">덤벨 (무게 × 횟수)</option>' +
       '<option value="body">맨몸 (횟수, 추가중량 선택)</option>' +
@@ -4000,7 +4069,9 @@ function openNewEx(){
       '<option value="cardio">유산소 (분 · km)</option></select></div>' +
     '<div class="pf-w"><label>한 번에 올릴 무게 단위 (kg)</label><input id="nInc" inputmode="decimal" value="2.5"></div>' +
     '</div><button class="btn" onclick="saveNewEx()">추가하기</button>' +
-    '<div class="note">추가한 종목은 검색과 목록에 함께 나오고, 1RM 추정·원판 계산도 똑같이 적용됩니다.</div>';
+    '<div class="note">추가한 종목은 검색과 목록에 함께 나오고, 1RM 추정·원판 계산도 똑같이 적용됩니다.<br><br>' +
+      '<b>보조 머신</b>은 어시스트 풀업·딥스처럼 <b>보조 무게가 줄어들수록 강해지는</b> 종목입니다. ' +
+      '신기록 판정과 성장 그래프가 반대 방향으로 계산됩니다.</div>';
   openSheet('종목 직접 추가', h);
 }
 async function saveNewEx(){
