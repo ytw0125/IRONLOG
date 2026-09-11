@@ -14,22 +14,30 @@
 
 <style>
 :root{
-  --bg:#000000; --card:#0B0B0D; --card-2:#131316; --card-3:#1C1C21;
-  --line:#1E1E23; --line-2:#2E2E36;
-  --tx:#FFFFFF; --tx-2:#9C9CA6; --tx-3:#5C5C66; --white:#FFFFFF;
-  --chest:#FF6B5A; --back:#4C9AFF; --shoulder:#FFB020; --leg:#A78BFA;
-  --arm:#2DD4BF; --abs:#84CC16; --cardio:#F472B6;
-  --good:#4ADE80; --warn:#FB923C;
+  /* 순수 검정 대신 미세한 청색기를 넣어 금속 느낌을 만든다 */
+  --bg:#08090B; --card:#101216; --card-2:#171A20; --card-3:#1F232B;
+  --line:#1A1D23; --line-2:#262B33;
+  --tx:#F4F6F9; --tx-2:#8B939F; --tx-3:#4C535E; --white:#F4F6F9;
+  /* 부위색은 면이 아니라 선·점으로만 쓴다. 채도를 낮춰 강조색을 방해하지 않게. */
+  --chest:#C4564A; --back:#3E7BC4; --shoulder:#C4903A; --leg:#7C6BC4;
+  --arm:#2E9E92; --abs:#6B9E3A; --cardio:#B85A87;
+  /* 강조는 하나. 호박색이 이 앱의 목소리다. */
+  --acc:#FFB84D;
+  --good:#FFB84D; --warn:#FF6B4A;
   --mono:ui-monospace,"SF Mono","JetBrains Mono","Roboto Mono",Menlo,monospace;
   --sans:"Pretendard",-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
 
   /* 금속 질감 · 모션 */
   --e:cubic-bezier(.2,.9,.25,1);
   --edge:inset 0 1px 0 rgba(255,255,255,.055);
-  --edge2:inset 0 1px 0 rgba(255,255,255,.09);
-  --steel:linear-gradient(180deg,#1A1B21 0%,#101116 58%,#0B0C10 100%);
-  --steel-h:linear-gradient(180deg,#24262E 0%,#15161B 100%);
-  --r-lg:6px; --r-md:5px; --r-sm:4px;
+  --edge2:inset 0 1px 0 rgba(255,255,255,.085);
+  /* 그라데이션으로 금속을 흉내내지 않는다.
+     단색 위에 위쪽 한 줄 빛, 아래쪽 한 줄 그늘 — 그게 금속이다. */
+  --steel:#171A20;
+  --steel-h:#1F232B;
+  --lit: inset 0 1px 0 rgba(255,255,255,.07), inset 0 -1px 0 rgba(0,0,0,.5);
+  --lit-in: inset 0 2px 5px rgba(0,0,0,.65), inset 0 -1px 0 rgba(255,255,255,.045);
+  --r-lg:16px; --r-md:13px; --r-sm:10px;
 
   /* ── 글자 단계 ──
      지금까지 9~24px 이 규칙 없이 흩어져 있었다.
@@ -46,6 +54,9 @@
 
   /* ── 움직임 ── */
   --dur:.18s;
+  /* 이징은 둘만 쓴다. 튕김 없이 날카롭게 감속. */
+  --eo:cubic-bezier(.16,1,.3,1);
+  --ei:cubic-bezier(.7,0,.84,0);
   /* 하단 안전영역. 기기에 따라 값이 비정상으로 크게 잡히는 경우가 있어
      34px 로 상한을 둔다. 아이폰 홈 인디케이터가 34px 이므로 그 이상은 불필요. */
   --sab:0px;
@@ -86,10 +97,13 @@ button,input,select,textarea{font-family:inherit;font-variant-numeric:tabular-nu
 input,select,textarea{font-size:var(--f-title)!important}
 input[inputmode=decimal],input[inputmode=numeric]{font-size:17px!important}
 body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+/* 순수한 검은 면은 화면에서 납작해 보인다. 아주 옅은 노이즈로 재질감을 준다. */
+body:before{content:'';position:fixed;inset:0;pointer-events:none;z-index:200;opacity:.032;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E")}
 /* 숫자가 바뀔 때 폭이 흔들리지 않게 자릿수를 고정한다 */
 .stat b,.rh-n,.ring-v,.grow-lv,.big3-n,.st-v,.tmr-n,.food-k,.mac-v,
 .hb-d b,.live b,.cal-d b{font-variant-numeric:tabular-nums}
-/* 무대 : 내용이 차지하는 영역. 떠다니는 요소(헬냥이·토스트)는 모두
+/* 무대 : 내용이 차지하는 영역. 떠다니는 요소(코치·토스트)는 모두
    이 안에 절대 배치되므로 타이머나 탭바와 겹칠 수 없다. */
 #stage{flex:1 1 auto;min-height:0;position:relative;overflow:hidden}
 #app{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;
@@ -123,7 +137,7 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   border:1px solid var(--line-2);color:var(--tx-2);cursor:pointer;
   display:flex;align-items:center;justify-content:center;box-shadow:var(--edge2);
   transition:transform .1s var(--e),color .15s var(--e)}
-.ibtn:active{transform:scale(.92);color:var(--tx)}
+.ibtn:active{color:var(--tx)}
 .ibtn svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .ibtn:active{background:var(--card-2)}
 
@@ -137,38 +151,38 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .dnav-mid.past span{color:var(--warn)}
 
 /* ══ 공통 ══ */
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px;
-  margin-bottom:12px;box-shadow:var(--edge)}
+.card{background:var(--card);border:none;border-radius:var(--r-lg);padding:16px;
+  margin-bottom:12px;box-shadow:var(--lit)}
 .sec{font-size:var(--f-micro);font-weight:800;letter-spacing:.22em;color:var(--tx-3);
   margin:24px 2px 8px;display:flex;align-items:center;gap:8px;font-family:var(--mono)}
 .sec:after{content:'';flex:1;height:1px;background:var(--line)}
 .empty{text-align:center;color:var(--tx-3);font-size:var(--f-body);padding:24px 16px;line-height:1.75}
-.btn{border:none;border-radius:var(--r-md);cursor:pointer;font-weight:800;font-size:var(--f-title);
-  padding:16px;width:100%;letter-spacing:-.01em;
-  background:linear-gradient(180deg,#FFFFFF 0%,#E8E8EC 100%);color:#09090B;
-  box-shadow:0 1px 0 rgba(255,255,255,.5) inset,0 2px 10px rgba(0,0,0,.35);
+.btn{border:none;border-radius:var(--r-md);cursor:pointer;font-weight:850;font-size:var(--f-title);
+  padding:16px;width:100%;letter-spacing:-.025em;
+  background:linear-gradient(180deg,#FFFFFF 0%,#DEE3EA 100%);color:#08090B;
+  box-shadow:inset 0 1px 0 #FFF,0 6px 18px -8px rgba(255,255,255,.26);
   transition:transform .1s var(--e),filter .1s var(--e)}
-.btn:active{transform:scale(.976);filter:brightness(.94)}
-.btn-g{background:var(--steel);color:var(--tx);border:1px solid var(--line-2);
-  box-shadow:var(--edge2)}
+.btn:active{background:linear-gradient(180deg,#DEE3EA 0%,#FFFFFF 100%);box-shadow:inset 0 -1px 0 rgba(255,255,255,.85),inset 0 3px 8px rgba(0,0,0,.26)}
+.btn-g{background:var(--steel);color:var(--tx);border:none;box-shadow:var(--lit)}
+.btn-g:active{background:var(--steel-h);box-shadow:var(--lit-in);filter:none}
 .btn-g:active{background:var(--steel-h)}
 .btn-sm{padding:12px;font-size:var(--f-body);border-radius:var(--r-sm)}
 .row2{display:flex;gap:8px}
 .row2 .btn{flex:1}
 
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
-.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);
-  padding:12px 12px;box-shadow:var(--edge)}
+.stat{background:var(--card);border:none;border-radius:var(--r-md);
+  padding:14px 13px 12px;box-shadow:var(--lit)}
 .stat b{display:block;font-size:var(--f-hero);font-weight:900;letter-spacing:-.05em;
   font-variant-numeric:tabular-nums;line-height:1}
 .stat span{display:block;font-size:var(--f-micro);color:var(--tx-3);margin-top:8px;font-weight:800;
   letter-spacing:.14em;font-family:var(--mono)}
 
 /* ══ 운동 카드 (아코디언) ══ */
-.ex{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);
-  margin-bottom:8px;overflow:hidden;box-shadow:var(--edge);
-  transition:border-color .2s var(--e)}
-.ex.open{border-color:var(--line-2)}
+.ex{background:var(--card);border:none;border-radius:var(--r-lg);
+  margin-bottom:8px;overflow:hidden;box-shadow:var(--lit);
+  transition:box-shadow .2s var(--eo)}
+.ex.open{box-shadow:var(--lit),0 0 0 1px rgba(255,255,255,.05)}
 .ex-hd{display:flex;align-items:center;gap:8px;padding:12px 12px;cursor:pointer}
 .ex-cl{width:3px;height:34px;flex:none}
 .ex-tt{flex:1;min-width:0}
@@ -183,9 +197,13 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 /* 세트 테이블 */
 .st-h,.st-r{display:grid;grid-template-columns:22px minmax(0,1fr) 78px 44px 30px 24px;
   align-items:center;gap:4px;padding:0 12px}
-.st-h{font-size:var(--f-micro);font-weight:800;letter-spacing:.14em;color:var(--tx-3);
-  padding-top:12px;padding-bottom:8px;font-family:var(--mono)}
-.st-r{padding-top:8px;padding-bottom:8px;border-top:1px solid var(--line);font-size:var(--f-title)}
+.st-h{font-size:var(--f-micro);font-weight:800;letter-spacing:.18em;color:var(--tx-3);
+  padding-top:12px;padding-bottom:9px;font-family:var(--mono);text-transform:uppercase;
+  border-bottom:1px solid rgba(255,255,255,.05)}
+/* 괘선 대신 줄 배경 명도로 구분한다. 선이 적을수록 숫자가 또렷해진다. */
+.st-r{padding-top:11px;padding-bottom:11px;border-top:none;font-size:var(--f-title);
+  position:relative}
+.st-r:nth-of-type(even){background:rgba(255,255,255,.016)}
 .st-n{font-family:var(--mono);font-size:var(--f-label);color:var(--tx-3)}
 .st-p{font-size:var(--f-label);color:var(--tx-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .st-v{font-weight:800;letter-spacing:-.02em}
@@ -193,10 +211,13 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .st-e{font-size:var(--f-micro);color:var(--tx-3);font-weight:700;text-align:center}
 .st-x{background:none;border:none;color:var(--tx-3);cursor:pointer;font-size:var(--f-title);
   min-width:44px;min-height:44px;padding:0}
-.st-r.pr{background:rgba(74,222,128,.06)}
+/* 신기록 — 왼쪽 끝에 호박색 띠 하나. 배경을 물들이지 않는다. */
+.st-r.pr{background:linear-gradient(90deg,rgba(255,184,77,.10),transparent 62%)}
+.st-r.pr:after{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;
+  background:var(--acc)}
 .badge{display:inline-block;font-size:var(--f-micro);font-weight:900;letter-spacing:.04em;
-  background:var(--good);color:#02150A;padding:1px 4px;border-radius:2px;margin-left:4px;
-  vertical-align:1.5px;white-space:nowrap}
+  background:rgba(255,184,77,.15);color:var(--acc);padding:2px 5px;border-radius:4px;
+  margin-left:5px;vertical-align:1.5px;white-space:nowrap}
 .st-v{white-space:nowrap;overflow:hidden}
 
 /* 입력 바 */
@@ -206,10 +227,10 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .fd label{display:block;font-size:var(--f-micro);color:var(--tx-3);font-weight:800;
   letter-spacing:.05em;margin-bottom:4px}
 .fb{display:flex;gap:4px}
-.fb button{width:44px;height:46px;flex:none;background:var(--steel);border:1px solid var(--line-2);
-  border-radius:var(--r-sm);color:var(--tx-2);font-size:var(--f-title);font-weight:700;cursor:pointer;
-  box-shadow:var(--edge2);transition:transform .09s var(--e),background .12s var(--e)}
-.fb button:active{transform:scale(.9);background:var(--steel-h);color:var(--tx)}
+.fb button{width:44px;height:46px;flex:none;background:var(--steel);border:none;
+  border-radius:var(--r-sm);color:var(--tx-2);cursor:pointer;display:grid;place-items:center;
+  box-shadow:var(--lit);transition:filter .12s var(--eo),box-shadow .12s var(--eo)}
+.fb button:active{box-shadow:var(--lit-in);filter:brightness(1.5)}
 .fb input{flex:1;min-width:0;width:100%;height:40px;background:#0A0A0C;
   border:1px solid var(--line-2);border-radius:var(--r-sm);color:var(--tx);
   font-size:17px;font-weight:800;text-align:center;letter-spacing:-.02em}
@@ -218,14 +239,14 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   background:linear-gradient(180deg,#FFFFFF,#E4E4E8);
   box-shadow:0 1px 0 rgba(255,255,255,.6) inset,0 2px 8px rgba(0,0,0,.4);
   transition:transform .09s var(--e),filter .09s var(--e)}
-.ip-go:active{transform:scale(.94);filter:brightness(.93)}
+.ip-go:active{filter:brightness(.93)}
 .rp{display:flex;gap:4px;margin-top:8px;align-items:center}
 .rp em{font-style:normal;font-size:var(--f-micro);color:var(--tx-3);font-weight:800;
   letter-spacing:.05em;width:26px;flex:none}
-.rp button{flex:1;background:#101013;border:1px solid var(--line-2);border-radius:7px;
+.rp button{flex:1;background:var(--card-2);border:none;border-radius:var(--r-sm);
   color:var(--tx-3);font-size:var(--f-label);font-weight:800;min-height:44px;padding:0;cursor:pointer;
-  transition:transform .09s var(--e),background .15s var(--e),color .15s var(--e)}
-.rp button:active{transform:scale(.93)}
+  box-shadow:var(--edge);transition:filter .12s var(--eo),background .15s var(--eo),color .15s var(--eo)}
+.rp button:active{filter:brightness(1.5)}
 .rp button[aria-pressed=true]{background:var(--white);color:#09090B;border-color:var(--white)}
 
 .pls{margin-top:8px;padding-top:8px;border-top:1px dashed var(--line-2)}
@@ -237,7 +258,7 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 /* PR 요약 줄 */
 .prl{display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;
   border-top:1px solid var(--line);font-size:var(--f-body);font-weight:700}
-.prl.go{background:rgba(74,222,128,.09);color:#86EFAC}
+.prl.go{background:rgba(255,184,77,.09);color:#86EFAC}
 .prl.wait{background:rgba(251,146,60,.09);color:#FDBA74}
 .prl.near{background:var(--card-2);color:var(--tx-2)}
 .prl span{flex:1;min-width:0}
@@ -268,12 +289,14 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   background:rgba(9,9,11,.94);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
   border-top:1px solid var(--line)}
 .tabbar-in{display:flex;width:100%;max-width:520px}
-.tab{flex:1;background:none;border:none;cursor:pointer;color:var(--tx-3);
+.tab{flex:1;background:none;border:none;cursor:pointer;color:var(--tx-3);position:relative;
   padding:8px 0 4px;display:flex;flex-direction:column;align-items:center;gap:4px}
-.tab svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.tab[aria-selected="true"]:before{content:'';position:absolute;top:-1px;width:20px;height:2px;
+  background:var(--acc);border-radius:0 0 3px 3px}
+.tab svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
 .tab span{font-size:var(--f-micro);font-weight:800;letter-spacing:.06em}
 .tab{transition:color .18s var(--e)}
-.tab svg{transition:transform .2s var(--e)}
+.tab svg{transition:opacity .18s var(--eo)}
 .tab:active svg{transform:scale(.86)}
 .tab[aria-selected=true]{color:var(--tx)}
 .tab[aria-selected=true] svg{filter:drop-shadow(0 0 7px rgba(255,255,255,.32))}
@@ -388,7 +411,7 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .gapc-b button{flex:1;background:var(--steel);border:1px solid var(--line-2);
   border-radius:var(--r-sm);color:var(--tx-2);font-size:var(--f-body);font-weight:700;
   padding:12px 0;cursor:pointer}
-.gapc-b button:active{transform:scale(.97);color:var(--tx)}
+.gapc-b button:active{color:var(--tx)}
 .gapc-go{width:100%;background:none;border:none;color:var(--tx-3);font-size:var(--f-label);
   font-weight:700;min-height:44px;padding:0;cursor:pointer}
 
@@ -407,12 +430,12 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .cal-d.skipd{opacity:.45}
 
 /* ══ 낱개 나누기 안내 ══ */
-.pack-on{display:block;width:100%;background:rgba(74,222,128,.07);
-  border:1px solid rgba(74,222,128,.28);border-radius:var(--r-md);
+.pack-on{display:block;width:100%;background:rgba(255,184,77,.07);
+  border:1px solid rgba(255,184,77,.28);border-radius:var(--r-md);
   color:var(--tx-2);font-size:var(--f-body);font-weight:600;padding:12px 16px;
   margin-top:12px;cursor:pointer;text-align:center;line-height:1.5}
 .pack-on b{color:var(--good);font-weight:800}
-.pack-on:active{background:rgba(74,222,128,.12)}
+.pack-on:active{background:rgba(255,184,77,.12)}
 
 /* 개입 수 · 먹은 개수 */
 .pack{margin-top:16px;border-top:1px solid var(--line);padding-top:12px}
@@ -420,7 +443,7 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .pack-r label{flex:1;text-align:left;font-size:var(--f-body);color:var(--tx-3);font-weight:700}
 .pack-r button{flex:0 0 38px;height:38px;background:var(--steel);border:1px solid var(--line-2);
   border-radius:var(--r-sm);color:var(--tx);font-size:var(--f-num);font-weight:700;cursor:pointer}
-.pack-r button:active{transform:scale(.93)}
+.pack-r button:active{}
 .pack-r b{flex:0 0 54px;text-align:center;font-size:17px;font-weight:900;font-family:var(--mono)}
 .pack-r.hi b{color:var(--good);font-size:var(--f-num)}
 .pack-off{width:100%;background:none;border:none;color:var(--tx-3);font-size:var(--f-label);
@@ -434,25 +457,69 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   font-weight:700;padding:8px 0 2px;cursor:pointer}
 .lg-t:active{color:var(--tx-2)}
 
+/* ══════════════════════════════════════════
+   모션
+
+   이징은 둘만 쓴다. 튕김 없이 날카롭게 감속하는 --eo,
+   사라질 때 빠르게 빠지는 --ei.
+   transform 과 opacity 만 건드려 60fps 를 지킨다.
+   ══════════════════════════════════════════ */
+
+/* 화면이 바뀔 때 요소가 차례로 들어온다 */
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+#view > *{animation:rise .34s var(--eo) both}
+#view > *:nth-child(1){animation-delay:0ms}
+#view > *:nth-child(2){animation-delay:35ms}
+#view > *:nth-child(3){animation-delay:70ms}
+#view > *:nth-child(4){animation-delay:105ms}
+#view > *:nth-child(5){animation-delay:130ms}
+#view > *:nth-child(n+6){animation-delay:150ms}
+
+/* 세트를 기록한 순간 — 이 앱에서 가장 많이 보는 장면 */
+@keyframes setIn{
+  0%{opacity:0;transform:translateY(12px)}
+  100%{opacity:1;transform:none}}
+@keyframes setGlow{
+  0%{background-position:100% 0;opacity:0}
+  22%{opacity:1}
+  100%{background-position:-40% 0;opacity:0}}
+.st-r.flash{animation:setIn .42s var(--eo)}
+.st-r.flash:before{content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgba(255,184,77,.28),transparent);
+  background-size:220% 100%;animation:setGlow .62s var(--eo)}
+
+/* 숫자가 바뀔 때 살짝 솟는다 */
+@keyframes pop{0%{transform:translateY(4px);opacity:.4}100%{transform:none;opacity:1}}
+.st-v.pop,.stat b.pop{animation:pop .3s var(--eo)}
+
+/* 시트가 올라올 때 */
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:none}}
+
+/* ══ 아이콘 ══ */
+svg.i{fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;
+  display:block;flex:none}
+
 /* ══ 한 줄 헤더 ══ */
 .hdr-row{display:flex;align-items:center;gap:8px}
-.hb-a{flex:0 0 34px;height:38px;background:var(--steel);border:1px solid var(--line-2);
-  border-radius:var(--r-md);color:var(--tx-2);font-size:17px;cursor:pointer;
-  box-shadow:var(--edge2);transition:transform .1s var(--e)}
-.hb-a:active{transform:scale(.92)}
-.hb-d{flex:1;min-width:0;height:38px;background:var(--steel);border:1px solid var(--line-2);
-  border-radius:var(--r-md);color:var(--tx);cursor:pointer;box-shadow:var(--edge2);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 8px}
-.hb-d:active{background:var(--card-2)}
+.hb-a{flex:0 0 38px;height:38px;background:var(--steel);border:none;
+  border-radius:var(--r-sm);color:var(--tx-2);cursor:pointer;display:grid;place-items:center;
+  box-shadow:var(--lit);transition:filter .12s var(--eo)}
+.hb-a:active{filter:brightness(1.4);box-shadow:var(--lit-in)}
+.hb-d{flex:1;min-width:0;height:38px;background:var(--steel);border:none;
+  border-radius:var(--r-sm);color:var(--tx);cursor:pointer;box-shadow:var(--lit);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 8px;
+  transition:filter .12s var(--eo)}
+.hb-d:active{filter:brightness(1.25)}
 .hb-d b{font-size:var(--f-title);font-weight:800;letter-spacing:-.03em;white-space:nowrap;line-height:1.1}
-.hb-d b em{font-style:normal;color:var(--tx-3);font-weight:700;font-size:var(--f-body)}
+.hb-d b em{font-style:normal;color:var(--tx-3);font-weight:700;font-size:var(--f-label);
+  margin-left:3px}
 .hb-d span{font-size:var(--f-micro);color:var(--warn);font-weight:700;letter-spacing:.04em;margin-top:1px}
 .hb-d.past b{color:var(--tx-2)}
 
-.ibtn.cat{padding:4px;overflow:visible;position:relative}
-.ibtn.cat svg{width:100%;height:100%;display:block}
+.ibtn.cat{padding:0;overflow:visible;position:relative;display:grid;place-items:center}
+.ibtn.cat svg{display:block}
 .ibtn-dot{position:absolute;top:-2px;right:-2px;width:8px;height:8px;border-radius:50%;
-  background:var(--chest);border:2px solid var(--bg)}
+  background:var(--acc);border:2px solid var(--bg)}
 
 /* ══ 매크로 카드 안 얇은 줄 (당류·카페인) ══ */
 .mini-w{border-top:1px solid var(--line);margin-top:12px;padding-top:12px;
@@ -490,7 +557,7 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .foot{display:flex;gap:8px;padding:2px 12px 12px}
 .foot>button{border-radius:var(--r-sm);font-size:var(--f-body);font-weight:800;cursor:pointer;
   transition:transform .1s var(--e),filter .1s var(--e)}
-.foot>button:active{transform:scale(.97)}
+.foot>button:active{}
 .done-b{flex:1;border:none;padding:12px;
   background:linear-gradient(180deg,#3B8A55,#256B3C);color:#EAFBF0;
   box-shadow:0 1px 0 rgba(255,255,255,.14) inset,0 2px 10px rgba(0,0,0,.35)}
@@ -512,10 +579,10 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .mrow.danger .mrow-t b{color:var(--chest)}
 
 /* ══ 세트 성격 칩 (RPE 줄 안) ══ */
-.rp-tag{flex:0 0 auto;min-width:42px;background:#0A0A0C;border:1px solid var(--line-2);
+.rp-tag{flex:0 0 auto;min-width:46px;background:var(--card-2);border:none;
   border-radius:var(--r-sm);color:var(--tx-3);font-size:var(--f-label);font-weight:800;
-  min-height:44px;padding:0 8px;cursor:pointer;font-family:var(--mono)}
-.rp-tag.on{background:var(--card-3);border-color:var(--tx-3);color:var(--tx)}
+  min-height:44px;padding:0 8px;cursor:pointer;font-family:var(--mono);box-shadow:var(--edge)}
+.rp-tag.on{background:var(--acc);color:#08090B;box-shadow:inset 0 1px 0 rgba(255,255,255,.5)}
 
 /* ══ 불러오는 중 ══ */
 .skel{display:flex;flex-direction:column;gap:8px;padding:4px 0 8px}
@@ -536,7 +603,7 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .quick button{background:var(--steel);border:1px solid var(--line-2);border-radius:var(--r-sm);
   color:var(--tx-2);font-size:var(--f-body);font-weight:700;padding:8px 12px;cursor:pointer;
   box-shadow:var(--edge2);transition:transform .09s var(--e)}
-.quick button:active{transform:scale(.94);color:var(--tx)}
+.quick button:active{color:var(--tx)}
 
 /* ══ 종목 순서 ══ */
 .ord{display:flex;gap:8px;padding:0 12px 12px}
@@ -568,10 +635,10 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .live-x{background:none;border:1px solid var(--line-2);border-radius:var(--r-sm);
   color:var(--tx-3);font-size:var(--f-label);font-weight:700;padding:4px 8px;cursor:pointer;
   flex:none;transition:transform .09s var(--e),color .15s var(--e)}
-.live-x:active{transform:scale(.92);color:var(--tx-2)}
+.live-x:active{color:var(--tx-2)}
 
 /* ══ 마친 종목 ══ */
-.ex.fin{opacity:.62;border-color:rgba(74,222,128,.18)}
+.ex.fin{opacity:.62;border-color:rgba(255,184,77,.18)}
 .ex.fin .ex-tt b{color:var(--tx-2)}
 .ex-ck{font-style:normal;color:var(--good);font-size:var(--f-body);margin-right:4px;font-weight:900}
 .done-b{background:linear-gradient(180deg,#3B8A55,#256B3C);color:#EAFBF0;
@@ -623,7 +690,7 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .modal.on{opacity:1;pointer-events:auto}
 .md-in{width:100%;max-width:340px;background:#0E0E11;border:1px solid var(--line-2);
   border-radius:var(--r-lg);padding:20px 16px 16px;box-shadow:0 20px 50px rgba(0,0,0,.7),var(--edge2);
-  transform:scale(.96);transition:transform .18s var(--e)}
+  transition:transform .18s var(--e)}
 .modal.on .md-in{transform:none}
 .md-t{font-size:var(--f-title);font-weight:900;letter-spacing:-.03em;margin-bottom:8px}
 .md-b{font-size:var(--f-body);color:var(--tx-2);line-height:1.7}
@@ -632,7 +699,7 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .md-f{display:flex;gap:8px;margin-top:16px}
 .md-f button{flex:1;border:none;border-radius:var(--r-sm);font-size:var(--f-title);font-weight:800;
   padding:12px;cursor:pointer;transition:transform .1s var(--e)}
-.md-f button:active{transform:scale(.97)}
+.md-f button:active{}
 .md-no{background:var(--card-2);color:var(--tx-2);border:1px solid var(--line-2)!important}
 .md-ok{background:linear-gradient(180deg,#FFF,#E4E4E8);color:#09090B}
 .md-ok.danger{background:linear-gradient(180deg,#F0554A,#C93A31);color:#fff}
@@ -700,9 +767,10 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 /* ══ 내 정보 ══ */
 .grow{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);
   padding:var(--s4);margin-bottom:var(--s3);text-align:center}
-.grow-a{width:84px;height:84px;margin:0 auto var(--s1)}
+.grow-a{width:200px;height:138px;margin:0 auto var(--s1)}
 .grow-a svg{width:100%;height:100%}
 .grow-n{font-size:var(--f-num);font-weight:900;letter-spacing:-.04em}
+.grow-l i{font-style:normal;opacity:.45;margin:0 2px}
 .grow-l{font-size:var(--f-label);color:var(--tx-3);font-weight:800;letter-spacing:.09em;margin-top:2px}
 .grow-b{height:7px;background:var(--card-2);border-radius:4px;overflow:hidden;margin:12px 0 8px}
 .grow-b i{display:block;height:100%;background:var(--white);border-radius:4px;transition:width .4s}
@@ -746,7 +814,7 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .guide-cta{display:flex;align-items:center;gap:12px;width:100%;margin-top:8px;
   background:var(--steel);border:1px solid var(--line-2);border-radius:var(--r-lg);
   padding:16px 16px;cursor:pointer;text-align:left;color:var(--tx);box-shadow:var(--edge2)}
-.guide-cta:active{transform:scale(.99)}
+.guide-cta:active{}
 .gc-i{font-size:var(--f-num);flex:none}
 .gc-x{flex:1;min-width:0}
 .gc-x b{display:block;font-size:var(--f-title);font-weight:800;letter-spacing:-.02em}
@@ -778,7 +846,7 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .fin{background:var(--steel);border:1px solid var(--line-2);border-radius:var(--r-lg);
   padding:20px 16px;margin-bottom:12px;box-shadow:var(--edge2);text-align:center}
 .fin-tag{display:inline-block;font-size:var(--f-micro);font-weight:900;letter-spacing:.18em;
-  color:var(--good);border:1px solid rgba(74,222,128,.4);border-radius:5px;padding:4px 8px}
+  color:var(--good);border:1px solid rgba(255,184,77,.4);border-radius:5px;padding:4px 8px}
 .fin-top b{display:block;font-size:var(--f-hero);font-weight:900;letter-spacing:-.05em;margin-top:12px;line-height:1}
 .fin-sub{display:block;font-size:var(--f-body);color:var(--tx-3);font-weight:700;margin-top:8px}
 .fin-dots{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:12px}
@@ -840,7 +908,7 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .acctbig-t b{display:block;font-size:var(--f-num);font-weight:900;letter-spacing:-.035em}
 .acctbig-t span{font-size:var(--f-label);color:var(--tx-3);word-break:break-all}
 .rt-b{transition:transform .1s var(--e)}
-.rt-b:active{transform:scale(.93)}
+.rt-b:active{}
 
 /* ══ 휴식 시간 인라인 조절 ══ */
 .rest-row{display:flex;gap:8px;padding:12px 12px 8px;align-items:stretch}
@@ -901,7 +969,7 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .rep-btn em{font-style:normal;font-size:var(--f-label);color:var(--tx-3);font-weight:700}
 
-/* ══ 헬냥이 ══ */
+/* ══ 코치 ══ */
 .cat-bb{position:absolute;right:13px;z-index:35;top:calc(var(--hdrh, 96px) + 6px);
   max-width:min(250px,calc(100vw - 108px));background:#FFF;color:#141418;border-radius:14px;
   padding:8px 12px;font-size:var(--f-body);font-weight:600;line-height:1.6;
@@ -925,7 +993,7 @@ body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .say-t{flex:1;min-width:0;font-size:var(--f-body);line-height:1.65;color:var(--tx-2)}
 .say-t b{color:var(--tx);font-weight:800}
 .say.a{border-color:rgba(251,146,60,.35);background:rgba(251,146,60,.07)}
-.say.g{border-color:rgba(74,222,128,.32);background:rgba(74,222,128,.07)}
+.say.g{border-color:rgba(255,184,77,.32);background:rgba(255,184,77,.07)}
 
 #toast{position:absolute;left:50%;bottom:26px;
   transform:translateX(-50%) translateY(10px);background:var(--white);color:#09090B;
@@ -1975,12 +2043,12 @@ function headerHTML(isDated){
   if (isDated){
     const dow = DAYS[new Date(viewDate).getDay()];
     const isT = viewDate === today();
-    left = '<button class="hb-a" onclick="goDay(-1)" aria-label="이전 날">‹</button>' +
+    left = '<button class="hb-a" onclick="goDay(-1)" aria-label="이전 날">'+svg('prev',19)+'</button>' +
       '<button class="hb-d'+(isT?'':' past')+'" onclick="pickDate()">' +
-        '<b>'+fmtD(viewDate)+' <em>('+dow+')</em></b>' +
+        '<b>'+fmtD(viewDate)+' <em>'+dow+'</em></b>' +
         (isT ? '' : '<span>'+(viewDate < today() ? '지난 기록' : '예정일')+'</span>') +
       '</button>' +
-      '<button class="hb-a" onclick="goDay(1)" aria-label="다음 날">›</button>';
+      '<button class="hb-a" onclick="goDay(1)" aria-label="다음 날">'+svg('next',19)+'</button>';
   } else {
     left = '<div class="brand">IRONLOG</div>';
   }
@@ -1988,11 +2056,10 @@ function headerHTML(isDated){
   return left +
     '<div class="hdr-btns">' +
       (isDated ? '<button class="ibtn" onclick="jumpDay(today())" aria-label="오늘로">' +
-        '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></button>' : '') +
-      '<button class="ibtn" onclick="openTimer()" aria-label="타이머">' +
-        '<svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg></button>' +
-      '<button class="ibtn cat" id="catBtn" onclick="openCat()" aria-label="헬냥이">' +
-        catSVG(st.idx, mood, true) + (alert?'<span class="ibtn-dot"></span>':'') + '</button>' +
+        svg('cal',19)+'</button>' : '') +
+      '<button class="ibtn" onclick="openTimer()" aria-label="타이머">'+svg('timer',19)+'</button>' +
+      '<button class="ibtn cat" id="catBtn" onclick="openCat()" aria-label="성장">' +
+        gaugeSVG(st.idx, 22) + (alert?'<span class="ibtn-dot"></span>':'') + '</button>' +
     '</div>';
 }
 
@@ -3332,18 +3399,19 @@ async function applySplit(id){
 }
 
 /* ═══════════════════════════════════════════════════
-   12. 헬냥이
+   12. 코치
    ═══════════════════════════════════════════════════ */
+/* 등급 — 원판이 한 쌍씩 늘어나는 단계 */
 const STAGES = [
-  { exp:0, name:'아깽이', sw:14, arm:4.0, bi:0, pose:'down' },
-  { exp:80, name:'뉴비냥', sw:17, arm:5.5, bi:2.5, pose:'down' },
-  { exp:220, name:'헬린이냥', sw:21, arm:7.0, bi:4.0, pose:'down' },
-  { exp:450, name:'머슬냥', sw:25, arm:9.0, bi:5.5, pose:'flex' },
-  { exp:800, name:'벌크냥', sw:29, arm:11.0, bi:7.0, pose:'flex' },
-  { exp:1300, name:'괴물냥', sw:33, arm:13.0, bi:8.5, pose:'flex' }
+  { exp:0,    name:'입문', sw:14, arm:4.0,  bi:0,   pose:'down' },
+  { exp:80,   name:'초급', sw:17, arm:5.5,  bi:2.5, pose:'down' },
+  { exp:220,  name:'중급', sw:21, arm:7.0,  bi:4.0, pose:'down' },
+  { exp:450,  name:'상급', sw:25, arm:9.0,  bi:5.5, pose:'flex' },
+  { exp:800,  name:'고급', sw:29, arm:11.0, bi:7.0, pose:'flex' },
+  { exp:1300, name:'정예', sw:33, arm:13.0, bi:8.5, pose:'flex' }
 ];
 
-/* 헬냥이 성장 계산은 전체 기록을 훑으므로 화면마다 다시 하지 않는다 */
+/* 코치 성장 계산은 전체 기록을 훑으므로 화면마다 다시 하지 않는다 */
 function catStats(){ return memo('cs|'+today(), _catStats); }
 function _catStats(){
   const sd = {}; D.slots.forEach(s => sd[s.id] = s.date);
@@ -3424,9 +3492,73 @@ function _catStats(){
 
 /* mood 뒤에 mono 를 주면 단색 강철빛 엠블럼으로 그린다.
    ─ 엠블럼: 플로팅 버튼·친구 목록처럼 UI 부품으로 쓰이는 자리
-   ─ 컬러  : 성장 카드·헬냥이 시트처럼 캐릭터가 주인공인 자리
+   ─ 컬러  : 성장 카드·코치 시트처럼 캐릭터가 주인공인 자리
    같은 형태를 두 벌로 운영해, 평소 화면은 날카롭게 유지하면서
    캐릭터의 매력은 필요한 곳에서만 꺼낸다. */
+/* ───────────────────────────────────────────────
+   성장 오브제
+
+   작은 자리(헤더·친구 목록)에는 게이지, 큰 자리(내 정보)에는 바벨.
+   같은 단계를 두 형태로 표현한다.
+   귀여운 마스코트는 이 앱의 차가운 금속 방향과 맞지 않아 걷어냈다.
+   ─────────────────────────────────────────────── */
+function gaugeSVG(idx, sz){
+  const lv = Math.max(1, Math.min(6, (idx|0) + 1));
+  const c = 60, R = 44, C = 2 * Math.PI * R;
+  let g = '<circle cx="60" cy="60" r="44" fill="none" stroke="#3A404A" stroke-width="9"/>' +
+    '<circle cx="60" cy="60" r="44" fill="none" stroke="var(--acc)" stroke-width="9" ' +
+      'stroke-linecap="round" stroke-dasharray="'+C.toFixed(0)+'" ' +
+      'stroke-dashoffset="'+(C*(1-lv/6)).toFixed(0)+'" transform="rotate(-90 60 60)"/>';
+  const n = Math.min(lv, 5) * 2;
+  for (let i = 0; i < n; i++){
+    g += '<rect x="57.4" y="34" width="5.2" height="10" rx="2.6" fill="#98A0AC" ' +
+         'transform="rotate('+(i*360/n)+' 60 60)"/>';
+  }
+  g += '<circle cx="60" cy="60" r="'+(lv>=6?9:7)+'" fill="var(--acc)"/>';
+  if (lv >= 6) g += '<circle cx="60" cy="60" r="16" fill="none" stroke="var(--acc)" stroke-width="3"/>';
+  return '<svg viewBox="0 0 120 120" width="'+(sz||24)+'" height="'+(sz||24)+'">'+g+'</svg>';
+}
+
+/* 큰 자리용 — 원판이 한 쌍씩 끼워지는 바벨 */
+function barSVG(idx){
+  const lv = Math.max(1, Math.min(6, (idx|0) + 1));
+  const cy = 70;
+  let g = '<defs>' +
+    '<linearGradient id="bplate" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0%" stop-color="#A8B0BC"/><stop offset="45%" stop-color="#6F7784"/>' +
+      '<stop offset="100%" stop-color="#454C57"/></linearGradient>' +
+    '<linearGradient id="bnew" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0%" stop-color="#FFD08A"/><stop offset="45%" stop-color="#FFB84D"/>' +
+      '<stop offset="100%" stop-color="#C98A2E"/></linearGradient>' +
+    '<linearGradient id="bbar" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0%" stop-color="#7E8794"/><stop offset="50%" stop-color="#4E5560"/>' +
+      '<stop offset="100%" stop-color="#333941"/></linearGradient></defs>';
+  g += '<rect x="14" y="'+(cy-3)+'" width="172" height="6" rx="3" fill="url(#bbar)"/>';
+  g += '<rect x="14" y="'+(cy-3)+'" width="172" height="1.4" rx="1" fill="#fff" opacity=".26"/>';
+  for (let i = 0; i < 16; i++)
+    g += '<rect x="'+(74+i*3.4)+'" y="'+(cy-4.5)+'" width="1.2" height="9" rx=".6" fill="#262B33"/>';
+  const P = [[13,40],[11,34],[10,28],[9,23],[8,18]];
+  const n = Math.min(lv, 5);
+  for (let i = 0; i < n; i++){
+    const w = P[i][0], h = P[i][1], x = 60 - i*14;
+    const fill = (i === n-1 && lv <= 5) ? 'url(#bnew)' : 'url(#bplate)';
+    [x, 200-x-w].forEach(sx => {
+      g += '<g class="bp'+(i===n-1?' bp-new':'')+'">' +
+        '<rect x="'+sx+'" y="'+(cy-h)+'" width="'+w+'" height="'+(h*2)+'" rx="3" fill="'+fill+'"/>' +
+        '<rect x="'+sx+'" y="'+(cy-h)+'" width="'+w+'" height="2.2" rx="1.1" fill="#fff" opacity=".42"/>' +
+        '<circle cx="'+(sx+w/2)+'" cy="'+cy+'" r="2.6" fill="#1A1E25"/></g>';
+    });
+  }
+  if (lv >= 6){
+    [30, 162].forEach(sx => {
+      g += '<rect x="'+sx+'" y="'+(cy-11)+'" width="8" height="22" rx="3" fill="url(#bnew)"/>' +
+           '<rect x="'+sx+'" y="'+(cy-11)+'" width="8" height="2" rx="1" fill="#fff" opacity=".5"/>';
+    });
+    g += '<ellipse cx="100" cy="'+cy+'" rx="94" ry="52" fill="none" stroke="var(--acc)" stroke-width="1" opacity=".22"/>';
+  }
+  return '<svg viewBox="0 0 200 140">'+g+'</svg>';
+}
+
 function catSVG(idx, mood, mono){
   const S = STAGES[Math.max(0,Math.min(STAGES.length-1,idx))];
   const SW = S.sw, AR = S.arm, BI = S.bi;
@@ -3505,26 +3637,26 @@ function catMood(st){
 }
 
 const TIPS = [
-'단백질은 한 번에 몰아 먹는 것보다 3~4끼로 나눠 먹는 게 근합성에 유리하다냥.',
-'증량 중이어도 지방을 총 칼로리의 20% 밑으로 내리진 말자냥. 호르몬이 힘들어한다냥.',
-'체중이 2주 동안 안 변하면 목표 칼로리를 200 정도 조정할 때다냥.',
-'물을 적게 마시면 힘이 빠진다냥. 체중 1kg당 30ml 정도가 기준이라냥.',
-'근육은 헬스장에서 찢어지고 잠자는 동안 자란다냥. 7시간은 자자냥.',
-'운동 전에 굶고 가면 후반 세트가 무너진다냥. 1~2시간 전 탄수화물이 좋다냥.',
-'같은 부위는 48시간 쉬어주는 게 좋다냥. 매일 가슴만 하면 오히려 안 큰다냥.',
-'한 부위 주당 10~20세트가 근비대에 적당하다냥. 그 이상은 회복이 못 따라온다냥.',
-'유산소는 근손실의 주범이 아니다냥. 문제는 칼로리를 너무 적게 먹는 거라냥.',
-'체중계 숫자는 하루 2kg도 흔들린다냥. 주 평균으로 보자냥.',
-'보충제는 식단을 채우는 도구지 대체품이 아니다냥. 밥부터 챙기자냥.',
-'세트 사이 휴식은 복합운동이면 2~3분이 좋다냥. 30초씩 쉬면 무게가 안 오른다냥.',
-'감량기엔 단백질을 오히려 늘려야 근육을 지킨다냥. 체중 1kg당 2g 이상이 목표다냥.',
-'술은 하루치 회복을 통째로 깎아먹는다냥. 마셨으면 다음날은 가볍게 가자냥.',
-'휴식 시간을 재면 세트 강도가 일정해진다냥. 앱 안에 타이머가 있으니 쓰자냥.',
-'3주 넘게 무게가 안 오르면 더 밀어붙이지 말고 한 주 가볍게 가라냥. 그게 더 빨리 는다냥.',
-'같은 무게로 횟수가 늘었으면 그것도 신기록이다냥. 종목을 눌러 추이 그래프를 보라냥.',
-'프리워크아웃 먹고 커피까지 마시면 400mg을 금방 넘는다냥. 둘 중 하나만 하자냥.',
-'카페인은 운동 30~60분 전이 가장 효과가 좋다냥. 체중 1kg당 3mg이면 충분하다냥.',
-'당류를 줄이려면 음료부터 바꾸라냥. 액체로 마신 설탕은 배가 안 부르다냥.'
+'단백질은 한 번에 몰아 먹는 것보다 3~4끼로 나눠 먹는 편이 근합성에 유리합니다.',
+'증량 중이어도 지방을 총 칼로리의 20% 밑으로 내리지 마세요. 호르몬이 힘들어집니다.',
+'체중이 2주 동안 안 변하면 목표 칼로리를 200 정도 조정할 때입니다.',
+'물을 적게 마시면 힘이 빠집니다. 체중 1kg당 30ml 정도가 기준입니다.',
+'근육은 헬스장에서 찢어지고 잠자는 동안 자랍니다. 7시간은 확보하세요.',
+'운동 전에 굶고 가면 후반 세트가 무너집니다. 1~2시간 전 탄수화물이 좋습니다.',
+'같은 부위는 48시간 쉬는 편이 좋습니다. 매일 가슴만 하면 오히려 효율이 떨어집니다.',
+'한 부위 주당 10~20세트가 근비대에 적당합니다. 그 이상은 회복이 따라오지 못합니다.',
+'유산소는 근손실의 주범이 아닙니다. 문제는 칼로리를 너무 적게 먹는 거.',
+'체중계 숫자는 하루 2kg도 흔들립니다. 주 평균으로 보.',
+'보충제는 식단을 채우는 도구지 대체품이 아닙니다. 밥부터 챙기.',
+'세트 사이 휴식은 복합운동이면 2~3분이 좋습니다. 30초씩 쉬면 무게가 안 오릅니다.',
+'감량기엔 단백질을 오히려 늘려야 근육을 지킨습니다. 체중 1kg당 2g 이상이 목표습니다.',
+'술은 하루치 회복을 통째로 깎아먹납니다. 마셨으면 다음날은 가볍게 가.',
+'휴식 시간을 재면 세트 강도가 일정해집니다. 앱 안에 타이머가 있으니 쓰.',
+'3주 넘게 무게가 안 오르면 더 밀어붙이지 말고 한 주 가볍게 가. 그게 더 빨리 납니다.',
+'같은 무게로 횟수가 늘었으면 그것도 신기록입니다. 종목을 눌러 추이 그래프를 보.',
+'프리워크아웃 먹고 커피까지 마시면 400mg을 금방 넘납니다. 둘 중 하나만 하.',
+'카페인은 운동 30~60분 전이 가장 효과가 좋습니다. 체중 1kg당 3mg이면 충분합니다.',
+'당류를 줄이려면 음료부터 바꾸. 액체로 마신 설탕은 배가 안 부르습니다.'
 ];
 
 function catSay(st){
@@ -3533,37 +3665,37 @@ function catSay(st){
   const t = targets(), e = t ? eaten(d) : null;
   const mc = mealsOn(d).length;
 
-  if (st.noRest >= 6) out.push({i:'😾',tone:'a',t:'<b>'+st.noRest+'일 연속</b> 운동했다냥. 근육은 쉴 때 자란다냥. 내일은 쉬자냥.'});
+  if (st.noRest >= 6) out.push({i:'😾',tone:'a',t:'<b>'+st.noRest+'일 연속</b> 운동했습니다. 근육은 쉴 때 자랍니다. 내일은 쉬.'});
   if (st.volPrev > 0 && st.volNow > st.volPrev*1.4)
-    out.push({i:'⚠️',tone:'a',t:'이번주 볼륨이 지난주보다 <b>'+Math.round((st.volNow/st.volPrev-1)*100)+'%</b> 늘었다냥. 부상이 나는 구간이라냥.'});
+    out.push({i:'⚠️',tone:'a',t:'이번주 볼륨이 지난주보다 <b>'+Math.round((st.volNow/st.volPrev-1)*100)+'%</b> 늘었습니다. 부상이 나는 구간이.'});
 
   slotsOn(d).forEach(sl => {
     const a = prAnalysis(sl); if (!a) return;
-    if (a.verdict === 'go') out.push({i:'🔥',tone:'g',t:'<b>'+a.ex.name+'</b> 추정 1RM이 '+a.topE+'kg다냥! <b>'+a.ladder[0]+'kg</b>부터 도전각이다냥.'});
-    else if (a.verdict === 'wait') out.push({i:'✋',tone:'a',t:'<b>'+a.ex.name+'</b> 수치는 PR급인데 지금은 지쳤다냥. 다음에 첫 종목으로 하자냥.'});
+    if (a.verdict === 'go') out.push({i:'🔥',tone:'g',t:'<b>'+a.ex.name+'</b> 추정 1RM이 '+a.topE+'kg습니다. <b>'+a.ladder[0]+'kg</b>부터 도전각입니다.'});
+    else if (a.verdict === 'wait') out.push({i:'✋',tone:'a',t:'<b>'+a.ex.name+'</b> 수치는 PR급인데 지금은 지쳤습니다. 다음에 첫 종목으로 하.'});
   });
 
   if (t && e){
     const left = t.p - e.p;
-    if (mc > 0 && left > 25) out.push({i:'🍗',tone:'',t:'단백질이 <b>'+e.p+'g</b>이다냥. '+left+'g 남았어냥 — 닭가슴살 한 팩 23g, 프로틴 한 스쿱 24g이라냥.'});
-    else if (mc > 0 && left <= 0) out.push({i:'💪',tone:'g',t:'단백질 <b>'+e.p+'g</b> 채웠다냥! 오늘 근육은 안심이라냥.'});
+    if (mc > 0 && left > 25) out.push({i:'🍗',tone:'',t:'단백질이 <b>'+e.p+'g</b>입니다. '+left+'g 남았어요 — 닭가슴살 한 팩 23g, 프로틴 한 스쿱 24g이.'});
+    else if (mc > 0 && left <= 0) out.push({i:'💪',tone:'g',t:'단백질 <b>'+e.p+'g</b> 채웠습니다. 오늘 근육은 안심이.'});
     const over = e.kcal - t.kcal;
-    if (over > 300) out.push({i:'🍩',tone:'',t:'목표보다 <b>'+over+'kcal</b> 더 먹었다냥. 하루로 무너지진 않는다냥.'});
+    if (over > 300) out.push({i:'🍩',tone:'',t:'목표보다 <b>'+over+'kcal</b> 더 먹었습니다. 하루로 무너지진 않납니다.'});
     else if (mc >= 3 && over < -500 && new Date().getHours() >= 20)
-      out.push({i:'🥺',tone:'a',t:'오늘 <b>'+Math.abs(over)+'kcal</b>나 덜 먹었다냥. 너무 굶으면 근육부터 빠진다냥.'});
-    if (mc === 0 && tSet > 0) out.push({i:'🍚',tone:'',t:'운동은 했는데 식단이 비었다냥. 기록해야 도와줄 수 있다냥.'});
+      out.push({i:'🥺',tone:'a',t:'오늘 <b>'+Math.abs(over)+'kcal</b>나 덜 먹었습니다. 너무 굶으면 근육부터 빠집니다.'});
+    if (mc === 0 && tSet > 0) out.push({i:'🍚',tone:'',t:'운동은 했는데 식단이 비었습니다. 기록해야 분석해 드릴 수 있습니다.'});
 
     if (e.caf > t.caf)
-      out.push({i:'☕',tone:'a',t:'카페인 <b>'+e.caf+'mg</b>이다냥. 하루 '+t.caf+'mg을 넘었어. 잠 못 자면 근육도 안 자란다냥.'});
+      out.push({i:'☕',tone:'a',t:'카페인 <b>'+e.caf+'mg</b>입니다. 하루 '+t.caf+'mg을 넘었어. 잠 못 자면 근육도 안 자랍니다.'});
     else if (e.caf > 0 && e.lateCaf){
       const ch = parseInt(String(e.lateCaf).slice(0,2),10);
       if (!isNaN(ch) && ch >= 16)
-        out.push({i:'😴',tone:'',t:'<b>'+e.lateCaf+'</b>에 카페인을 먹었다냥. 반감기가 5~6시간이라 잘 때까지 남아있다냥.'});
+        out.push({i:'😴',tone:'',t:'<b>'+e.lateCaf+'</b>에 카페인을 먹었습니다. 반감기가 5~6시간이라 잘 때까지 남아있습니다.'});
     }
     if (e.sug > t.sug * 1.5)
-      out.push({i:'🍬',tone:'a',t:'당류가 <b>'+e.sug+'g</b>이다냥. 권장 '+t.sug+'g의 1.5배야. 탄수는 밥으로 채우자냥.'});
+      out.push({i:'🍬',tone:'a',t:'당류가 <b>'+e.sug+'g</b>입니다. 권장 '+t.sug+'g의 1.5배야. 탄수는 밥으로 채우.'});
   } else if (!t){
-    out.push({i:'📋',tone:'',t:'아직 네 정보를 모른다냥. 내 정보 탭에서 키·몸무게를 알려주라냥.'});
+    out.push({i:'📋',tone:'',t:'아직 회원님 정보를 모릅니다. 내 정보 탭에서 키·몸무게를 알려주세요.'});
   }
 
   /* 지난주 리포트가 아직 안 열렸다면 (월·화요일에 알림) */
@@ -3571,7 +3703,7 @@ function catSay(st){
   const lastWeek = weekStart(shift(d,-7));
   if ((dow === 1 || dow === 2 || dow === 0) && D.lastReport !== lastWeek &&
       D.slots.some(x => x.date >= lastWeek && x.date < weekStart(d))){
-    out.push({i:'📋',tone:'g',t:'지난주 리포트가 나왔다냥! <b>기록실 → 주</b>에서 볼 수 있다냥.'});
+    out.push({i:'📋',tone:'g',t:'지난주 리포트가 나왔습니다. <b>기록실 → 주</b>에서 볼 수 있습니다.'});
   }
 
   /* 정체 종목 */
@@ -3581,22 +3713,22 @@ function catSay(st){
     const s0 = stalled.find(x => x.down) || stalled[0];
     out.push({i: s0.down ? '📉' : '⏸', tone:'a',
       t: s0.down
-        ? '<b>'+s0.ex.name+'</b> 무게가 떨어지고 있다냥. 이번 주는 <b>'+s0.deload+'kg</b>로 낮춰서 가자냥.'
-        : '<b>'+s0.ex.name+'</b>이 '+s0.n+'세션째 제자리다냥. 무게 올리기 전에 횟수를 2회 더 채워보라냥.'});
+        ? '<b>'+s0.ex.name+'</b> 무게가 떨어지고 있습니다. 이번 주는 <b>'+s0.deload+'kg</b>로 낮춰서 가.'
+        : '<b>'+s0.ex.name+'</b>이 '+s0.n+'세션째 제자리습니다. 무게 올리기 전에 횟수를 2회 더 채워보.'});
   }
 
   const strong = PARTS.filter(p => p.id !== 'cardio' && st.partSets[p.id] > 22);
   const weak = PARTS.filter(p => p.id !== 'cardio' && st.partSets[p.id] === 0);
-  if (strong.length) out.push({i:'📊',tone:'a',t:'이번주 <b>'+strong[0].name+'</b>'+josa(strong[0].name,'이','가')+' '+st.partSets[strong[0].id]+'세트라냥. 회복이 안 따라온다냥.'});
+  if (strong.length) out.push({i:'📊',tone:'a',t:'이번주 <b>'+strong[0].name+'</b>'+josa(strong[0].name,'이','가')+' '+st.partSets[strong[0].id]+'세트. 회복이 안 따라오지 못합니다.'});
   if (st.totalDays >= 4 && weak.length && weak.length <= 3){
     const wn = weak.map(w => w.name).join('·');
-    out.push({i:'🦵',tone:'',t:'이번주 <b>'+wn+'</b>'+josa(wn,'이','가')+' 0세트다냥. 한쪽만 크면 이상해진다냥.'});
+    out.push({i:'🦵',tone:'',t:'이번주 <b>'+wn+'</b>'+josa(wn,'이','가')+' 0세트습니다. 한쪽만 크면 이상해집니다.'});
   }
 
-  if (st.since !== null && st.since >= 3) out.push({i:'😿',tone:'a',t:'<b>'+st.since+'일째</b> 안 왔다냥... 가볍게라도 오자냥.'});
-  else if (st.streak >= 3) out.push({i:'🔥',tone:'g',t:'<b>'+st.streak+'일 연속</b> 기록 중이다냥! 곧 '+(st.nxt?st.nxt.name:'최종 단계')+'이다냥.'});
-  else if (tSet === 0) out.push({i:'👀',tone:'',t:'오늘은 아직 기록이 없다냥. 종목 하나만 눌러도 시작이다냥.'});
-  if (D.slots.length < 3) out.push({i:'📋',tone:'',t:'뭘 할지 모르겠으면 <b>내 정보 → 시작 가이드</b>를 보라냥. 주 몇 회 갈지만 정하면 짜준다냥.'});
+  if (st.since !== null && st.since >= 3) out.push({i:'😿',tone:'a',t:'<b>'+st.since+'일째</b> 안 왔습니다... 가볍게라도 오.'});
+  else if (st.streak >= 3) out.push({i:'🔥',tone:'g',t:'<b>'+st.streak+'일 연속</b> 기록 중입니다. 곧 '+(st.nxt?st.nxt.name:'최종 단계')+'입니다.'});
+  else if (tSet === 0) out.push({i:'👀',tone:'',t:'오늘은 아직 기록이 없습니다. 종목 하나만 눌러도 시작입니다.'});
+  if (D.slots.length < 3) out.push({i:'📋',tone:'',t:'뭘 할지 모르겠으면 <b>내 정보 → 시작 가이드</b>를 보세요. 주 몇 회 갈지만 정하면 짜드립니다.'});
 
   out.push({i:'💡',tone:'',t:TIPS[Math.floor(new Date(d).getTime()/864e5) % TIPS.length]});
   return out;
@@ -3611,7 +3743,7 @@ function openCat(){
   catSay(st).forEach(s => {
     h += '<div class="say '+s.tone+'"><span class="say-i">'+s.i+'</span><span class="say-t">'+s.t+'</span></div>';
   });
-  openSheet('헬냥이', h);
+  openSheet('코치', h);
 }
 
 let bubbleShown = false;
@@ -3621,7 +3753,7 @@ function renderCat(){
   if (st.idx > (D.seenStage||0)){ lv = st.cur.name; D.seenStage = st.idx; saveData(); }
   const says = catSay(st);
   const urgent = says.some(s => s.tone === 'a');
-  /* 헬냥이는 헤더 버튼 안에 있다. headerHTML 이 이미 그려두므로 여기서는 손대지 않는다. */
+  /* 코치는 헤더 버튼 안에 있다. headerHTML 이 이미 그려두므로 여기서는 손대지 않는다. */
   const b = $('#catBB');
   /* 말풍선은 내용을 가리므로 짧게 보여주고 아무 데나 누르면 바로 닫는다 */
   const show = (html, ms) => {
@@ -3631,9 +3763,9 @@ function renderCat(){
     bubbleT = setTimeout(() => b.classList.remove('on'), ms);
   };
   if (lv){
-    show('<span class="cb-t">LEVEL UP</span>진화했다냥!! 이제 <b>'+lv+'</b>이다냥 🎉', 7000);
+    show('<span class="cb-t">LEVEL UP</span>진화했습니다.! 이제 <b>'+lv+'</b>이습니다 🎉', 7000);
   } else if (!bubbleShown && says.length){
-    show('<span class="cb-t">헬냥이</span>'+says[0].t, 5000);
+    show('<span class="cb-t">코치</span>'+says[0].t, 5000);
   }
 }
 let bubbleT = null;
@@ -3652,9 +3784,9 @@ document.addEventListener('pointerdown', e => {
    ═══════════════════════════════════════════════════ */
 function viewMe(){
   const st = catStats(), mood = catMood(st);
-  let h = '<div class="grow"><div class="grow-a">'+catSVG(st.idx,mood)+'</div>' +
+  let h = '<div class="grow"><div class="grow-a">'+barSVG(st.idx)+'</div>' +
     '<div class="grow-n">'+st.cur.name+'</div>' +
-    '<div class="grow-l">LV '+(st.idx+1)+'</div>' +
+    '<div class="grow-l">LV '+(st.idx+1)+' <i>·</i> 원판 '+(Math.min(st.idx+1,5)*2)+'장</div>' +
     '<div class="grow-b"><i style="width:'+st.pct+'%"></i></div>' +
     '<div class="grow-x">' +
       '<span>'+st.exp+' EXP</span>' +
@@ -3735,7 +3867,7 @@ function viewMe(){
     '<button class="btn btn-g btn-sm" style="margin-top:8px;color:var(--chest)" onclick="wipe()">기록 전체 삭제</button></div>';
 
   h += '<div class="note" style="text-align:center;margin-top:16px;cursor:pointer" onclick="toggleDiag()">' +
-       'IRONLOG v31 · 종목 '+Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
+       'IRONLOG v32 · 종목 '+Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
   if (showDiag){
     h += '<div class="note" style="text-align:center;margin-top:5px;font-size:9px;opacity:.5;' +
          'font-family:var(--mono);line-height:1.7;word-break:break-all">' + diagLine() + '</div>';
@@ -3767,7 +3899,7 @@ function diagLine(){
   const bh = Math.round(document.body.getBoundingClientRect().height);
   const vv = window.visualViewport;
   return [
-    'v31',
+    'v32',
     'body' + bh,
     'inner' + window.innerHeight,
     'client' + document.documentElement.clientHeight,
@@ -5029,12 +5161,50 @@ function importData(){ $('#impFile').click(); }
 /* ═══════════════════════════════════════════════════
    16. 렌더
    ═══════════════════════════════════════════════════ */
+/* 24×24 격자 · 획 1.75 · 끝 round. 유니코드 글자는 쓰지 않는다. */
 const ICONS = {
-  workout:'<path d="M4 8v8M8 5v14M16 5v14M20 8v8M8 12h8"/>',
-  diet:'<path d="M6 3v8a3 3 0 006 0V3M9 11v10M18 3c-1.5 2-2 4-2 6v3h3V3z"/>',
-  rec:'<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4M8 14h2M14 14h2M8 18h2"/>',
-  me:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/>'
+  workout:'<path d="M4 9v6M20 9v6M7 6.5v11M17 6.5v11M7 12h10"/>',
+  diet:'<path d="M6 3v7a2.5 2.5 0 0 0 5 0V3M8.5 10v11M17.5 3c-1.6 1.1-2.5 3-2.5 5.2 0 1.9.9 3 2.5 3.3V21"/>',
+  rec:'<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><circle cx="8.5" cy="14" r=".9" fill="currentColor" stroke="none"/><circle cx="12" cy="14" r=".9" fill="currentColor" stroke="none"/><circle cx="15.5" cy="17" r=".9" fill="currentColor" stroke="none"/>',
+  me:'<circle cx="12" cy="8" r="3.8"/><path d="M4.5 20.5c0-3.9 3.4-6.3 7.5-6.3s7.5 2.4 7.5 6.3"/>'
 };
+
+/* 화면 곳곳에서 쓰는 아이콘 */
+const UI = {
+  timer:'<circle cx="12" cy="13.5" r="7.5"/><path d="M12 9.5v4l2.6 1.8M9.3 2.5h5.4M18.8 6.2l1.4-1.4"/>',
+  cal:'<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
+  prev:'<path d="M14.5 5.5L8 12l6.5 6.5" stroke-linejoin="round"/>',
+  next:'<path d="M9.5 5.5L16 12l-6.5 6.5" stroke-linejoin="round"/>',
+  plus:'<path d="M12 5.5v13M5.5 12h13"/>',
+  minus:'<path d="M5.5 12h13"/>',
+  more:'<circle cx="5.5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="18.5" cy="12" r="1.5" fill="currentColor" stroke="none"/>',
+  close:'<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/>',
+  check:'<path d="M4.5 12.8l5 5 10-11" stroke-linejoin="round"/>',
+  search:'<circle cx="10.8" cy="10.8" r="6.3"/><path d="M15.4 15.4L20.5 20.5"/>',
+  edit:'<path d="M15.6 4.4l4 4L8.6 19.4l-4.6 1 1-4.6z" stroke-linejoin="round"/>',
+  trash:'<path d="M4.5 6.5h15M9 6.5V4h6v2.5M6.5 6.5l1 13h9l1-13M10 10v6M14 10v6"/>',
+  chart:'<path d="M5 19.5V13M12 19.5V6.5M19 19.5v-9"/>',
+  link:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7L11.3 7M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7L12.7 17"/>',
+  up:'<path d="M12 18.5V6M6.5 11L12 5.5 17.5 11" stroke-linejoin="round"/>',
+  down:'<path d="M12 5.5V18M6.5 13L12 18.5 17.5 13" stroke-linejoin="round"/>'
+};
+
+/* 부위 아이콘 */
+const PICO = {
+  chest:'<path d="M12 6.5c-2.5-1.8-6-1.6-7.5.6-1 1.5-.4 4 1.2 5.6 1.5 1.5 4 2.6 6.3 4.3 2.3-1.7 4.8-2.8 6.3-4.3 1.6-1.6 2.2-4.1 1.2-5.6-1.5-2.2-5-2.4-7.5-.6zM12 6.5v10.5"/>',
+  back:'<path d="M12 4v16M12 7c-2.5.5-5 2-6.5 4.5M12 7c2.5.5 5 2 6.5 4.5M12 13c-2 .4-3.8 1.6-5 3.4M12 13c2 .4 3.8 1.6 5 3.4"/>',
+  shoulder:'<path d="M12 5.5a4 4 0 0 1 4 4v2M12 5.5a4 4 0 0 0-4 4v2M8 11.5c-2.2.6-3.5 2.4-3.5 4.6v3M16 11.5c2.2.6 3.5 2.4 3.5 4.6v3"/>',
+  leg:'<path d="M8 4.5h8M8.5 4.5c-.4 4 .3 7 .8 10 .3 2 .4 3.7.2 5.5M15.5 4.5c.4 4-.3 7-.8 10-.3 2-.4 3.7-.2 5.5M9.3 12h5.4"/>',
+  arm:'<path d="M6.5 8.5c0-2.2 1.6-4 3.8-4s3.7 1.8 3.7 4v3c2.5.4 4 2.2 4 4.6 0 2-1.4 3.4-3.3 3.4H10c-2 0-3.5-1.5-3.5-3.6z"/>',
+  abs:'<rect x="7" y="4.5" width="10" height="15" rx="2.5"/><path d="M12 4.5v15M7 9.5h10M7 14.5h10"/>',
+  cardio:'<path d="M3 12.5h4l2-5 3 10 2.5-7 1.8 4h4.7"/>'
+};
+
+/* 어디서든 아이콘 하나를 꺼내 쓴다 */
+function svg(name, sz){
+  const d = UI[name] || ICONS[name] || PICO[name] || '';
+  return '<svg class="i" viewBox="0 0 24 24" width="'+(sz||20)+'" height="'+(sz||20)+'">'+d+'</svg>';
+}
 const TABNAME = { workout:'운동', diet:'식단', rec:'기록실', me:'내 정보' };
 
 function render(){
@@ -5134,11 +5304,11 @@ Object.assign(window, {
 });
 
 /* 이벤트 */
-/* 스크롤하는 동안엔 헬냥이를 흐리게 해서 아래 버튼을 가리지 않게 한다 */
+/* 스크롤하는 동안엔 코치를 흐리게 해서 아래 버튼을 가리지 않게 한다 */
 let scrollTimer = null;
 /* 스크롤 주체가 창(window)이 아니라 #app 이 되었으므로 여기에 붙인다 */
 $('#app').addEventListener('scroll', () => {
-  /* 헬냥이가 헤더로 옮겨져 콘텐츠를 가리지 않으므로 흐리게 할 필요가 없다 */
+  /* 코치가 헤더로 옮겨져 콘텐츠를 가리지 않으므로 흐리게 할 필요가 없다 */
 }, { passive:true });
 
 /* 탭바 실제 높이를 재서 변수에 넣는다. 떠 있는 요소들이 이걸 기준으로 놓인다. */
@@ -5177,7 +5347,7 @@ $('#mask').onclick = () => mdClose(false);
 $('#scrim').onclick = closeSheet;
 $('#shX').onclick = closeSheet;
 /* 헤더 버튼은 headerHTML 안에서 직접 연결한다 */
-/* 헬냥이 버튼은 headerHTML 안에서 연결한다 */
+/* 코치 버튼은 headerHTML 안에서 연결한다 */
 $('#catBB').onclick = () => { $('#catBB').classList.remove('on'); openCat(); };
 $('#tmrAdd').onclick = timerAdd;
 $('#tmrEnd').onclick = stopTimer;
@@ -5825,7 +5995,7 @@ function openShare(){
   let h = '<button class="shrow" onclick="toggleSearchable()">' +
     '<span class="shbox'+(srch?' on':'')+'">'+(srch?'✓':'')+'</span>' +
     '<span class="shtx"><b>닉네임 검색 허용</b><span>다른 사람이 내 닉네임으로 나를 찾을 수 있어요</span></span></button>';
-  h += row('big3','3대 기록 · 헬냥이 레벨','스쿼트·벤치·데드 추정 1RM과 DOTS 점수') +
+  h += row('big3','3대 기록 · 코치 레벨','스쿼트·벤치·데드 추정 1RM과 DOTS 점수') +
        row('weekly','주간 활동','이번 주 운동 일수, 총 볼륨, 연속 일수') +
        row('detail','종목별 최고 기록','상위 8개 종목의 최고 중량');
   h += '<div class="note" style="margin-top:16px"><b>식단과 체중은 어떤 설정에서도 친구에게 공개되지 않습니다.</b><br>' +
