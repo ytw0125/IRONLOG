@@ -102,11 +102,15 @@ input[inputmode=decimal],input[inputmode=numeric]{font-size:17px!important}
 body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 /* 순수한 검은 면은 화면에서 납작해 보인다. 아주 옅은 노이즈로 재질감을 준다. */
 /* 위쪽이 미세하게 밝은 수직 그라데이션 위에 상단 광원 하나.
-   시선이 자연스럽게 위로 모인다. */
+
+   background-attachment:fixed 는 쓰지 않는다.
+   그걸 쓰면 배경이 '화면 높이'까지만 칠해지는데,
+   iOS 홈 화면 앱에서는 body 가 화면보다 62px 더 길어서
+   아래쪽이 칠해지지 않고 흰 띠로 남는다. */
+html{background:#08090B}
 body{background:
   radial-gradient(130% 62% at 50% -12%, rgba(255,184,77,.035) 0%, transparent 58%),
-  linear-gradient(180deg, #0C0E12 0%, #08090B 42%) !important;
-  background-attachment:fixed !important}
+  linear-gradient(180deg, #0C0E12 0%, #08090B 42%) #08090B !important}
 
 body:before{content:'';position:fixed;inset:0;pointer-events:none;z-index:var(--z-grain);opacity:.032;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E")}
@@ -3887,7 +3891,7 @@ function viewMe(){
     '<button class="btn btn-g btn-sm" style="margin-top:8px;color:var(--chest)" onclick="wipe()">기록 전체 삭제</button></div>';
 
   h += '<div class="note" style="text-align:center;margin-top:16px;cursor:pointer" onclick="toggleDiag()">' +
-       'IRONLOG v33 · 종목 '+Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
+       'IRONLOG v34 · 종목 '+Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
   if (showDiag){
     h += '<div class="note" style="text-align:center;margin-top:5px;font-size:9px;opacity:.5;' +
          'font-family:var(--mono);line-height:1.7;word-break:break-all">' + diagLine() + '</div>';
@@ -3919,7 +3923,7 @@ function diagLine(){
   const bh = Math.round(document.body.getBoundingClientRect().height);
   const vv = window.visualViewport;
   return [
-    'v33',
+    'v34',
     'body' + bh,
     'inner' + window.innerHeight,
     'client' + document.documentElement.clientHeight,
