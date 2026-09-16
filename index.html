@@ -550,6 +550,22 @@ body:before{content:'';position:fixed;inset:0;pointer-events:none;z-index:var(--
 .tmr.done .mini-pl{animation:miniPulse 1s var(--eo) infinite}
 @keyframes miniPulse{0%,100%{opacity:1}50%{opacity:.45}}
 
+/* 미니바 오른쪽 — 재생·정지와 닫기 */
+.tmr-act,.tmr-x{flex:0 0 auto;display:grid;place-items:center;width:38px;height:38px;
+  border-radius:var(--r-sm);color:var(--tx-2);cursor:pointer;
+  transition:color .12s var(--eo),background .12s var(--eo)}
+.tmr-act{background:rgba(255,255,255,.055);color:var(--tx)}
+.tmr-act:active{background:rgba(255,255,255,.1)}
+.tmr-x{color:var(--tx-3)}
+.tmr-x:active{color:var(--tx-2)}
+
+/* 원판 닫기 — 오른쪽 위, 조용하게 */
+.pl-x{position:absolute;top:12px;right:12px;width:36px;height:36px;border:none;
+  border-radius:50%;background:rgba(255,255,255,.05);color:var(--tx-3);
+  display:grid;place-items:center;cursor:pointer;z-index:4;
+  transition:color .12s var(--eo),background .12s var(--eo)}
+.pl-x:active{background:rgba(255,255,255,.1);color:var(--tx)}
+
 /* ── 어두운 배경 ── */
 .pl-dim{position:fixed;top:0;left:0;right:0;bottom:var(--fixneg);z-index:var(--z-nav);
   background:rgba(4,5,7,.62);backdrop-filter:blur(16px) saturate(.75);
@@ -559,6 +575,7 @@ body:before{content:'';position:fixed;inset:0;pointer-events:none;z-index:var(--
 
 /* ── 큰 원판 드로어 ── */
 .plate{position:fixed;left:0;right:0;bottom:var(--fixneg);z-index:var(--z-modal);
+  /* 닫기 버튼을 안쪽에 두기 위해 기준을 잡는다 */
   max-width:520px;margin:0 auto;
   background:var(--card);border-radius:24px 24px 0 0;
   padding:8px 18px calc(22px + var(--sab));
@@ -568,8 +585,8 @@ body:before{content:'';position:fixed;inset:0;pointer-events:none;z-index:var(--
 .plate.on{transform:translateY(0)}
 .plate.drag{transition:none}
 
-.pl-grip{width:42px;height:4px;border-radius:2px;background:var(--line-2);
-  margin:4px auto 14px;cursor:grab}
+.pl-grip{width:38px;height:5px;border-radius:3px;background:rgba(255,255,255,.14);
+  margin:6px auto 16px;cursor:grab}
 
 /* ── 모드 전환 ── */
 .pl-seg{display:flex;gap:4px;background:#0A0C0F;border-radius:var(--r-md);padding:4px;
@@ -1228,12 +1245,27 @@ svg.i{fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;
     <b id="tmrN">0:00</b>
     <em id="tmrL">휴식</em>
   </span>
-  <span class="tmr-go" id="tmrGo">펼치기</span>
+  <span class="tmr-act" id="tmrAct" onclick="event.stopPropagation();plStart()" role="button"
+    aria-label="일시정지 · 재개">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"
+      style="fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round">
+      <g id="tmrIco"></g></svg>
+  </span>
+  <span class="tmr-x" onclick="event.stopPropagation();hideTimerUI()" role="button" aria-label="닫기">
+    <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"
+      style="fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round">
+      <path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>
+  </span>
 </button>
 
 <!-- ═══ 원판 시계 ═══ -->
 <div class="pl-dim" id="plDim" onclick="closePlate()"></div>
 <div class="plate" id="plate" role="dialog" aria-modal="true" aria-label="타이머">
+  <button class="pl-x" onclick="closePlate()" aria-label="닫기">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"
+      style="fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round">
+      <path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>
+  </button>
   <div class="pl-grip" id="plGrip"></div>
 
   <div class="pl-seg">
@@ -1568,11 +1600,92 @@ const partOf = id => PARTS.find(p => p.id === id) || PARTS[0];
 /* ═══════════════════════════════════════════════════
    3. 저장소
    ═══════════════════════════════════════════════════ */
-const KEY = 'ironlog-v1';
+const KEY = 'ironlog-v1';          /* 키 이름은 바꾸지 않는다 — 기존 데이터를 그대로 읽어야 한다 */
+const SCHEMA = 2;                  /* 현재 스키마 버전 */
+
 const BLANK = { slots:[], sets:[], meals:[], profile:null, seenStage:0,
                 customEx:[], customFood:[], weights:[], restPref:{},
                 routines:[], lastReport:null, tomb:{}, updatedAt:0,
-                done:{}, notify:false, caffLimit:400, barPref:{}, memo:{}, sess:{}, rest:{}, skip:{} };
+                done:{}, notify:false, caffLimit:400, barPref:{}, memo:{}, sess:{}, rest:{}, skip:{},
+                /* v2 에서 더해진 것 — 아직 쓰이지 않고 자리만 잡아둔다 */
+                schemaVersion:SCHEMA, prog:{}, ovr:{}, rev:0, dev:'' };
+
+/* ───────────────────────────────────────────────
+   스키마 이전
+
+   버전을 건너뛰지 않고 한 단계씩 올린다.
+   실패하면 원본을 그대로 둔다 — 덮어쓰지 않는다.
+   ─────────────────────────────────────────────── */
+const MIGRATIONS = {
+  2: d => {            /* v1 → v2 : 진행 엔진이 쓸 자리를 만든다 */
+    d.prog = d.prog || {};
+    d.ovr  = d.ovr  || {};
+    d.rev  = d.rev  || 0;
+    d.dev  = d.dev  || newDeviceId();
+    return d;
+  }
+};
+
+/* 기기 식별자 — 설치할 때 한 번만 만든다. 개인정보는 넣지 않는다. */
+function newDeviceId(){
+  try{
+    const a = new Uint8Array(6); crypto.getRandomValues(a);
+    return Array.from(a).map(x => x.toString(16).padStart(2,'0')).join('');
+  }catch(e){
+    return Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4);
+  }
+}
+
+/* 구조가 망가졌는지만 본다. 선택 항목이 없다고 거부하지 않는다. */
+function validateShape(d){
+  if (!d || typeof d !== 'object') return '내용이 비어 있습니다';
+  if (!Array.isArray(d.slots))  return '운동 기록 형식이 맞지 않습니다';
+  if (!Array.isArray(d.sets))   return '세트 기록 형식이 맞지 않습니다';
+  if (d.meals !== undefined && !Array.isArray(d.meals)) return '식단 형식이 맞지 않습니다';
+  if (d.profile !== undefined && d.profile !== null && typeof d.profile !== 'object')
+    return '프로필 형식이 맞지 않습니다';
+  return null;
+}
+
+/* 이전을 시도한다. { ok, data } 또는 { ok:false, reason } 을 돌려준다. */
+function migrate(raw, opts){
+  const from = raw && raw.schemaVersion ? raw.schemaVersion : 1;
+  if (from === SCHEMA) return { ok:true, data:raw, migrated:false };
+  if (from > SCHEMA)
+    return { ok:false, reason:'이 백업은 더 새로운 버전에서 만들어졌습니다. 앱을 업데이트해주세요.' };
+
+  /* 손대기 전에 원본을 따로 둔다 */
+  let bak = null;
+  if (!(opts && opts.skipBackup)){
+    bak = KEY + '.bak.v' + from;
+    try{
+      if (!localStorage.getItem(bak)) localStorage.setItem(bak, JSON.stringify(raw));
+    }catch(e){
+      /* 공간이 없어 백업을 못 만들면 이전하지 않는다 */
+      return { ok:false, reason:'저장 공간이 부족해 안전하게 이전할 수 없습니다.' };
+    }
+  }
+
+  /* 원본을 직접 고치지 않도록 복사본에서 작업한다 */
+  let d;
+  try{ d = JSON.parse(JSON.stringify(raw)); }
+  catch(e){ return { ok:false, reason:'데이터를 복사하지 못했습니다.', backup:bak }; }
+
+  try{
+    for (let v = from + 1; v <= SCHEMA; v++){
+      if (!MIGRATIONS[v]) throw new Error('v' + v + ' 이전 경로가 없습니다');
+      d = MIGRATIONS[v](d);
+    }
+    d.schemaVersion = SCHEMA;
+    const bad = validateShape(d);
+    if (bad) throw new Error(bad);
+    return { ok:true, data:d, migrated:true, from, backup:bak };
+  }catch(e){
+    return { ok:false, reason:String(e && e.message || e), backup:bak };
+  }
+}
+
+let loadWarn = null;   /* 불러오며 생긴 문제를 화면이 준비된 뒤 알린다 */
 
 async function loadData(){
   let raw = null;
@@ -1583,10 +1696,44 @@ async function loadData(){
     }
   }catch(e){}
   if (!raw){ try{ raw = localStorage.getItem(KEY); }catch(e){} }
-  let parsed = {};
-  if (raw){ try{ parsed = JSON.parse(raw) || {}; }catch(e){} }
-  /* 예전 버전 데이터에 없던 항목은 기본값으로 채운다 */
-  return Object.assign({}, BLANK, parsed);
+
+  if (!raw){
+    /* 첫 실행 */
+    const fresh = Object.assign({}, BLANK);
+    fresh.dev = newDeviceId();
+    return fresh;
+  }
+
+  let parsed = null;
+  try{ parsed = JSON.parse(raw); }
+  catch(e){
+    /* 읽을 수 없는 내용이다. 지우지 않고 따로 남긴 뒤 빈 상태로 연다. */
+    try{ localStorage.setItem(KEY + '.corrupt.' + Date.now(), raw); }catch(_){}
+    loadWarn = '저장된 내용을 읽지 못했습니다. 원본은 따로 보관했고, 백업 파일로 되돌릴 수 있습니다.';
+    const fresh = Object.assign({}, BLANK);
+    fresh.dev = newDeviceId();
+    return fresh;
+  }
+
+  const bad = validateShape(parsed);
+  if (bad){
+    try{ localStorage.setItem(KEY + '.corrupt.' + Date.now(), raw); }catch(_){}
+    loadWarn = '저장된 기록의 형식이 맞지 않습니다 (' + bad + '). 원본은 보관했습니다.';
+    const fresh = Object.assign({}, BLANK);
+    fresh.dev = newDeviceId();
+    return fresh;
+  }
+
+  const m = migrate(parsed);
+  if (!m.ok){
+    /* 이전에 실패했다. 원본을 그대로 쓴다 — 덮어쓰지 않는다. */
+    loadWarn = '데이터 이전에 실패했습니다. 기존 기록은 그대로 보존되었습니다. (' + m.reason + ')';
+    return Object.assign({}, BLANK, parsed);
+  }
+
+  const out = Object.assign({}, BLANK, m.data);
+  if (!out.dev) out.dev = newDeviceId();
+  return out;
 }
 /* 지운 기록은 묘비에 남긴다. 안 그러면 다른 기기와 합칠 때 되살아난다. */
 function bury(){
@@ -1599,8 +1746,14 @@ let saveFailed = false;    /* 저장이 막힌 상태인지 */
 async function saveData(){
   bumpDV();                 /* 기록이 바뀌었으니 색인·계산결과를 버린다 */
   D.updatedAt = Date.now();
+  /* rev 는 저장할 때마다 1씩 오른다.
+     기기 시각이 틀려도 어느 쪽이 나중인지 판단할 수 있다. */
+  D.rev = (D.rev || 0) + 1;
+  if (!D.dev) D.dev = newDeviceId();
+  if (!D.schemaVersion) D.schemaVersion = SCHEMA;
   const json = JSON.stringify(D);
   lastSize = json.length;
+  storageWatch(json.length);
 
   try{
     if (window.storage){ await window.storage.set(KEY, json, false); saveOK(); safePush(); return; }
@@ -1631,6 +1784,36 @@ async function saveData(){
 
 function saveOK(){ saveFailed = false; }
 let lastSize = 0;
+
+/* ── 저장 공간 감시 ──
+   지우지도 옮기지도 않는다. 알리기만 한다. */
+const QUOTA = 5 * 1024 * 1024;       /* localStorage 는 보통 5MB */
+let warnedAt = 0;                     /* 마지막으로 알린 단계 */
+
+function storagePct(bytes){
+  return Math.min(100, Math.round((bytes / QUOTA) * 100));
+}
+
+function storageWatch(bytes){
+  const pct = storagePct(bytes);
+  let step = 0;
+  if (pct >= 95) step = 95;
+  else if (pct >= 85) step = 85;
+  else if (pct >= 70) step = 70;
+  if (!step || step <= warnedAt) return;
+  warnedAt = step;
+
+  const msg = step === 95
+    ? '저장 공간이 거의 찼습니다 (' + pct + '%).<br><b>지금 백업을 받아두세요.</b><br><br>' +
+      '내 정보 → 데이터 → 백업 내려받기'
+    : step === 85
+    ? '저장 공간을 ' + pct + '% 쓰고 있습니다.<br>오래된 기록을 백업 파일로 옮겨두는 편이 안전합니다.'
+    : '저장 공간을 ' + pct + '% 쓰고 있습니다.<br>가끔 백업을 받아두시길 권합니다.';
+
+  setTimeout(() => ask({
+    title:'저장 공간', ok:'알겠어요', no:'백업 받기', body:msg
+  }).then(v => { if (v === false) exportData(); }), 500);
+}
 /* 클라우드 모듈이 아직 준비되기 전에 저장이 일어나도 터지지 않도록 감싼다 */
 function safePush(){ try{ queuePush(); }catch(e){} }
 
@@ -2012,6 +2195,71 @@ function _eaten(d){
 const T = { on:false, mode:'rest', left:0, total:0, up:0, tick:null, label:'', paused:false,
              laps:[], ms:0, raf:null, at:0 };
 
+/* ───────────────────────────────────────────────
+   스톱워치 — 전용 상태로 분리해서 관리한다.
+
+   휴식 타이머와 한 덩어리로 묶여 있으면
+   일시정지·재개에서 어느 값이 기준인지 헷갈린다.
+   여기서는 '누적 시간'과 '이번 구간 시작 시각'만 다룬다.
+   ─────────────────────────────────────────────── */
+const SW = {
+  running:false,   /* 시작된 적이 있는가 */
+  paused:false,    /* 멈춰 있는가 */
+  elapsed:0,       /* 지금까지 누적된 밀리초 */
+  since:0,         /* 이번 구간이 시작된 시각 */
+  raf:null,
+  laps:[]
+};
+
+/* 화면에 보여줄 현재 값 */
+function swNow(){
+  if (!SW.running) return 0;
+  return SW.paused ? SW.elapsed : SW.elapsed + (Date.now() - SW.since);
+}
+
+function swStart(){
+  SW.running = true; SW.paused = false;
+  SW.elapsed = 0; SW.since = Date.now(); SW.laps = [];
+  if (!SW.raf) SW.raf = requestAnimationFrame(swLoop);
+}
+function swPause(){
+  if (!SW.running || SW.paused) return;
+  SW.elapsed += Date.now() - SW.since;   /* 누적에 더해 보존 */
+  SW.paused = true;
+}
+function swResume(){
+  if (!SW.running || !SW.paused) return;
+  SW.since = Date.now();                 /* 보존된 누적 위에서 다시 센다 */
+  SW.paused = false;
+  if (!SW.raf) SW.raf = requestAnimationFrame(swLoop);
+}
+function swToggle(){ SW.paused ? swResume() : swPause(); }
+function swReset(){
+  SW.running = false; SW.paused = false;
+  SW.elapsed = 0; SW.since = 0; SW.laps = [];
+  if (SW.raf){ cancelAnimationFrame(SW.raf); SW.raf = null; }
+}
+function swLap(){
+  if (!SW.running || SW.paused) return;
+  const at = swNow();
+  const prev = SW.laps.length ? SW.laps[SW.laps.length-1].at : 0;
+  SW.laps.push({ at, split: at - prev });
+}
+
+/* 화면 갱신 — 멈춰 있으면 그리지 않는다 */
+function swLoop(){
+  if (!SW.running){ SW.raf = null; return; }
+  if (!SW.paused && (PL.open || T.on)){
+    const ms = swNow();
+    const a = $('#plNum');  if (PL.open && a) a.textContent = mmssms(ms);
+    const b = $('#tmrN');   if (b && T.on) b.textContent = mmssms(ms);
+    const C = 647, MC = 113, p = (ms % 60000) / 60000;
+    const c = $('#plArc');   if (PL.open && c) c.setAttribute('stroke-dashoffset', (C*(1-p)).toFixed(1));
+    const d = $('#miniArc'); if (d) d.setAttribute('stroke-dashoffset', (MC*(1-p)).toFixed(1));
+  }
+  SW.raf = requestAnimationFrame(swLoop);
+}
+
 /* 100분의 1초까지 보여주는 스톱워치 표기 */
 const mmssms = ms => {
   const t = Math.max(0, ms);
@@ -2083,13 +2331,20 @@ function beep(){
   }catch(e){}
 }
 
+/* 재생·일시정지 아이콘 */
+const ICO_PLAY  = '<path d="M8.5 5.5l10 6.5-10 6.5z" stroke-linejoin="round"/>';
+const ICO_PAUSE = '<path d="M9 6v12M15 6v12"/>';
+
 function paintTimer(){
   const el = $('#tmr');
-  if (!T.on){ el.classList.remove('on','done','warn'); syncFab(); paintPlate(); return; }
+  const running = T.on || SW.running;
+  if (!running || TU.hidden){ el.classList.remove('on','done','warn'); syncFab(); paintPlate(); return; }
   el.classList.add('on');
 
   const MC = 113;   /* 미니 원판 둘레 (반지름 18) */
   const arc = $('#miniArc');
+  const ico = $('#tmrIco');
+
   if (T.mode === 'rest'){
     const done = T.left <= 0;
     el.classList.toggle('done', done);
@@ -2098,12 +2353,15 @@ function paintTimer(){
     $('#tmrL').textContent = (T.paused ? '일시정지' : (T.label || '휴식'));
     const p = T.total ? Math.max(0, T.left/T.total) : 0;
     if (arc) arc.setAttribute('stroke-dashoffset', (MC*(1-p)).toFixed(1));
+    if (ico) ico.innerHTML = T.paused ? ICO_PLAY : ICO_PAUSE;
   } else {
+    const ms = swNow();
     el.classList.remove('done','warn');
-    $('#tmrN').textContent = mmssms(T.ms);
-    $('#tmrL').textContent = (T.paused ? '일시정지' : '스톱워치');
-    const p = (T.ms % 60000) / 60000;
+    $('#tmrN').textContent = mmssms(ms);
+    $('#tmrL').textContent = (SW.paused ? '일시정지' : '스톱워치');
+    const p = (ms % 60000) / 60000;
     if (arc) arc.setAttribute('stroke-dashoffset', (MC*(1-p)).toFixed(1));
+    if (ico) ico.innerHTML = SW.paused ? ICO_PLAY : ICO_PAUSE;
   }
   paintPlate();
   /* 열려 있는 운동 카드의 휴식 표시도 같이 갱신 */
@@ -2130,21 +2388,7 @@ function tickFn(){
   paintTimer();
 }
 
-/* 스톱워치는 1초 단위로는 부족하다.
-   실제 흐른 시간을 재서 100분의 1초까지 보여준다. */
-function watchLoop(){
-  if (T.mode !== 'watch' || !T.on){ T.raf = null; return; }
-  if (!T.paused){
-    T.ms = Date.now() - T.at;
-    T.up = Math.floor(T.ms/1000);
-    const n1 = $('#plNum'); if (PL.open && n1) n1.textContent = mmssms(T.ms);
-    const n2 = $('#tmrN');  if (n2 && T.on) n2.textContent = mmssms(T.ms);
-    const C = 647, MC = 113, p = (T.ms % 60000) / 60000;
-    const a1 = $('#plArc');   if (PL.open && a1) a1.setAttribute('stroke-dashoffset', (C*(1-p)).toFixed(1));
-    const a2 = $('#miniArc'); if (a2) a2.setAttribute('stroke-dashoffset', (MC*(1-p)).toFixed(1));
-  }
-  T.raf = requestAnimationFrame(watchLoop);
-}
+/* 스톱워치 갱신은 swLoop 가 맡는다 */
 
 function ensureTick(){
   if (T.tick) clearInterval(T.tick);
@@ -2152,6 +2396,7 @@ function ensureTick(){
 }
 
 function startRest(sec, label){
+  TU.hidden = false;
   if (!sec) return;
   T.on = true; T.mode = 'rest'; T.total = sec; T.left = sec;
   T.label = label || '휴식'; T.paused = false;
@@ -2161,15 +2406,15 @@ function startRest(sec, label){
 }
 function startWatch(){
   T.on = true; T.mode = 'watch'; T.up = 0; T.paused = false;
-  T.ms = 0; T.at = Date.now(); T.laps = [];
+  TU.hidden = false;
+  swStart();
   ensureTick();
-  if (!T.raf) T.raf = requestAnimationFrame(watchLoop);
   paintTimer();
 }
 function stopTimer(){
   T.on = false; T.paused = false;
   if (T.tick){ clearInterval(T.tick); T.tick = null; }
-  if (T.raf){ cancelAnimationFrame(T.raf); T.raf = null; }
+  swReset();
   paintTimer();
   if (typeof tab !== 'undefined' && tab === 'workout' && openEx) render();
 }
@@ -2190,7 +2435,7 @@ document.addEventListener('visibilitychange', () => {
       const was = T.left;
       T.left = Math.max(0, T.left - gone);
       if (was > 0 && T.left === 0){ toast('휴식 시간이 끝나 있었어요'); vibrate([120,60,120]); }
-    } else { T.ms = Date.now() - T.at; T.up = Math.floor(T.ms/1000); }
+    } else { T.up = Math.floor(swNow()/1000); }
     paintTimer();
   }
   hiddenAt = null;
@@ -2228,6 +2473,7 @@ function buildPlate(){
 }
 
 function openPlate(){
+  TU.hidden = false;
   buildPlate();
   PL.open = true;
   PL.mode = T.on ? T.mode : PL.mode;
@@ -2258,13 +2504,13 @@ function plPick(sec){
 
 function plStart(){
   if (PL.mode === 'watch'){
-    if (!T.on) startWatch();
-    else T.paused = !T.paused;
-    if (!T.paused) T.at = Date.now() - T.ms;
+    if (!SW.running){ swStart(); T.on = true; T.mode = 'watch'; T.paused = false; }
+    else { swToggle(); T.paused = SW.paused; }
   } else {
     if (!T.on) startRest(PL.pick, '휴식');
     else T.paused = !T.paused;
   }
+  TU.hidden = false;
   paintTimer(); paintPlate(); vibrate(10);
 }
 function plAdjust(sec){
@@ -2273,15 +2519,21 @@ function plAdjust(sec){
   T.total = Math.max(T.total, T.left);
   paintTimer(); paintPlate(); vibrate(6);
 }
-function plLap(){
-  if (!T.on || T.mode !== 'watch') return;
-  const prev = T.laps.length ? T.laps[T.laps.length-1].at : 0;
-  T.laps.push({ at:T.ms, split:T.ms - prev });
-  paintPlate(); vibrate(8);
-}
+function plLap(){ swLap(); paintPlate(); vibrate(8); }
 function plReset(){
-  if (PL.mode === 'watch'){ T.laps = []; T.ms = 0; T.up = 0; T.at = Date.now(); }
+  if (PL.mode === 'watch'){ swReset(); T.on = false; T.paused = false; }
   stopTimer(); paintPlate(); vibrate(10);
+}
+
+/* 타이머 UI 를 완전히 감춘다.
+   시간은 계속 흐르고 알림도 그대로 울린다 — 화면만 비운다. */
+const TU = { hidden:false };
+function hideTimerUI(){
+  TU.hidden = true;
+  closePlate();
+  $('#tmr').classList.remove('on');
+  toast('타이머는 계속 돌아갑니다 · 상단 버튼으로 다시 열 수 있어요');
+  vibrate(8);
 }
 
 /* 화면 갱신 — 열려 있을 때만 그린다 */
@@ -2296,10 +2548,11 @@ function paintPlate(){
   let pct, num, sub, mode;
 
   if (watch){
+    const ms = swNow();
     mode = 'STOPWATCH';
-    num = mmssms(T.ms);
-    sub = !T.on ? '시작을 누르세요' : (T.paused ? '일시정지' : '측정 중');
-    pct = (T.ms % 60000) / 60000;          /* 1분에 한 바퀴 */
+    num = mmssms(ms);
+    sub = !SW.running ? '시작을 누르세요' : (SW.paused ? '일시정지' : '측정 중');
+    pct = (ms % 60000) / 60000;          /* 1분에 한 바퀴 */
     el.classList.remove('done','warn');
   } else {
     mode = 'REST';
@@ -2333,11 +2586,12 @@ function paintPlate(){
   const run = T.on && !T.paused;
   let c = '';
   if (watch){
+    const go = SW.running && !SW.paused;
     c += '<button onclick="plReset()">리셋</button>';
     c += '<button class="main" onclick="plStart()">' +
-         (!T.on ? '시작' : (T.paused ? '계속' : '일시정지')) + '</button>';
-    c += '<button class="' + (run ? 'acc' : '') + '" onclick="plLap()"' +
-         (run ? '' : ' disabled style="opacity:.4"') + '>랩</button>';
+         (!SW.running ? '시작' : (SW.paused ? '계속' : '일시정지')) + '</button>';
+    c += '<button class="' + (go ? 'acc' : '') + '" onclick="plLap()"' +
+         (go ? '' : ' disabled style="opacity:.4"') + '>랩</button>';
   } else {
     c += '<button onclick="plAdjust(-10)">−10초</button>';
     c += '<button class="main" onclick="plStart()">' +
@@ -2348,11 +2602,12 @@ function paintPlate(){
 
   /* 랩 목록 */
   const L = $('#plLaps');
-  if (watch && T.laps.length){
-    const fastest = Math.min(...T.laps.map(x => x.split));
+  if (watch && SW.laps.length){
+    const T2 = SW.laps;
+    const fastest = Math.min(...T2.map(x => x.split));
     L.classList.add('on');
-    L.innerHTML = T.laps.slice().reverse().map((x, i) => {
-      const no = T.laps.length - i;
+    L.innerHTML = T2.slice().reverse().map((x, i) => {
+      const no = T2.length - i;
       return '<div class="pl-lap' + (x.split === fastest ? ' best' : '') + '">' +
         '<i>' + String(no).padStart(2,'0') + '</i>' +
         '<b>' + mmssms(x.split) + '</b>' +
@@ -4318,7 +4573,7 @@ function viewMe(){
     '<button class="btn btn-g btn-sm" style="margin-top:8px;color:var(--chest)" onclick="wipe()">기록 전체 삭제</button></div>';
 
   h += '<div class="note" style="text-align:center;margin-top:16px;cursor:pointer" onclick="toggleDiag()">' +
-       'IRONLOG v35 · 종목 '+Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
+       'IRONLOG v39 · 종목 '+Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
   if (showDiag){
     h += '<div class="note" style="text-align:center;margin-top:5px;font-size:9px;opacity:.5;' +
          'font-family:var(--mono);line-height:1.7;word-break:break-all">' + diagLine() + '</div>';
@@ -4350,7 +4605,7 @@ function diagLine(){
   const bh = Math.round(document.body.getBoundingClientRect().height);
   const vv = window.visualViewport;
   return [
-    'v35',
+    'v39',
     'body' + bh,
     'inner' + window.innerHeight,
     'client' + document.documentElement.clientHeight,
@@ -5599,7 +5854,14 @@ async function wipe(){
 
 /* 백업 / 복원 */
 function exportData(){
-  const blob = new Blob([JSON.stringify(D,null,2)], { type:'application/json' });
+  /* 어떤 앱·버전에서 언제 만든 백업인지 남긴다.
+     기존 형식과 호환되도록 기존 필드는 그대로 둔 채 덧붙이기만 한다. */
+  const out = Object.assign({}, D, {
+    _app: 'IRONLOG',
+    schemaVersion: D.schemaVersion || SCHEMA,
+    _exportedAt: new Date().toISOString()
+  });
+  const blob = new Blob([JSON.stringify(out,null,2)], { type:'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url; a.download = 'ironlog-'+today()+'.json';
@@ -5747,6 +6009,7 @@ Object.assign(window, {
   moveSlot, topExercises, topFoods, avgRest, cancelSession,
   cycleTech, openExMenu, openBar, toggleLegend,
   openPlate, closePlate, plMode, plPick, plStart, plAdjust, plLap, plReset, paintPlate,
+  hideTimerUI, swStart, swPause, swResume, swToggle, swReset, swLap, swNow,
   guessCount, looksBulk, qtyUI, packOn, packOff, packB, pieceB, rememberPack,
   dayState, markDay, pendingGaps, syncHdrH,
   mfdsSearch, pickMfds, mfdsRow, aiSearch, pickAi, aiRow,
@@ -5812,20 +6075,80 @@ document.addEventListener('keydown', e => {
   if (mdResolve) mdClose(false); else closeSheet();
 });
 
+/* ── 복원 ──
+   바꾸기 전 단계에서 하나라도 실패하면 지금 기록을 건드리지 않는다. */
 $('#impFile').onchange = async ev => {
   const f = ev.target.files && ev.target.files[0];
   ev.target.value = '';
   if (!f) return;
+
+  /* 1. 읽기 */
+  let text;
+  try{ text = await f.text(); }
+  catch(e){ toast('파일을 읽지 못했어요'); return; }
+
+  /* 2. 해석 */
+  let j;
+  try{ j = JSON.parse(text); }
+  catch(e){
+    await ask({ title:'복원할 수 없습니다', ok:'알겠어요',
+      body:'파일 내용을 읽지 못했습니다.<br><b>지금 기록은 그대로입니다.</b>' });
+    return;
+  }
+
+  /* 3. 형식 검증 */
+  const bad = validateShape(j);
+  if (bad){
+    await ask({ title:'복원할 수 없습니다', ok:'알겠어요',
+      body:esc(bad) + '<br><br><b>지금 기록은 그대로입니다.</b>' });
+    return;
+  }
+
+  /* 4. 이전 (옛 백업도 받아들인다) */
+  const m = migrate(j, { skipBackup:true });
+  if (!m.ok){
+    await ask({ title:'복원할 수 없습니다', ok:'알겠어요',
+      body:esc(m.reason) + '<br><br><b>지금 기록은 그대로입니다.</b>' });
+    return;
+  }
+
+  const inc = m.data;
+  const cnt = (inc.slots||[]).length + (inc.sets||[]).length + (inc.meals||[]).length;
+  const when = inc._exportedAt ? inc._exportedAt.slice(0,10) : '날짜 미상';
+
+  if (!await ask({ title:'백업 복원', danger:true, ok:'복원',
+    body:'<b>' + when + '</b> 백업 · 항목 ' + cnt + '개<br><br>' +
+         '지금 기기의 기록을 이 내용으로 <b>바꿉니다.</b><br>' +
+         '되돌릴 수 있도록 현재 기록은 따로 보관합니다.' })) return;
+
+  /* 5. 지금 기록을 먼저 보관 */
+  const roll = KEY + '.before-restore';
+  let rolled = false;
+  try{ localStorage.setItem(roll, JSON.stringify(D)); rolled = true; }
+  catch(e){
+    if (!await ask({ title:'되돌리기 지점을 만들지 못했습니다', danger:true, ok:'그래도 복원',
+      body:'저장 공간이 부족해 현재 기록을 따로 보관할 수 없습니다.<br>계속하시겠어요?' })) return;
+  }
+
+  /* 6. 교체 */
+  const prev = D;
   try{
-    const j = JSON.parse(await f.text());
-    if (!j || !Array.isArray(j.slots) || !Array.isArray(j.sets)) throw new Error('형식 오류');
-    if (!await ask({ title:'백업 복원', danger:true, ok:'복원',
-      body:'지금 기기의 기록을 백업 파일 내용으로 <b>바꿉니다.</b><br>계속할까요?' })) return;
-    D = Object.assign({}, BLANK, j);
+    D = Object.assign({}, BLANK, inc);
+    delete D._app; delete D._exportedAt;
+    D.dev = prev.dev || D.dev || newDeviceId();      /* 기기 식별자는 이 기기 것을 유지 */
+    D.rev = Math.max(prev.rev || 0, inc.rev || 0) + 1;
     draft = {}; openEx = null;
-    bumpDV(); rebuildIndex(); await saveData(); render();
+    bumpDV(); rebuildIndex();
+    await saveData();
+    render();
     toast('복원했어요');
-  }catch(e){ toast('파일을 읽지 못했어요'); }
+  }catch(e){
+    /* 7. 실패하면 되돌린다 */
+    D = prev;
+    bumpDV(); rebuildIndex(); render();
+    await ask({ title:'복원에 실패했습니다', ok:'알겠어요',
+      body:'원래 기록으로 되돌렸습니다.' + (rolled ? '' : '<br>보관본이 없어 메모리에서 복구했습니다.') });
+  }
 };
 
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')){
@@ -6112,7 +6435,12 @@ function mergeData(local, remote){
   const localNewer = (local.updatedAt || 0) >= (remote.updatedAt || 0);
   const pick = (l, r) => localNewer ? (l !== undefined && l !== null ? l : r) : (r !== undefined && r !== null ? r : l);
 
-  return Object.assign({}, BLANK, {
+  /* 여기에 적지 않은 항목은 BLANK 기본값으로 되돌아간다.
+     예전에는 done·memo·sess 같은 것들이 동기화할 때마다 사라졌다.
+     그래서 local 을 바닥에 깔고 그 위에 합친 결과를 덮는다. */
+  const mergedMap = (a, b) => Object.assign({}, a || {}, b || {});
+
+  return Object.assign({}, BLANK, local, {
     slots:      union(remote.slots, local.slots),
     sets:       union(remote.sets, local.sets),
     meals:      union(remote.meals, local.meals),
@@ -6120,31 +6448,129 @@ function mergeData(local, remote){
     weights:    uniqBy(remote.weights, local.weights, 'date'),
     customEx:   uniqBy(remote.customEx, local.customEx, 'name'),
     customFood: uniqBy(remote.customFood, local.customFood, 'name'),
-    restPref:   Object.assign({}, remote.restPref || {}, local.restPref || {}),
+    restPref:   mergedMap(remote.restPref, local.restPref),
+    /* 아래 다섯은 날짜·종목을 열쇠로 쓰는 표라 합쳐도 안전하다 */
+    done:       mergedMap(remote.done,   local.done),
+    memo:       mergedMap(remote.memo,   local.memo),
+    sess:       mergedMap(remote.sess,   local.sess),
+    rest:       mergedMap(remote.rest,   local.rest),
+    skip:       mergedMap(remote.skip,   local.skip),
+    barPref:    mergedMap(remote.barPref, local.barPref),
+    prog:       mergedMap(remote.prog,   local.prog),
+    ovr:        mergedMap(remote.ovr,    local.ovr),
     tomb,
     profile:    pick(local.profile, remote.profile),
     seenStage:  Math.max(local.seenStage || 0, remote.seenStage || 0),
     lastReport: pick(local.lastReport, remote.lastReport),
-    updatedAt:  Math.max(local.updatedAt || 0, remote.updatedAt || 0)
+    updatedAt:  Math.max(local.updatedAt || 0, remote.updatedAt || 0),
+    rev:        Math.max(local.rev || 0, remote.rev || 0),
+    dev:        local.dev || remote.dev || newDeviceId(),
+    schemaVersion: SCHEMA
   });
+}
+
+/* 두 데이터가 실질적으로 같은 내용인가 */
+function sameContent(a, b){
+  if (!a || !b) return false;
+  const k = x => (x.slots||[]).length + '/' + (x.sets||[]).length + '/' +
+                 (x.meals||[]).length + '/' + Object.keys(x.tomb||{}).length;
+  return k(a) === k(b);
+}
+
+/* 어느 쪽을 써야 하는가 */
+function decideSync(local, remote){
+  if (!remote) return { act:'push', why:'서버에 아직 기록이 없습니다' };
+  const lr = local.rev || 0, rr = remote.rev || 0;
+
+  /* rev 가 없던 시절 데이터는 시각으로 판단한다 */
+  if (!lr && !rr){
+    return (local.updatedAt||0) >= (remote.updatedAt||0)
+      ? { act:'push', why:'이 기기가 더 최근입니다' }
+      : { act:'merge', why:'서버가 더 최근입니다' };
+  }
+  if (rr > lr) return { act:'merge',  why:'서버가 더 최근입니다' };
+  if (lr > rr) return { act:'push',   why:'이 기기가 더 최근입니다' };
+
+  /* rev 가 같다 */
+  if (sameContent(local, remote)) return { act:'none', why:'같은 내용입니다' };
+  if ((remote.dev || '') !== (local.dev || ''))
+    return { act:'conflict', why:'다른 기기에서도 같은 시점에 기록했습니다' };
+  return { act:'merge', why:'같은 기기 · 내용이 다릅니다' };
 }
 
 async function pullMerge(){
   if (!sb || !me) return;
   syncState = 'syncing'; render();
+  let remote = null;
   try{
     const { data, error } = await sb.from('vaults')
       .select('payload').eq('user_id', me.id).maybeSingle();
     if (error) throw error;
-    const before = D.slots.length + D.sets.length + D.meals.length;
-    D = mergeData(D, data ? data.payload : null);
-    bumpDV(); rebuildIndex();
-    await saveData();
-    const after = D.slots.length + D.sets.length + D.meals.length;
+    remote = data ? data.payload : null;
+
+    /* 서버 기록도 이전 대상일 수 있다 */
+    if (remote){
+      const m = migrate(remote, { skipBackup:true });
+      if (m.ok) remote = m.data;
+      else { console.warn('서버 데이터 이전 실패', m.reason); remote = null; }
+    }
+
+    const d = decideSync(D, remote);
+    if (d.act === 'conflict'){
+      syncState = 'done';
+      await resolveConflict(remote);
+      return;
+    }
+    if (d.act === 'merge' || d.act === 'push'){
+      const before = D.slots.length + D.sets.length + D.meals.length;
+      D = mergeData(D, remote);
+      bumpDV(); rebuildIndex();
+      await saveData();
+      const after = D.slots.length + D.sets.length + D.meals.length;
+      if (after > before) toast('클라우드에서 기록을 가져왔어요');
+    }
     syncState = 'done';
-    if (after > before) toast('클라우드에서 기록을 가져왔어요');
   }catch(e){ syncState = 'error'; console.warn('내려받기 실패', e); }
   await pushVault();
+}
+
+/* 두 기기에서 같은 시점에 기록했을 때.
+   어느 쪽도 조용히 버리지 않는다. */
+async function resolveConflict(remote){
+  const cnt = x => (x.slots||[]).length + (x.sets||[]).length + (x.meals||[]).length;
+  const lastOf = x => {
+    const ds = (x.slots||[]).map(s => s.date).sort();
+    return ds.length ? ds[ds.length-1] : '기록 없음';
+  };
+  const body =
+    '다른 기기에서도 기록이 바뀌었습니다.<br><br>' +
+    '<b>이 기기</b><br>항목 ' + cnt(D) + '개 · ' + lastOf(D) + ' 까지<br><br>' +
+    '<b>다른 기기</b><br>항목 ' + cnt(remote) + '개 · ' + lastOf(remote) + ' 까지<br><br>' +
+    '어느 쪽도 지우지 않고, 고르지 않은 쪽은 복구용으로 남겨둡니다.';
+
+  const keepLocal = await ask({
+    title:'기록이 갈렸습니다', body,
+    ok:'이 기기 사용', no:'다른 기기 사용'
+  });
+
+  /* 고르지 않은 쪽을 반드시 남긴다 */
+  const stamp = Date.now();
+  try{
+    localStorage.setItem(KEY + '.conflict.' + stamp,
+      JSON.stringify(keepLocal ? remote : D));
+  }catch(e){ /* 공간이 없으면 병합으로 돌린다 */ }
+
+  if (keepLocal){
+    D.rev = Math.max(D.rev||0, (remote.rev||0) + 1);
+    await saveData();
+    toast('이 기기 기록을 씁니다 · 다른 쪽은 복구용으로 남겼어요');
+  } else {
+    D = Object.assign({}, BLANK, remote);
+    D.dev = D.dev || newDeviceId();
+    D.rev = (remote.rev||0) + 1;
+    bumpDV(); rebuildIndex(); await saveData(); render();
+    toast('다른 기기 기록을 씁니다 · 이 기기 것은 복구용으로 남겼어요');
+  }
 }
 
 let lastPushed = '';     /* 마지막으로 올린 내용의 지문 */
@@ -6421,6 +6847,7 @@ function openLogin(){
 }
 
 function openAccount(){
+  if (!me) { openLogin(); return; }   /* 로그인 전에는 로그인 화면으로 */
   let h = '<div class="acctbig"><div class="acctbig-c">'+catSVG(catStats().idx,'happy',true)+'</div>' +
     '<div class="acctbig-t"><b>'+esc(myProfile ? myProfile.nickname : '')+'</b>' +
     '<span>'+esc(me.email || '소셜 로그인')+'</span></div></div>';
@@ -6597,6 +7024,10 @@ Object.assign(window, {
   render();
   syncTabH();
   syncHdrH();
+  if (loadWarn){
+    const msg = loadWarn; loadWarn = null;
+    setTimeout(() => ask({ title:'데이터 안내', ok:'알겠어요', body:esc(msg) }), 400);
+  }
   setTimeout(syncHdrH, 400);
   setTimeout(syncTabH, 400);   /* 폰트 로딩 후 한 번 더 */
   initCloud();
