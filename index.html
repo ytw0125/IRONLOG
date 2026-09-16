@@ -518,6 +518,154 @@ body:before{content:'';position:fixed;inset:0;pointer-events:none;z-index:var(--
 .stat span,.st-h,.sec,.fd label,.grp,.mini>span{
   letter-spacing:.16em;font-weight:800;text-transform:uppercase}
 
+
+/* ══════════════════════════════════════════
+   원판 시계
+
+   바벨 원판을 모티브로 한 타이머·스톱워치.
+   · 미니 배지  : 동작 중일 때 탭바 위에 작게
+   · 큰 원판    : 탭하면 아래에서 올라옴
+   둘 다 같은 T 상태를 본다.
+   ══════════════════════════════════════════ */
+
+/* ── 미니 배지 ── */
+.tmr{flex:0 0 auto;display:flex;align-items:center;gap:10px;width:100%;
+  max-height:0;overflow:hidden;opacity:0;padding:0 16px;border:none;cursor:pointer;
+  background:rgba(16,18,22,.92);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07);
+  transition:max-height .32s var(--eo),opacity .22s var(--eo),padding .32s var(--eo)}
+.tmr.on{max-height:60px;opacity:1;padding:9px 16px}
+.tmr:active{filter:brightness(1.25)}
+.mini-pl{flex:0 0 34px;height:34px;display:block}
+.mini-pl svg{width:34px;height:34px;display:block}
+.tmr .tmr-t{flex:1;min-width:0;text-align:left;display:block}
+.tmr .tmr-t b{display:block;font-size:var(--f-title);font-weight:850;letter-spacing:-.04em;
+  color:var(--tx);font-variant-numeric:tabular-nums;line-height:1.1}
+.tmr .tmr-t em{display:block;font-style:normal;font-size:var(--f-micro);color:var(--tx-3);
+  font-weight:800;letter-spacing:.14em;margin-top:2px;text-transform:uppercase}
+.tmr-go{flex:0 0 auto;font-size:var(--f-micro);font-weight:800;letter-spacing:.14em;
+  color:var(--tx-3);text-transform:uppercase}
+.tmr.warn .tmr-t b{color:var(--acc)}
+.tmr.done .tmr-t b{color:var(--acc)}
+.tmr.done .mini-pl{animation:miniPulse 1s var(--eo) infinite}
+@keyframes miniPulse{0%,100%{opacity:1}50%{opacity:.45}}
+
+/* ── 어두운 배경 ── */
+.pl-dim{position:fixed;top:0;left:0;right:0;bottom:var(--fixneg);z-index:var(--z-nav);
+  background:rgba(4,5,7,.62);backdrop-filter:blur(16px) saturate(.75);
+  -webkit-backdrop-filter:blur(16px) saturate(.75);
+  opacity:0;pointer-events:none;transition:opacity .22s var(--eo)}
+.pl-dim.on{opacity:1;pointer-events:auto}
+
+/* ── 큰 원판 드로어 ── */
+.plate{position:fixed;left:0;right:0;bottom:var(--fixneg);z-index:var(--z-modal);
+  max-width:520px;margin:0 auto;
+  background:var(--card);border-radius:24px 24px 0 0;
+  padding:8px 18px calc(22px + var(--sab));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.09), 0 -24px 60px -20px rgba(0,0,0,.85);
+  transform:translateY(100%);transition:transform .38s var(--eo);
+  touch-action:none}
+.plate.on{transform:translateY(0)}
+.plate.drag{transition:none}
+
+.pl-grip{width:42px;height:4px;border-radius:2px;background:var(--line-2);
+  margin:4px auto 14px;cursor:grab}
+
+/* ── 모드 전환 ── */
+.pl-seg{display:flex;gap:4px;background:#0A0C0F;border-radius:var(--r-md);padding:4px;
+  box-shadow:var(--lit-in);margin-bottom:18px}
+.pl-seg button{flex:1;min-height:40px;border:none;border-radius:var(--r-sm);background:none;
+  color:var(--tx-3);font-size:var(--f-body);font-weight:800;cursor:pointer;
+  transition:color .18s var(--eo),background .18s var(--eo)}
+.pl-seg button[aria-pressed="true"]{background:var(--steel);color:var(--tx);box-shadow:var(--lit)}
+
+/* ── 원판 본체 ── */
+.pl-wrap{display:grid;place-items:center;padding:4px 0 18px}
+.pl-disc{position:relative;width:248px;height:248px;border-radius:50%;
+  /* 고무 림 → 금속 → 중앙 허브 */
+  background:
+    radial-gradient(circle at 50% 50%,
+      #15181E 0 30%, #0D0F13 30% 34%,
+      #1A1E25 34% 40%, #12151A 40% 44%, transparent 44%),
+    conic-gradient(from 0deg,
+      #23272F 0deg, #171A20 12deg, #23272F 24deg, #171A20 36deg,
+      #23272F 48deg, #171A20 60deg, #23272F 72deg, #171A20 84deg,
+      #23272F 96deg, #171A20 108deg, #23272F 120deg, #171A20 132deg,
+      #23272F 144deg, #171A20 156deg, #23272F 168deg, #171A20 180deg,
+      #23272F 192deg, #171A20 204deg, #23272F 216deg, #171A20 228deg,
+      #23272F 240deg, #171A20 252deg, #23272F 264deg, #171A20 276deg,
+      #23272F 288deg, #171A20 300deg, #23272F 312deg, #171A20 324deg,
+      #23272F 336deg, #171A20 348deg, #23272F 360deg);
+  box-shadow:
+    inset 0 2px 0 rgba(255,255,255,.09),
+    inset 0 -2px 0 rgba(0,0,0,.7),
+    inset 0 0 0 1px rgba(255,255,255,.04),
+    0 18px 40px -18px rgba(0,0,0,.9)}
+/* 안쪽 원판면 — 널링 위에 덮여 매끈한 면을 만든다 */
+.pl-disc:after{content:'';position:absolute;inset:26px;border-radius:50%;
+  background:radial-gradient(circle at 50% 34%, #191D24 0%, #101318 62%, #0B0D11 100%);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.07),inset 0 -2px 0 rgba(0,0,0,.6)}
+.pl-ring{position:absolute;inset:0;width:100%;height:100%;z-index:2}
+.pl-hub{position:absolute;inset:0;display:grid;place-content:center;text-align:center;z-index:3}
+.pl-mode{font-size:var(--f-micro);font-weight:800;letter-spacing:.24em;color:var(--tx-3)}
+.pl-num{font-size:40px;font-weight:850;letter-spacing:-.05em;line-height:1.05;margin:5px 0 3px;
+  font-variant-numeric:tabular-nums}
+.pl-sub{font-size:var(--f-label);color:var(--tx-3);font-weight:700}
+
+/* 끝났을 때 — 링이 반짝인다 */
+.plate.done .pl-num{color:var(--acc)}
+.plate.done .pl-disc{animation:plDone .9s var(--eo) infinite}
+@keyframes plDone{
+  0%,100%{box-shadow:inset 0 2px 0 rgba(255,255,255,.09),inset 0 -2px 0 rgba(0,0,0,.7),
+    inset 0 0 0 1px rgba(255,255,255,.04),0 18px 40px -18px rgba(0,0,0,.9),
+    0 0 0 0 rgba(255,184,77,.35)}
+  50%{box-shadow:inset 0 2px 0 rgba(255,255,255,.09),inset 0 -2px 0 rgba(0,0,0,.7),
+    inset 0 0 0 1px rgba(255,184,77,.5),0 18px 40px -18px rgba(0,0,0,.9),
+    0 0 0 12px rgba(255,184,77,0)}}
+.plate.warn .pl-num{color:var(--acc)}
+
+/* ── 퀵 선택 ── */
+.pl-quick{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:14px}
+.pl-quick::-webkit-scrollbar{display:none}
+.pl-quick button{flex:0 0 auto;min-height:44px;padding:0 15px;border:none;border-radius:var(--r-sm);
+  background:var(--steel);color:var(--tx-2);font-size:var(--f-body);font-weight:800;
+  cursor:pointer;box-shadow:var(--lit);font-variant-numeric:tabular-nums;
+  transition:filter .12s var(--eo)}
+.pl-quick button:active{filter:brightness(1.4)}
+.pl-quick button.on{background:var(--acc);color:#08090B;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.5)}
+
+/* ── 조작 버튼 ── */
+.pl-ctl{display:flex;gap:8px}
+.pl-ctl button{flex:1;min-height:52px;border:none;border-radius:var(--r-md);
+  background:var(--steel);color:var(--tx);font-size:var(--f-body);font-weight:850;
+  cursor:pointer;box-shadow:var(--lit);letter-spacing:-.01em;
+  display:grid;place-items:center;
+  transition:filter .12s var(--eo),box-shadow .12s var(--eo)}
+.pl-ctl button:active{box-shadow:var(--lit-in);filter:brightness(1.3)}
+.pl-ctl button.main{flex:1.5;background:linear-gradient(180deg,#FFFFFF,#DEE3EA);color:#08090B;
+  box-shadow:inset 0 1px 0 #FFF,0 6px 18px -8px rgba(255,255,255,.26)}
+.pl-ctl button.main:active{background:linear-gradient(180deg,#DEE3EA,#FFFFFF);
+  box-shadow:inset 0 -1px 0 rgba(255,255,255,.85),inset 0 3px 8px rgba(0,0,0,.26)}
+.pl-ctl button.acc{background:var(--acc);color:#08090B;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.45)}
+
+/* ── 랩 기록 ── */
+.pl-laps{max-height:0;overflow:hidden;transition:max-height .3s var(--eo)}
+.pl-laps.on{max-height:148px;overflow-y:auto;margin-top:14px}
+.pl-lap{display:flex;align-items:center;gap:10px;padding:10px 2px;
+  border-top:1px solid rgba(255,255,255,.05);font-variant-numeric:tabular-nums}
+.pl-lap i{font-style:normal;font-size:var(--f-micro);color:var(--tx-3);font-weight:800;
+  min-width:26px;letter-spacing:.1em}
+.pl-lap b{font-size:var(--f-title);font-weight:800;letter-spacing:-.02em}
+.pl-lap span{margin-left:auto;font-size:var(--f-label);color:var(--tx-3);font-weight:700}
+.pl-lap.best b{color:var(--acc)}
+
+@media (prefers-reduced-motion: reduce){
+  .plate{transition:none}
+  .plate.done .pl-disc{animation:none}
+}
+
 /* ══ 아이콘 ══ */
 svg.i{fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;
   display:block;flex:none}
@@ -1065,16 +1213,64 @@ svg.i{fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;
 <div id="toast"></div>
 </div>
 
-<div class="tmr" id="tmr">
-  <div class="tmr-in">
-    <div class="tmr-t">
-      <div class="tmr-n" id="tmrN">0:00</div>
-      <div class="tmr-l" id="tmrL"></div>
-      <button class="tmr-b" id="tmrAdd">+30초</button>
-      <button class="tmr-b w" id="tmrEnd">종료</button>
-    </div>
-    <div class="tmr-p"><i id="tmrP" style="width:100%"></i></div>
+<!-- 동작 중일 때만 탭바 위에 뜨는 미니 원판. 누르면 큰 원판이 올라온다. -->
+<button class="tmr" id="tmr" onclick="openPlate()" aria-label="타이머 열기">
+  <span class="mini-pl">
+    <svg viewBox="0 0 44 44" aria-hidden="true">
+      <circle cx="22" cy="22" r="18" fill="none" stroke="var(--line-2)" stroke-width="4"/>
+      <circle id="miniArc" cx="22" cy="22" r="18" fill="none" stroke="var(--acc)" stroke-width="4"
+        stroke-linecap="round" stroke-dasharray="113" stroke-dashoffset="0"
+        transform="rotate(-90 22 22)"/>
+      <circle cx="22" cy="22" r="6.5" fill="none" stroke="var(--tx-3)" stroke-width="2"/>
+    </svg>
+  </span>
+  <span class="tmr-t">
+    <b id="tmrN">0:00</b>
+    <em id="tmrL">휴식</em>
+  </span>
+  <span class="tmr-go" id="tmrGo">펼치기</span>
+</button>
+
+<!-- ═══ 원판 시계 ═══ -->
+<div class="pl-dim" id="plDim" onclick="closePlate()"></div>
+<div class="plate" id="plate" role="dialog" aria-modal="true" aria-label="타이머">
+  <div class="pl-grip" id="plGrip"></div>
+
+  <div class="pl-seg">
+    <button id="segRest"  onclick="plMode('rest')">휴식 타이머</button>
+    <button id="segWatch" onclick="plMode('watch')">스톱워치</button>
   </div>
+
+  <!-- 원판 -->
+  <div class="pl-wrap">
+    <div class="pl-disc" id="plDisc">
+      <svg class="pl-ring" viewBox="0 0 240 240" aria-hidden="true">
+        <!-- 널링 -->
+        <g id="plKnurl"></g>
+        <!-- 진행 링 -->
+        <circle cx="120" cy="120" r="103" fill="none" stroke="rgba(255,255,255,.055)" stroke-width="7"/>
+        <circle id="plArc" cx="120" cy="120" r="103" fill="none" stroke="var(--acc)" stroke-width="7"
+          stroke-linecap="round" stroke-dasharray="647" stroke-dashoffset="0"
+          transform="rotate(-90 120 120)"/>
+        <!-- 눈금 -->
+        <g id="plTicks"></g>
+      </svg>
+      <div class="pl-hub">
+        <div class="pl-mode" id="plMode">REST</div>
+        <div class="pl-num" id="plNum">0:00</div>
+        <div class="pl-sub" id="plSub">준비됨</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 퀵 선택 (휴식 모드) -->
+  <div class="pl-quick" id="plQuick"></div>
+
+  <!-- 조작 -->
+  <div class="pl-ctl" id="plCtl"></div>
+
+  <!-- 랩 기록 (스톱워치) -->
+  <div class="pl-laps" id="plLaps"></div>
 </div>
 
 <nav class="tabbar"><div class="tabbar-in" id="tabs"></div></nav>
@@ -1813,7 +2009,15 @@ function _eaten(d){
 /* ═══════════════════════════════════════════════════
    8. 휴식 타이머 / 스톱워치
    ═══════════════════════════════════════════════════ */
-const T = { on:false, mode:'rest', left:0, total:0, up:0, tick:null, label:'', paused:false };
+const T = { on:false, mode:'rest', left:0, total:0, up:0, tick:null, label:'', paused:false,
+             laps:[], ms:0, raf:null, at:0 };
+
+/* 100분의 1초까지 보여주는 스톱워치 표기 */
+const mmssms = ms => {
+  const t = Math.max(0, ms);
+  const m = Math.floor(t/60000), sec = Math.floor(t%60000/1000), cs = Math.floor(t%1000/10);
+  return m + ':' + String(sec).padStart(2,'0') + '.' + String(cs).padStart(2,'0');
+};
 
 /* 종목 성격에 따른 기본 휴식 시간 */
 function defaultRest(exName){
@@ -1881,25 +2085,27 @@ function beep(){
 
 function paintTimer(){
   const el = $('#tmr');
-  if (!T.on){ el.classList.remove('on','done','warn'); syncFab(); return; }
+  if (!T.on){ el.classList.remove('on','done','warn'); syncFab(); paintPlate(); return; }
   el.classList.add('on');
+
+  const MC = 113;   /* 미니 원판 둘레 (반지름 18) */
+  const arc = $('#miniArc');
   if (T.mode === 'rest'){
     const done = T.left <= 0;
     el.classList.toggle('done', done);
     el.classList.toggle('warn', !done && T.left <= 5 && T.left > 0);
-    $('#tmrN').textContent = done ? '완료' : mmss(T.left);
-    $('#tmrL').textContent = (T.paused ? '일시정지 · ' : '') + (T.label || '휴식');
-    $('#tmrP').style.width = (T.total ? Math.max(0, T.left/T.total*100) : 0) + '%';
-    $('#tmrAdd').textContent = '+30초';
-    $('#tmrEnd').textContent = done ? '닫기' : '건너뛰기';
+    $('#tmrN').textContent = done ? '휴식 끝' : mmss(T.left);
+    $('#tmrL').textContent = (T.paused ? '일시정지' : (T.label || '휴식'));
+    const p = T.total ? Math.max(0, T.left/T.total) : 0;
+    if (arc) arc.setAttribute('stroke-dashoffset', (MC*(1-p)).toFixed(1));
   } else {
-    el.classList.remove('done');
-    $('#tmrN').textContent = mmss(T.up);
-    $('#tmrL').textContent = (T.paused ? '일시정지 · ' : '') + '스톱워치';
-    $('#tmrP').style.width = '100%';
-    $('#tmrAdd').textContent = T.paused ? '계속' : '일시정지';
-    $('#tmrEnd').textContent = '종료';
+    el.classList.remove('done','warn');
+    $('#tmrN').textContent = mmssms(T.ms);
+    $('#tmrL').textContent = (T.paused ? '일시정지' : '스톱워치');
+    const p = (T.ms % 60000) / 60000;
+    if (arc) arc.setAttribute('stroke-dashoffset', (MC*(1-p)).toFixed(1));
   }
+  paintPlate();
   /* 열려 있는 운동 카드의 휴식 표시도 같이 갱신 */
   const live = document.querySelector('.rest-mid.live b');
   if (live && T.mode === 'rest') live.textContent = mmss(T.left);
@@ -1923,6 +2129,23 @@ function tickFn(){
   }
   paintTimer();
 }
+
+/* 스톱워치는 1초 단위로는 부족하다.
+   실제 흐른 시간을 재서 100분의 1초까지 보여준다. */
+function watchLoop(){
+  if (T.mode !== 'watch' || !T.on){ T.raf = null; return; }
+  if (!T.paused){
+    T.ms = Date.now() - T.at;
+    T.up = Math.floor(T.ms/1000);
+    const n1 = $('#plNum'); if (PL.open && n1) n1.textContent = mmssms(T.ms);
+    const n2 = $('#tmrN');  if (n2 && T.on) n2.textContent = mmssms(T.ms);
+    const C = 647, MC = 113, p = (T.ms % 60000) / 60000;
+    const a1 = $('#plArc');   if (PL.open && a1) a1.setAttribute('stroke-dashoffset', (C*(1-p)).toFixed(1));
+    const a2 = $('#miniArc'); if (a2) a2.setAttribute('stroke-dashoffset', (MC*(1-p)).toFixed(1));
+  }
+  T.raf = requestAnimationFrame(watchLoop);
+}
+
 function ensureTick(){
   if (T.tick) clearInterval(T.tick);
   T.tick = setInterval(tickFn, 1000);
@@ -1938,11 +2161,15 @@ function startRest(sec, label){
 }
 function startWatch(){
   T.on = true; T.mode = 'watch'; T.up = 0; T.paused = false;
-  ensureTick(); paintTimer();
+  T.ms = 0; T.at = Date.now(); T.laps = [];
+  ensureTick();
+  if (!T.raf) T.raf = requestAnimationFrame(watchLoop);
+  paintTimer();
 }
 function stopTimer(){
   T.on = false; T.paused = false;
   if (T.tick){ clearInterval(T.tick); T.tick = null; }
+  if (T.raf){ cancelAnimationFrame(T.raf); T.raf = null; }
   paintTimer();
   if (typeof tab !== 'undefined' && tab === 'workout' && openEx) render();
 }
@@ -1963,11 +2190,211 @@ document.addEventListener('visibilitychange', () => {
       const was = T.left;
       T.left = Math.max(0, T.left - gone);
       if (was > 0 && T.left === 0){ toast('휴식 시간이 끝나 있었어요'); vibrate([120,60,120]); }
-    } else T.up += gone;
+    } else { T.ms = Date.now() - T.at; T.up = Math.floor(T.ms/1000); }
     paintTimer();
   }
   hiddenAt = null;
 });
+
+/* ═══════════════════════════════════════════════
+   원판 시계
+
+   기존 T 상태를 그대로 쓴다. 미니 배지와 큰 원판이
+   같은 값을 바라보므로 어느 쪽을 봐도 시간이 어긋나지 않는다.
+   ═══════════════════════════════════════════════ */
+const PL = { open:false, mode:'rest', pick:90, built:false };
+const REST_OPTS = [30, 60, 90, 120, 180, 240, 300];
+
+/* 원판 테두리의 널링과 눈금은 한 번만 그린다 */
+function buildPlate(){
+  if (PL.built) return;
+  let k = '';
+  for (let i = 0; i < 72; i++){
+    k += '<rect x="119.3" y="4" width="1.4" height="7" rx=".7" fill="rgba(255,255,255,.07)" ' +
+         'transform="rotate(' + (i*5) + ' 120 120)"/>';
+  }
+  const kn = $('#plKnurl'); if (kn) kn.innerHTML = k;
+
+  let t = '';
+  for (let i = 0; i < 60; i++){
+    const big = i % 5 === 0;
+    t += '<rect x="119.6" y="' + (big ? 24 : 27) + '" width="' + (big ? .9 : .7) + '" ' +
+         'height="' + (big ? 9 : 5) + '" rx=".4" ' +
+         'fill="rgba(255,255,255,' + (big ? '.20' : '.10') + ')" ' +
+         'transform="rotate(' + (i*6) + ' 120 120)"/>';
+  }
+  const tk = $('#plTicks'); if (tk) tk.innerHTML = t;
+  PL.built = true;
+}
+
+function openPlate(){
+  buildPlate();
+  PL.open = true;
+  PL.mode = T.on ? T.mode : PL.mode;
+  $('#plate').classList.add('on');
+  $('#plDim').classList.add('on');
+  paintPlate();
+  vibrate(8);
+}
+function closePlate(){
+  PL.open = false;
+  $('#plate').classList.remove('on');
+  $('#plDim').classList.remove('on');
+}
+function plMode(m){
+  PL.mode = m;
+  if (T.on && T.mode !== m) stopTimer();
+  paintPlate();
+  vibrate(6);
+}
+
+/* 퀵 선택 — 누르면 바로 시작한다 */
+function plPick(sec){
+  PL.pick = sec;
+  startRest(sec, '휴식');
+  paintPlate();
+  vibrate([20,40,20]);
+}
+
+function plStart(){
+  if (PL.mode === 'watch'){
+    if (!T.on) startWatch();
+    else T.paused = !T.paused;
+    if (!T.paused) T.at = Date.now() - T.ms;
+  } else {
+    if (!T.on) startRest(PL.pick, '휴식');
+    else T.paused = !T.paused;
+  }
+  paintTimer(); paintPlate(); vibrate(10);
+}
+function plAdjust(sec){
+  if (!T.on || T.mode !== 'rest') return;
+  T.left = Math.max(0, T.left + sec);
+  T.total = Math.max(T.total, T.left);
+  paintTimer(); paintPlate(); vibrate(6);
+}
+function plLap(){
+  if (!T.on || T.mode !== 'watch') return;
+  const prev = T.laps.length ? T.laps[T.laps.length-1].at : 0;
+  T.laps.push({ at:T.ms, split:T.ms - prev });
+  paintPlate(); vibrate(8);
+}
+function plReset(){
+  if (PL.mode === 'watch'){ T.laps = []; T.ms = 0; T.up = 0; T.at = Date.now(); }
+  stopTimer(); paintPlate(); vibrate(10);
+}
+
+/* 화면 갱신 — 열려 있을 때만 그린다 */
+function paintPlate(){
+  if (!PL.open) return;
+  const el = $('#plate');
+  const watch = PL.mode === 'watch';
+  $('#segRest').setAttribute('aria-pressed', !watch);
+  $('#segWatch').setAttribute('aria-pressed', watch);
+
+  const C = 647;   /* 반지름 103 인 원의 둘레 */
+  let pct, num, sub, mode;
+
+  if (watch){
+    mode = 'STOPWATCH';
+    num = mmssms(T.ms);
+    sub = !T.on ? '시작을 누르세요' : (T.paused ? '일시정지' : '측정 중');
+    pct = (T.ms % 60000) / 60000;          /* 1분에 한 바퀴 */
+    el.classList.remove('done','warn');
+  } else {
+    mode = 'REST';
+    const done = T.on && T.left <= 0;
+    num = T.on ? (done ? '0:00' : mmss(T.left)) : mmss(PL.pick);
+    sub = !T.on ? '휴식 시간을 고르세요'
+        : done ? '휴식 끝 — 다음 세트'
+        : (T.paused ? '일시정지' : (T.label || '휴식'));
+    pct = T.on && T.total ? Math.max(0, T.left / T.total) : 1;
+    el.classList.toggle('done', !!done);
+    el.classList.toggle('warn', T.on && !done && T.left <= 5);
+  }
+
+  $('#plMode').textContent = mode;
+  $('#plNum').textContent = num;
+  $('#plSub').textContent = sub;
+  const arc = $('#plArc');
+  if (arc) arc.setAttribute('stroke-dashoffset', (C * (1 - pct)).toFixed(1));
+
+  /* 퀵 선택 */
+  const q = $('#plQuick');
+  if (watch){ q.innerHTML = ''; q.style.display = 'none'; }
+  else {
+    q.style.display = '';
+    q.innerHTML = REST_OPTS.map(v =>
+      '<button class="' + (PL.pick === v && !T.on ? 'on' : '') + '" ' +
+      'onclick="plPick(' + v + ')">' + mmss(v) + '</button>').join('');
+  }
+
+  /* 조작 버튼 */
+  const run = T.on && !T.paused;
+  let c = '';
+  if (watch){
+    c += '<button onclick="plReset()">리셋</button>';
+    c += '<button class="main" onclick="plStart()">' +
+         (!T.on ? '시작' : (T.paused ? '계속' : '일시정지')) + '</button>';
+    c += '<button class="' + (run ? 'acc' : '') + '" onclick="plLap()"' +
+         (run ? '' : ' disabled style="opacity:.4"') + '>랩</button>';
+  } else {
+    c += '<button onclick="plAdjust(-10)">−10초</button>';
+    c += '<button class="main" onclick="plStart()">' +
+         (!T.on ? '시작' : (T.paused ? '계속' : '일시정지')) + '</button>';
+    c += '<button onclick="plAdjust(30)">+30초</button>';
+  }
+  $('#plCtl').innerHTML = c;
+
+  /* 랩 목록 */
+  const L = $('#plLaps');
+  if (watch && T.laps.length){
+    const fastest = Math.min(...T.laps.map(x => x.split));
+    L.classList.add('on');
+    L.innerHTML = T.laps.slice().reverse().map((x, i) => {
+      const no = T.laps.length - i;
+      return '<div class="pl-lap' + (x.split === fastest ? ' best' : '') + '">' +
+        '<i>' + String(no).padStart(2,'0') + '</i>' +
+        '<b>' + mmssms(x.split) + '</b>' +
+        '<span>' + mmssms(x.at) + '</span></div>';
+    }).join('');
+  } else { L.classList.remove('on'); L.innerHTML = ''; }
+}
+
+/* 아래로 끌어 닫기 */
+(function plDrag(){
+  const el = () => $('#plate');
+  let y0 = null, dy = 0;
+  const start = e => {
+    if (!PL.open) return;
+    const t = e.touches ? e.touches[0] : e;
+    y0 = t.clientY; dy = 0;
+    el().classList.add('drag');
+  };
+  const move = e => {
+    if (y0 === null) return;
+    const t = e.touches ? e.touches[0] : e;
+    dy = Math.max(0, t.clientY - y0);
+    el().style.transform = 'translateY(' + dy + 'px)';
+  };
+  const end = () => {
+    if (y0 === null) return;
+    const p = el();
+    p.classList.remove('drag');
+    p.style.transform = '';
+    if (dy > 90) closePlate();
+    y0 = null;
+  };
+  document.addEventListener('DOMContentLoaded', () => {
+    const g = $('#plGrip'); if (!g) return;
+    g.addEventListener('touchstart', start, { passive:true });
+    g.addEventListener('touchmove', move, { passive:true });
+    g.addEventListener('touchend', end);
+    g.addEventListener('mousedown', start);
+    window.addEventListener('mousemove', move);
+    window.addEventListener('mouseup', end);
+  });
+})();
 
 /* 타이머 설정 시트 */
 function openTimer(){
@@ -2081,7 +2508,7 @@ function headerHTML(isDated){
     '<div class="hdr-btns">' +
       (isDated ? '<button class="ibtn" onclick="jumpDay(today())" aria-label="오늘로">' +
         svg('cal',19)+'</button>' : '') +
-      '<button class="ibtn" onclick="openTimer()" aria-label="타이머">'+svg('timer',19)+'</button>' +
+      '<button class="ibtn" onclick="openPlate()" aria-label="타이머">'+svg('timer',19)+'</button>' +
       '<button class="ibtn cat" id="catBtn" onclick="openCat()" aria-label="성장">' +
         gaugeSVG(st.idx, 22) + (alert?'<span class="ibtn-dot"></span>':'') + '</button>' +
     '</div>';
@@ -3891,7 +4318,7 @@ function viewMe(){
     '<button class="btn btn-g btn-sm" style="margin-top:8px;color:var(--chest)" onclick="wipe()">기록 전체 삭제</button></div>';
 
   h += '<div class="note" style="text-align:center;margin-top:16px;cursor:pointer" onclick="toggleDiag()">' +
-       'IRONLOG v34 · 종목 '+Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
+       'IRONLOG v35 · 종목 '+Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
   if (showDiag){
     h += '<div class="note" style="text-align:center;margin-top:5px;font-size:9px;opacity:.5;' +
          'font-family:var(--mono);line-height:1.7;word-break:break-all">' + diagLine() + '</div>';
@@ -3923,7 +4350,7 @@ function diagLine(){
   const bh = Math.round(document.body.getBoundingClientRect().height);
   const vv = window.visualViewport;
   return [
-    'v34',
+    'v35',
     'body' + bh,
     'inner' + window.innerHeight,
     'client' + document.documentElement.clientHeight,
@@ -5319,6 +5746,7 @@ Object.assign(window, {
   editMeal, saveMeal, delMeal, doneSlot, undoneSlot, startSession, sessOf, sessMinutes, keepAwake,
   moveSlot, topExercises, topFoods, avgRest, cancelSession,
   cycleTech, openExMenu, openBar, toggleLegend,
+  openPlate, closePlate, plMode, plPick, plStart, plAdjust, plLap, plReset, paintPlate,
   guessCount, looksBulk, qtyUI, packOn, packOff, packB, pieceB, rememberPack,
   dayState, markDay, pendingGaps, syncHdrH,
   mfdsSearch, pickMfds, mfdsRow, aiSearch, pickAi, aiRow,
@@ -5377,8 +5805,8 @@ $('#shX').onclick = closeSheet;
 /* 헤더 버튼은 headerHTML 안에서 직접 연결한다 */
 /* 코치 버튼은 headerHTML 안에서 연결한다 */
 $('#catBB').onclick = () => { $('#catBB').classList.remove('on'); openCat(); };
-$('#tmrAdd').onclick = timerAdd;
-$('#tmrEnd').onclick = stopTimer;
+
+
 document.addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
   if (mdResolve) mdClose(false); else closeSheet();
