@@ -37,12 +37,12 @@
   --steel-h:#1F232B;
   --lit: inset 0 1px 0 rgba(255,255,255,.07), inset 0 -1px 0 rgba(0,0,0,.5);
   --lit-in: inset 0 2px 5px rgba(0,0,0,.65), inset 0 -1px 0 rgba(255,255,255,.045);
-  --r-lg:16px; --r-md:13px; --r-sm:10px;
+  --r-lg:16px; --r-md:12px; --r-sm:10px;
 
   /* ── 글자 단계 ──
      지금까지 9~24px 이 규칙 없이 흩어져 있었다.
      여섯 단계로 묶어 화면마다 같은 뜻은 같은 크기로 보이게 한다. */
-  --f-hero:26px;   /* 화면당 하나. 오늘의 총량 같은 대표 숫자 */
+  --f-hero:30px;   /* 화면당 하나. 오늘의 총량 같은 대표 숫자 */
   --f-num:20px;    /* 카드 안의 주요 숫자 */
   --f-title:15px;  /* 종목명·음식명 등 제목 */
   --f-body:13px;   /* 본문 */
@@ -54,6 +54,9 @@
 
   /* ── 움직임 ── */
   --dur:.18s;
+
+  /* 층은 여섯 단계만. 이 밖의 숫자를 새로 만들지 않는다. */
+  --z-base:0; --z-sticky:20; --z-float:40; --z-nav:60; --z-modal:80; --z-grain:200;
   /* 이징은 둘만 쓴다. 튕김 없이 날카롭게 감속. */
   --eo:cubic-bezier(.16,1,.3,1);
   --ei:cubic-bezier(.7,0,.84,0);
@@ -98,7 +101,14 @@ input,select,textarea{font-size:var(--f-title)!important}
 input[inputmode=decimal],input[inputmode=numeric]{font-size:17px!important}
 body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 /* 순수한 검은 면은 화면에서 납작해 보인다. 아주 옅은 노이즈로 재질감을 준다. */
-body:before{content:'';position:fixed;inset:0;pointer-events:none;z-index:200;opacity:.032;
+/* 위쪽이 미세하게 밝은 수직 그라데이션 위에 상단 광원 하나.
+   시선이 자연스럽게 위로 모인다. */
+body{background:
+  radial-gradient(130% 62% at 50% -12%, rgba(255,184,77,.035) 0%, transparent 58%),
+  linear-gradient(180deg, #0C0E12 0%, #08090B 42%) !important;
+  background-attachment:fixed !important}
+
+body:before{content:'';position:fixed;inset:0;pointer-events:none;z-index:var(--z-grain);opacity:.032;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E")}
 /* 숫자가 바뀔 때 폭이 흔들리지 않게 자릿수를 고정한다 */
 .stat b,.rh-n,.ring-v,.grow-lv,.big3-n,.st-v,.tmr-n,.food-k,.mac-v,
@@ -108,11 +118,12 @@ body:before{content:'';position:fixed;inset:0;pointer-events:none;z-index:200;op
 #stage{flex:1 1 auto;min-height:0;position:relative;overflow:hidden}
 #app{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;
   -webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;
-  padding:0 16px 40px}
+  /* 떠 있는 요소가 마지막 카드를 덮지 않도록 높이를 계산해 비워둔다 */
+  padding:0 16px calc(24px + var(--sab))}
 #app>*{max-width:520px;margin-left:auto;margin-right:auto}
 
 /* ══ 헤더 ══ */
-.hdr{position:sticky;top:0;z-index:20;background:var(--bg);
+.hdr{position:sticky;top:0;z-index:var(--z-sticky);background:var(--bg);
   padding:calc(14px + min(env(safe-area-inset-top), 60px)) 0 8px}
 .hdr:after{content:'';position:absolute;left:-15px;right:-15px;bottom:0;height:1px;
   background:linear-gradient(90deg,transparent,var(--line-2) 18%,var(--line-2) 82%,transparent)}
@@ -154,7 +165,7 @@ body:before{content:'';position:fixed;inset:0;pointer-events:none;z-index:200;op
 .card{background:var(--card);border:none;border-radius:var(--r-lg);padding:16px;
   margin-bottom:12px;box-shadow:var(--lit)}
 .sec{font-size:var(--f-micro);font-weight:800;letter-spacing:.22em;color:var(--tx-3);
-  margin:24px 2px 8px;display:flex;align-items:center;gap:8px;font-family:var(--mono)}
+  margin:28px 2px 10px;display:flex;align-items:center;gap:8px;font-family:var(--mono)}
 .sec:after{content:'';flex:1;height:1px;background:var(--line)}
 .empty{text-align:center;color:var(--tx-3);font-size:var(--f-body);padding:24px 16px;line-height:1.75}
 .btn{border:none;border-radius:var(--r-md);cursor:pointer;font-weight:850;font-size:var(--f-title);
@@ -267,7 +278,7 @@ body:before{content:'';position:fixed;inset:0;pointer-events:none;z-index:200;op
 /* ══ 휴식 타이머 ══ */
 /* 타이머는 탭바 바로 위 '한 칸'을 차지한다.
    꺼져 있을 땐 높이 0 이라 자리를 전혀 먹지 않는다. */
-.tmr{flex:0 0 auto;z-index:34;overflow:hidden;max-height:0;padding:0 16px;
+.tmr{flex:0 0 auto;z-index:var(--z-float);overflow:hidden;max-height:0;padding:0 16px;
   transition:max-height .24s var(--e),padding .24s var(--e)}
 .tmr.on{max-height:110px;padding:0 16px 8px}
 .tmr-in{background:#17171C;border:1px solid var(--line-2);border-radius:var(--r-md);
@@ -284,7 +295,7 @@ body:before{content:'';position:fixed;inset:0;pointer-events:none;z-index:200;op
 .tmr.done .tmr-p i{background:var(--good)}
 
 /* ══ 탭바 ══ */
-.tabbar{flex:0 0 auto;position:relative;z-index:36;display:flex;justify-content:center;
+.tabbar{flex:0 0 auto;position:relative;z-index:var(--z-float);display:flex;justify-content:center;
   padding:7px 12px calc(9px + var(--sab));
   background:rgba(9,9,11,.94);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
   border-top:1px solid var(--line)}
@@ -304,10 +315,10 @@ body:before{content:'';position:fixed;inset:0;pointer-events:none;z-index:200;op
 
 /* ══ 시트 ══ */
 .scrim{position:fixed;top:0;left:0;right:0;bottom:var(--fixneg);
-  background:rgba(0,0,0,.66);z-index:40;opacity:0;
+  background:rgba(0,0,0,.66);z-index:var(--z-float);opacity:0;
   pointer-events:none;transition:.2s;backdrop-filter:blur(2px)}
 .scrim.on{opacity:1;pointer-events:auto}
-.sheet{position:fixed;left:0;right:0;bottom:var(--fixneg);z-index:41;max-width:520px;margin:0 auto;
+.sheet{position:fixed;left:0;right:0;bottom:var(--fixneg);z-index:var(--z-float);max-width:520px;margin:0 auto;
   background:#0F0F12;border:1px solid var(--line);border-bottom:none;
   border-radius:16px 16px 0 0;height:88dvh;max-height:88dvh;display:flex;flex-direction:column;
   transform:translateY(100%);transition:transform .26s cubic-bezier(.32,.72,0,1)}
@@ -454,7 +465,7 @@ body:before{content:'';position:fixed;inset:0;pointer-events:none;z-index:200;op
   display:flex;gap:1px;border-radius:2px;overflow:hidden}
 .cal-bar i{display:block;height:100%}
 .lg-t{width:100%;background:none;border:none;color:var(--tx-3);font-size:var(--f-label);
-  font-weight:700;padding:8px 0 2px;cursor:pointer}
+  font-weight:700;min-height:44px;padding:0;cursor:pointer}
 .lg-t:active{color:var(--tx-2)}
 
 /* ══════════════════════════════════════════
@@ -465,15 +476,15 @@ body:before{content:'';position:fixed;inset:0;pointer-events:none;z-index:200;op
    transform 과 opacity 만 건드려 60fps 를 지킨다.
    ══════════════════════════════════════════ */
 
-/* 화면이 바뀔 때 요소가 차례로 들어온다 */
+/* 탭을 바꿀 때만 요소가 차례로 들어온다.
+   매 render() 마다 돌리면 세트를 기록할 때마다 화면 전체가 깜빡인다. */
 @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-#view > *{animation:rise .34s var(--eo) both}
-#view > *:nth-child(1){animation-delay:0ms}
-#view > *:nth-child(2){animation-delay:35ms}
-#view > *:nth-child(3){animation-delay:70ms}
-#view > *:nth-child(4){animation-delay:105ms}
-#view > *:nth-child(5){animation-delay:130ms}
-#view > *:nth-child(n+6){animation-delay:150ms}
+#view.in > *{animation:rise .3s var(--eo) both}
+#view.in > *:nth-child(1){animation-delay:0ms}
+#view.in > *:nth-child(2){animation-delay:30ms}
+#view.in > *:nth-child(3){animation-delay:60ms}
+#view.in > *:nth-child(4){animation-delay:85ms}
+#view.in > *:nth-child(n+5){animation-delay:105ms}
 
 /* 세트를 기록한 순간 — 이 앱에서 가장 많이 보는 장면 */
 @keyframes setIn{
@@ -494,6 +505,14 @@ body:before{content:'';position:fixed;inset:0;pointer-events:none;z-index:200;op
 
 /* 시트가 올라올 때 */
 @keyframes sheetUp{from{transform:translateY(100%)}to{transform:none}}
+
+/* ══ 글자 위계 ══
+   시스템 폰트뿐이라 굵기와 자간을 극단적으로 다뤄 개성을 만든다. */
+.stat b,.rh-n,.ring-v,.big3-n{font-weight:850;letter-spacing:-.05em}
+.ex-tt b,.food-t b,.mrow-t b{font-weight:800;letter-spacing:-.03em}
+/* 라벨은 언제나 같은 모습 — 작게, 넓게, 대문자처럼 */
+.stat span,.st-h,.sec,.fd label,.grp,.mini>span{
+  letter-spacing:.16em;font-weight:800;text-transform:uppercase}
 
 /* ══ 아이콘 ══ */
 svg.i{fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;
@@ -536,7 +555,7 @@ svg.i{fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;
 .ring-top{display:flex;align-items:center;gap:16px}
 .goal-row{display:flex;align-items:center;justify-content:space-between;width:100%;
   background:none;border:none;border-top:1px solid var(--line);
-  margin-top:12px;padding:12px 0 0;cursor:pointer}
+  margin-top:12px;min-height:44px;padding:0;cursor:pointer}
 .goal-row span{font-size:var(--f-label);color:var(--tx-3);font-weight:700}
 .goal-row i{font-style:normal;font-size:var(--f-label);color:var(--tx-2);font-weight:700}
 .goal-row:active span{color:var(--tx-2)}
@@ -681,11 +700,13 @@ svg.i{fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;
 
 /* ══ 확인 · 입력 모달 ══ */
 .mask{position:fixed;top:0;left:0;right:0;bottom:var(--fixneg);
-  background:rgba(0,0,0,.72);z-index:60;opacity:0;
-  pointer-events:none;transition:.16s;backdrop-filter:blur(3px)}
+  /* 흐림은 시트 뒤에서만 쓴다. 카드에는 쓰지 않는다. */
+  background:rgba(4,5,7,.6);z-index:var(--z-nav);opacity:0;
+  pointer-events:none;transition:opacity .18s var(--eo);
+  backdrop-filter:blur(16px) saturate(.75);-webkit-backdrop-filter:blur(16px) saturate(.75)}
 .mask.on{opacity:1;pointer-events:auto}
 .modal{position:fixed;top:0;left:0;right:0;bottom:var(--fixneg);
-  z-index:61;display:flex;align-items:center;justify-content:center;
+  z-index:var(--z-nav);display:flex;align-items:center;justify-content:center;
   padding:24px;pointer-events:none;opacity:0;transition:.18s var(--e)}
 .modal.on{opacity:1;pointer-events:auto}
 .md-in{width:100%;max-width:340px;background:#0E0E11;border:1px solid var(--line-2);
@@ -970,7 +991,7 @@ svg.i{fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;
 .rep-btn em{font-style:normal;font-size:var(--f-label);color:var(--tx-3);font-weight:700}
 
 /* ══ 코치 ══ */
-.cat-bb{position:absolute;right:13px;z-index:35;top:calc(var(--hdrh, 96px) + 6px);
+.cat-bb{position:absolute;right:13px;z-index:var(--z-float);top:calc(var(--hdrh, 96px) + 6px);
   max-width:min(250px,calc(100vw - 108px));background:#FFF;color:#141418;border-radius:14px;
   padding:8px 12px;font-size:var(--f-body);font-weight:600;line-height:1.6;
   box-shadow:0 12px 34px rgba(0,0,0,.62);opacity:0;transform:translateY(-6px) scale(.94);
@@ -998,12 +1019,11 @@ svg.i{fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;
 #toast{position:absolute;left:50%;bottom:26px;
   transform:translateX(-50%) translateY(10px);background:var(--white);color:#09090B;
   font-size:var(--f-body);font-weight:800;padding:8px 16px;border-radius:11px;opacity:0;
-  pointer-events:none;transition:.22s;z-index:50;white-space:nowrap;max-width:90vw}
+  pointer-events:none;transition:.22s;z-index:var(--z-nav);white-space:nowrap;max-width:90vw}
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 
 /* 탭을 바꿀 때만 부드럽게 올라오게 (세트 입력 중에는 깜빡이지 않도록) */
-#view.in{animation:rise .26s var(--e)}
-@keyframes rise{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+/* 탭 전환 애니메이션은 아래 '모션' 절에서 한 곳으로 모았다 */
 
 /* 방금 기록한 세트 한 줄만 반짝 */
 .st-r.flash{animation:flash .75s var(--e)}
@@ -3867,7 +3887,7 @@ function viewMe(){
     '<button class="btn btn-g btn-sm" style="margin-top:8px;color:var(--chest)" onclick="wipe()">기록 전체 삭제</button></div>';
 
   h += '<div class="note" style="text-align:center;margin-top:16px;cursor:pointer" onclick="toggleDiag()">' +
-       'IRONLOG v32 · 종목 '+Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
+       'IRONLOG v33 · 종목 '+Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
   if (showDiag){
     h += '<div class="note" style="text-align:center;margin-top:5px;font-size:9px;opacity:.5;' +
          'font-family:var(--mono);line-height:1.7;word-break:break-all">' + diagLine() + '</div>';
@@ -3899,7 +3919,7 @@ function diagLine(){
   const bh = Math.round(document.body.getBoundingClientRect().height);
   const vv = window.visualViewport;
   return [
-    'v32',
+    'v33',
     'body' + bh,
     'inner' + window.innerHeight,
     'client' + document.documentElement.clientHeight,
@@ -5280,6 +5300,10 @@ function go(t){
   scrollTop0(); render();
   const v = $('#view');
   v.classList.remove('in'); void v.offsetWidth; v.classList.add('in');
+  /* 다 끝나면 클래스를 떼어 둔다.
+     남겨두면 이후 render() 마다 화면 전체가 다시 깜빡인다. */
+  clearTimeout(go._t);
+  go._t = setTimeout(() => v.classList.remove('in'), 500);
   vibrate(8);
 }
 
