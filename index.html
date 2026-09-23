@@ -567,18 +567,22 @@ body:before{content:'';position:fixed;inset:0;pointer-events:none;z-index:var(--
 .pl-x:active{background:rgba(255,255,255,.1);color:var(--tx)}
 
 /* ── 어두운 배경 ── */
-.pl-dim{position:fixed;top:0;left:0;right:0;bottom:var(--fixneg);z-index:var(--z-nav);
+.pl-dim{position:fixed;top:0;left:0;right:0;bottom:var(--fixneg);z-index:var(--z-sticky);
   background:rgba(4,5,7,.62);backdrop-filter:blur(16px) saturate(.75);
   -webkit-backdrop-filter:blur(16px) saturate(.75);
   opacity:0;pointer-events:none;transition:opacity .22s var(--eo)}
 .pl-dim.on{opacity:1;pointer-events:auto}
 
 /* ── 큰 원판 드로어 ── */
-.plate{position:fixed;left:0;right:0;bottom:var(--fixneg);z-index:var(--z-modal);
+.plate{position:fixed;left:0;right:0;
+  /* 탭바 위에서 멈춘다. 덮어버리면 탭이 가려져 화면이 잘린 것처럼 보인다. */
+  bottom:calc(var(--tabh) + var(--fixneg));
+  z-index:var(--z-modal);
   /* 닫기 버튼을 안쪽에 두기 위해 기준을 잡는다 */
   max-width:520px;margin:0 auto;
   background:var(--card);border-radius:24px 24px 0 0;
-  padding:8px 18px calc(22px + var(--sab));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.09), 0 -24px 60px -20px rgba(0,0,0,.85);
+  padding:8px 18px 18px;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.09), 0 -24px 60px -20px rgba(0,0,0,.85);
   transform:translateY(100%);transition:transform .38s var(--eo);
   touch-action:none}
@@ -682,6 +686,55 @@ body:before{content:'';position:fixed;inset:0;pointer-events:none;z-index:var(--
   .plate{transition:none}
   .plate.done .pl-disc{animation:none}
 }
+
+/* 타이머가 열려 있을 때 헤더 버튼 */
+.ibtn.on{background:var(--acc);color:#08090B;box-shadow:inset 0 1px 0 rgba(255,255,255,.45)}
+
+
+/* ══ 다음 세트 카드 ══ */
+.nx{display:flex;align-items:center;gap:11px;width:100%;
+  margin:0 13px 12px;width:calc(100% - 26px);
+  min-height:56px;padding:10px 13px;border:none;border-radius:var(--r-md);
+  background:var(--card-2);box-shadow:var(--edge);cursor:pointer;text-align:left;
+  transition:filter .12s var(--eo)}
+.nx:active{filter:brightness(1.3)}
+.nx-m{flex:0 0 22px;text-align:center;font-size:var(--f-title);font-weight:900;
+  color:var(--tx-3);font-family:var(--mono)}
+.nx.up   .nx-m{color:var(--acc)}
+.nx.down .nx-m{color:var(--warn)}
+.nx-b{flex:1;min-width:0}
+.nx-h{display:flex;align-items:baseline;gap:6px}
+.nx-h em{font-style:normal;font-size:var(--f-micro);font-weight:800;letter-spacing:.14em;
+  color:var(--tx-3)}
+.nx-h i{font-style:normal;font-size:var(--f-micro);color:var(--tx-3);font-weight:700}
+.nx-h b{font-size:var(--f-title);font-weight:850;letter-spacing:-.03em;
+  font-variant-numeric:tabular-nums}
+.nx.up .nx-h b{color:var(--acc)}
+.nx-w{display:block;font-size:var(--f-label);color:var(--tx-3);margin-top:3px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nx-go{flex:0 0 auto;font-size:var(--f-micro);font-weight:800;letter-spacing:.12em;
+  color:var(--tx-2);padding:8px 10px;border-radius:var(--r-sm);
+  background:rgba(255,255,255,.06)}
+.nx.faint{opacity:.62}
+.nx.faint .nx-go{background:none}
+
+/* 목표 미설정 · 근거 부족 */
+.nx-set,.nx-wait{background:none;box-shadow:none;min-height:44px}
+.nx-wait{cursor:default}
+.nx-t{flex:1;font-size:var(--f-label);color:var(--tx-3)}
+
+/* ══ 목표 범위 시트 ══ */
+.rg{background:#0A0C0F;border-radius:var(--r-md);padding:6px 12px;box-shadow:var(--lit-in)}
+.rg-r{display:flex;align-items:center;gap:10px;padding:8px 0;
+  border-bottom:1px solid rgba(255,255,255,.04)}
+.rg-r:last-child{border-bottom:none}
+.rg-r label{flex:1;font-size:var(--f-body);color:var(--tx-2);font-weight:700}
+.rg-r button{width:44px;height:44px;border:none;border-radius:var(--r-sm);
+  background:var(--steel);color:var(--tx-2);font-size:var(--f-title);cursor:pointer;
+  box-shadow:var(--lit)}
+.rg-r button:active{box-shadow:var(--lit-in);filter:brightness(1.4)}
+.rg-r b{flex:0 0 64px;text-align:center;font-size:var(--f-title);font-weight:850;
+  font-variant-numeric:tabular-nums}
 
 /* ══ 아이콘 ══ */
 svg.i{fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;
@@ -1231,7 +1284,7 @@ svg.i{fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;
 </div>
 
 <!-- 동작 중일 때만 탭바 위에 뜨는 미니 원판. 누르면 큰 원판이 올라온다. -->
-<button class="tmr" id="tmr" onclick="openPlate()" aria-label="타이머 열기">
+<button class="tmr" id="tmr" onclick="togglePlate()" aria-label="타이머 열기">
   <span class="mini-pl">
     <svg viewBox="0 0 44 44" aria-hidden="true">
       <circle cx="22" cy="22" r="18" fill="none" stroke="var(--line-2)" stroke-width="4"/>
@@ -2472,6 +2525,11 @@ function buildPlate(){
   PL.built = true;
 }
 
+/* 같은 버튼을 다시 누르면 닫힌다 */
+function togglePlate(){
+  if (PL.open) closePlate(); else openPlate();
+}
+
 function openPlate(){
   TU.hidden = false;
   buildPlate();
@@ -2480,12 +2538,19 @@ function openPlate(){
   $('#plate').classList.add('on');
   $('#plDim').classList.add('on');
   paintPlate();
+  syncHdrBtn();
   vibrate(8);
 }
 function closePlate(){
   PL.open = false;
   $('#plate').classList.remove('on');
   $('#plDim').classList.remove('on');
+  syncHdrBtn();
+}
+/* 헤더의 타이머 버튼만 다시 칠한다 — 화면 전체를 그리지 않는다 */
+function syncHdrBtn(){
+  const b = document.querySelector('.hdr-btns .ibtn:not(.cat)');
+  if (b) b.classList.toggle('on', PL.open);
 }
 function plMode(m){
   PL.mode = m;
@@ -2651,6 +2716,420 @@ function paintPlate(){
   });
 })();
 
+
+/* ═══════════════════════════════════════════════════════════
+   점진적 과부하 엔진 (v40)
+
+   기록을 읽어 "다음에 무엇을 할지" 를 정한다.
+   AI 를 쓰지 않는다. 모든 판단은 아래 규칙으로 설명된다.
+
+   여기에는 화면을 그리는 코드가 없다.
+   순수 계산만 하고 결과를 돌려준다.
+   ═══════════════════════════════════════════════════════════ */
+
+/* 상태 여섯 가지 */
+const PS = {
+  INCREASE:'INCREASE',           /* 무게를 올린다 */
+  REP_PROGRESS:'REP_PROGRESS',   /* 무게는 두고 횟수를 늘린다 */
+  HOLD:'HOLD',                   /* 그대로 */
+  DECREASE:'DECREASE',           /* 무게를 내린다 */
+  RECOVERY:'RECOVERY',           /* 회복이 필요하다 */
+  NONE:'INSUFFICIENT_DATA'       /* 판단할 근거가 없다 */
+};
+
+/* 종목 성격별 기본 횟수 범위 — 사용자가 정하지 않았을 때만 쓴다 */
+const RANGE_DEF = { bar:[5,8], db:[8,12], mach:[10,15], body:[8,15], assist:[6,10] };
+
+/* 증량 단위 기본값 */
+const INC_DEF = { bar:2.5, db:2, mach:5, assist:5, body:2.5 };
+
+/* 진행 판정을 하지 않는 종목 */
+const NO_PROG = { hold:1, cardio:1 };
+
+/* ── 증량 단위 ── */
+function incOf(exId){
+  const p = (D.prog || {})[exId];
+  if (p && p.inc > 0) return p.inc;
+  const ex = EX[exId];
+  if (!ex) return 0;
+  if (ex.inc > 0) return ex.inc;
+  return INC_DEF[ex.kind] || 0;     /* 0 이면 '모른다' — 무게를 바꾸지 않는다 */
+}
+
+/* ── 이 종목의 지난 세션들 ── */
+function getExerciseHistory(exId, limit){
+  const H = sessionsOf(exId);
+  return limit ? H.slice(-limit) : H;
+}
+
+/* ── 판정에 쓸 작업 세트만 추린다 ──
+   워밍업과 드랍세트는 진행 판단을 흐린다. */
+function normalizeWorkingSets(slotId){
+  return setsOf(slotId).filter(x =>
+    isWork(x) && !x.drop && x.r > 0 && typeof x.w === 'number' && x.w >= 0);
+}
+
+/* ── 목표 횟수 범위 ──
+   사용자 → 이력 → 종목 기본값 순으로 찾는다. */
+function determineTargetRange(exId){
+  const p = (D.prog || {})[exId];
+  if (p && p.lo > 0 && p.hi >= p.lo) return { lo:p.lo, hi:p.hi, src:'user' };
+
+  const ex = EX[exId];
+  if (!ex || NO_PROG[ex.kind]) return null;
+
+  const H = getExerciseHistory(exId, 5);
+  if (H.length >= 3){
+    const reps = H.map(x => x.r).filter(x => x > 0).sort((a,b) => a - b);
+    if (reps.length >= 3){
+      const mid = reps[Math.floor(reps.length / 2)];
+      return { lo:Math.max(1, mid - 2), hi:mid + 2, src:'history' };
+    }
+  }
+  const d = RANGE_DEF[ex.kind];
+  return d ? { lo:d[0], hi:d[1], src:'default' } : null;
+}
+
+/* ── 수행력 추세 ──
+   ±1.5% 안쪽은 흔들림으로 보고 무시한다. */
+function calculatePerformanceTrend(exId){
+  const H = getExerciseHistory(exId, 5);
+  if (H.length < 3) return { dir:0, pct:0, n:H.length };
+  const a = H[0].e, b = H[H.length - 1].e;
+  if (!a) return { dir:0, pct:0, n:H.length };
+  const pct = (b - a) / a;
+  return { dir: pct > 0.015 ? 1 : pct < -0.015 ? -1 : 0, pct, n:H.length };
+}
+
+/* ── RPE 읽기 ── */
+function evaluateRPE(sets, prevSets){
+  const cur = sets.filter(x => x.rpe > 0).map(x => x.rpe);
+  if (!cur.length) return { has:false, max:0, avg:0, drop:0 };
+  const avg = cur.reduce((a,b) => a + b, 0) / cur.length;
+  let drop = 0;
+  if (prevSets && prevSets.length){
+    const p = prevSets.filter(x => x.rpe > 0).map(x => x.rpe);
+    if (p.length) drop = (p.reduce((a,b) => a + b, 0) / p.length) - avg;
+  }
+  return { has:true, max:Math.max(...cur), avg, drop };
+}
+
+/* ── 연달아 내려가고 있는 세션 수 ──
+   한 번 삐끗한 것과 계속 밀리는 것은 다르다. */
+function decliningStreak(exId){
+  const H = getExerciseHistory(exId, 5);
+  let c = 0;
+  for (let i = H.length - 1; i >= 1; i--){
+    if (H[i].e < H[i-1].e) c++; else break;
+  }
+  return c;
+}
+
+/* ── 최근 몇 세션 연속으로 상단에 닿았나 ── */
+function consecutiveHi(exId, hi, upto){
+  const H = getExerciseHistory(exId, upto || 4);
+  let c = 0;
+  for (let i = H.length - 1; i >= 0; i--){
+    if (H[i].r >= hi) c++; else break;
+  }
+  return c;
+}
+
+/* ── 최근 n 세션이 연달아 하단에 못 미쳤나 ── */
+function lastNSessionsBelow(exId, lo, n){
+  const H = getExerciseHistory(exId, n);
+  if (H.length < n) return false;
+  return H.every(x => x.r < lo);
+}
+
+/* ── 신뢰도 ──
+   근거가 얇으면 과감한 제안을 내지 않는다. */
+function confidenceOf(H, R, T){
+  if (!H || H.length <= 2) return 'LOW';
+  const last = H[H.length - 1];
+  if (last && last.date){
+    const gap = Math.round((new Date(today()) - new Date(last.date)) / 864e5);
+    if (gap > 30) return 'LOW';
+  }
+  if (H.length >= 3 && R.has && T && T.src === 'user') return 'HIGH';
+  if (H.length >= 3 && (R.has || (T && T.src === 'user'))) return 'MED';
+  return 'MED';
+}
+
+/* ── 상태 결정 ──
+   우선순위 : 회복 → 감량 → 증량 → 횟수 → 유지 */
+function determineProgressionState(exId, slotId){
+  const ex = EX[exId];
+  if (!ex || NO_PROG[ex.kind])
+    return { state:PS.NONE, conf:'LOW', why:'진행 판정 대상이 아닌 종목입니다' };
+
+  const T = determineTargetRange(exId);
+  const W = normalizeWorkingSets(slotId);
+  const H = getExerciseHistory(exId, 5);
+
+  if (!T)         return { state:PS.NONE, conf:'LOW', why:'목표 범위를 정하면 제안을 드릴 수 있어요', T:null };
+  if (!W.length)  return { state:PS.NONE, conf:'LOW', why:'작업 세트가 아직 없습니다', T };
+  if (H.length < 2) return { state:PS.NONE, conf:'LOW', why:'두 세션쯤 더 쌓이면 제안을 드릴 수 있어요', T };
+
+  const reps  = W.map(x => x.r);
+  const minR  = Math.min(...reps);
+  const allHi = reps.every(r => r >= T.hi);
+  const R     = evaluateRPE(W, null);
+  const trend = calculatePerformanceTrend(exId);
+  const conf  = confidenceOf(H, R, T);
+
+  /* 1. 회복 — 가장 먼저 본다.
+     한 번 안 좋았던 날과 진짜 과훈련을 구분해야 한다.
+     그래서 '연속으로 내려갔는지' 까지 본다. 한 번 꺾인 것만으로는 부족하다. */
+  if (trend.dir === -1 && trend.n >= 3 && R.has && R.avg >= 9 &&
+      decliningStreak(exId) >= 2)
+    return { state:PS.RECOVERY, conf, T,
+             why:'세 세션 연속 수행력이 내려가고 RPE 가 높습니다' };
+
+  /* 2. 감량 — 두 세션 연속 하단 미달 */
+  if (minR < T.lo && lastNSessionsBelow(exId, T.lo, 2))
+    return { state:PS.DECREASE, conf, T,
+             why:'두 세션 연속 목표 최저 횟수에 못 미쳤습니다' };
+
+  /* 3~5. 상단 도달 */
+  if (allHi){
+    if (R.has && R.max >= 9.5)
+      return { state:PS.HOLD, conf, T,
+               why:'상단은 채웠지만 RPE 가 높아 한 번 더 굳히는 편이 좋습니다' };
+    if (consecutiveHi(exId, T.hi) >= 2)
+      return { state:PS.INCREASE, conf:'HIGH', T,
+               why:'두 세션 연속 목표 상단에 도달했습니다' };
+    return { state:PS.INCREASE, conf:(conf === 'HIGH' ? 'MED' : conf), T,
+             why:'목표 상단에 도달했습니다' };
+  }
+
+  /* 6. 아직 여유 있음 */
+  if (minR >= T.lo)
+    return { state:PS.REP_PROGRESS, conf, T,
+             why:'무게는 맞고 횟수를 더 올릴 여지가 있습니다' };
+
+  /* 7. RPE 가 내려갔으면 같은 성적도 발전 */
+  if (R.has && R.drop >= 1)
+    return { state:PS.REP_PROGRESS, conf:'MED', T,
+             why:'같은 성적을 더 가볍게 해냈습니다' };
+
+  /* 8. 한 번 미달 */
+  if (minR < T.lo)
+    return { state:PS.HOLD, conf, T, why:'한 번 미달했습니다. 이번엔 같은 무게로 굳혀보세요' };
+
+  return { state:PS.HOLD, conf:'LOW', T, why:'바꿀 뚜렷한 근거가 없습니다' };
+}
+
+/* ── 다음 무게 ──
+   단위를 모르면 지어내지 않고 그대로 둔다.
+   보조 기구는 방향이 반대다 — 올린다는 건 보조를 줄이는 것이다. */
+function calculateNextTarget(exId, curW, state){
+  const inc = incOf(exId);
+  if (!inc) return { w:curW, note:'증량 단위를 알 수 없어 무게는 유지합니다' };
+  const dir = isAssist(exId) ? -1 : 1;
+  const floorTo = (v, u) => Math.max(0, Math.round(v / u) * u);
+  switch (state){
+    case PS.INCREASE: return { w:r1(Math.max(0, curW + inc * dir)) };
+    case PS.DECREASE: return { w:r1(Math.max(0, curW - inc * dir)) };
+    case PS.RECOVERY: return { w:r1(floorTo(curW * 0.9, inc)) };
+    default:          return { w:curW };
+  }
+}
+
+/* ── 제안 만들기 ──
+   근거가 얇으면 과감한 쪽으로 가지 않는다. */
+function generateRecommendation(exId, slotId){
+  const s = determineProgressionState(exId, slotId);
+  const W = normalizeWorkingSets(slotId);
+  const curW = W.length ? W[W.length - 1].w : 0;
+  const T = s.T || null;
+
+  if (s.state === PS.NONE)
+    return { state:PS.NONE, exId, conf:'LOW', why:s.why, from:null, to:null };
+
+  /* 신뢰도가 낮으면 무게를 건드리지 않는다 */
+  let st = s.state;
+  if (s.conf === 'LOW' && (st === PS.INCREASE || st === PS.DECREASE)){
+    st = PS.HOLD;
+    s.why = '근거가 아직 얇아 이번엔 같은 무게를 권합니다';
+  }
+
+  const nt = calculateNextTarget(exId, curW, st);
+  return {
+    state: st, exId, conf: s.conf, why: s.why,
+    from: { w:curW, lo:T && T.lo, hi:T && T.hi, src:T && T.src },
+    to:   { w:nt.w, lo:T && T.lo, hi:T && T.hi },
+    note: nt.note || null
+  };
+}
+
+/* 계산 결과를 종목·슬롯 단위로 재사용한다 — 매번 이력을 훑지 않는다 */
+function recOf(exId, slotId){
+  return memo('rec|' + exId + '|' + slotId, () => generateRecommendation(exId, slotId));
+}
+
+/* ── 사용자가 다르게 골랐을 때 ── */
+async function recordUserOverride(exId, suggested, chosen, state){
+  if (suggested === chosen) return;
+  D.ovr = D.ovr || {};
+  const a = D.ovr[exId] = D.ovr[exId] || [];
+  a.push({ at:today(), sug:suggested, chose:chosen, state });
+  D.ovr[exId] = a.slice(-5);          /* 최근 다섯 번만 남긴다 */
+  await saveData();
+}
+
+/* 같은 방향으로 세 번 벗어났으면 한 번 물어볼 만하다 */
+function overrideHint(exId){
+  const a = (D.ovr || {})[exId] || [];
+  if (a.length < 3) return null;
+  const last3 = a.slice(-3);
+  const lower = last3.every(x => x.chose < x.sug);
+  const higher = last3.every(x => x.chose > x.sug);
+  if (!lower && !higher) return null;
+  return { dir: lower ? 'lower' : 'higher', n:3 };
+}
+
+/* ── 목표 범위 저장 ── */
+async function setTargetRange(exId, lo, hi, sets, inc){
+  D.prog = D.prog || {};
+  const p = D.prog[exId] = D.prog[exId] || {};
+  if (lo > 0) p.lo = lo;
+  if (hi > 0) p.hi = hi;
+  if (sets > 0) p.sets = sets;
+  if (inc > 0) p.inc = inc;
+  p.method = p.method || 'double';
+  p.src = 'user';
+  p.updated = today();
+  await saveData();
+}
+
+
+/* ═══════════════════════════════════════════
+   다음 세트 카드 (v41)
+
+   엔진이 낸 제안을 한 줄로 보여준다.
+   근거를 함께 적고, 사용자가 다르게 고를 수 있게 둔다.
+   ═══════════════════════════════════════════ */
+
+const PS_UI = {
+  INCREASE:     { mark:'▲', label:'증량',  cls:'up'   },
+  REP_PROGRESS: { mark:'+', label:'횟수',  cls:'up'   },
+  HOLD:         { mark:'=', label:'유지',  cls:'keep' },
+  DECREASE:     { mark:'▼', label:'감량',  cls:'down' },
+  RECOVERY:     { mark:'◐', label:'회복',  cls:'down' }
+};
+
+function nextCard(sl){
+  const ex = EX[sl.exId];
+  if (!ex || NO_PROG[ex.kind]) return '';
+
+  const r = recOf(sl.exId, sl.id);
+
+  /* 판단할 근거가 없을 때 — 목표를 정하면 되는 경우에만 길을 열어준다 */
+  if (r.state === PS.NONE){
+    const T = determineTargetRange(sl.exId);
+    if (!T){
+      return '<button class="nx nx-set" onclick="openRange(\'' + q(sl.exId) + '\')">' +
+        '<span class="nx-t">목표 범위를 정하면 다음 무게를 추천해 드려요</span>' +
+        '<span class="nx-go">설정</span></button>';
+    }
+    return '<div class="nx nx-wait"><span class="nx-t">' + esc(r.why) + '</span></div>';
+  }
+
+  const u = PS_UI[r.state] || PS_UI.HOLD;
+  const asst = isAssist(sl.exId);
+  const unit = asst ? '보조' : '';
+  const same = r.to.w === r.from.w;
+
+  const target = (r.to.lo && r.to.hi)
+    ? r1(r.to.w) + 'kg × ' + r.to.lo + '-' + r.to.hi
+    : r1(r.to.w) + 'kg';
+
+  return '<button class="nx ' + u.cls + (r.conf === 'LOW' ? ' faint' : '') + '" ' +
+      'onclick="applyNext(\'' + sl.id + '\')">' +
+    '<span class="nx-m">' + u.mark + '</span>' +
+    '<span class="nx-b">' +
+      '<span class="nx-h"><em>' + u.label + '</em>' + (unit ? ' <i>' + unit + '</i>' : '') +
+        '<b>' + target + '</b>' + (same ? '' : '') + '</span>' +
+      '<span class="nx-w">' + esc(r.why) + (r.note ? ' · ' + esc(r.note) : '') + '</span>' +
+    '</span>' +
+    '<span class="nx-go">적용</span></button>';
+}
+
+/* 제안을 입력칸에 채운다 */
+function applyNext(slotId){
+  const sl = D.slots.find(x => x.id === slotId); if (!sl) return;
+  const r = recOf(sl.exId, slotId);
+  if (!r || !r.to) return;
+  setDr(slotId, 'w', r.to.w);
+  if (r.to.lo) setDr(slotId, 'r', r.to.lo);
+  /* 어느 값을 권했는지 기억해 둔다 — 다르게 기록하면 그걸 배운다 */
+  lastSug[slotId] = { w:r.to.w, state:r.state };
+  render();
+  vibrate([18,30,18]);
+  toast('제안을 넣었어요 · 바꿔도 됩니다');
+}
+const lastSug = {};
+
+/* ── 목표 범위 시트 ── */
+function openRange(exName){
+  const p = (D.prog || {})[exName] || {};
+  const T = determineTargetRange(exName) || { lo:8, hi:12, src:'default' };
+  const lo = p.lo || T.lo, hi = p.hi || T.hi;
+  const sets = p.sets || 3;
+  const inc = p.inc || incOf(exName) || 2.5;
+  const asst = isAssist(exName);
+
+  rgState = { ex:exName, lo, hi, sets, inc };
+  openSheet(exName + ' 목표', rangeHTML());
+}
+let rgState = null;
+
+function rangeHTML(){
+  const g = rgState;
+  const asst = isAssist(g.ex);
+  const row = (label, key, min, max, step, unit) =>
+    '<div class="rg-r"><label>' + label + '</label>' +
+    '<button onclick="rgSet(\'' + key + '\',-' + step + ')">−</button>' +
+    '<b>' + r1(g[key]) + (unit || '') + '</b>' +
+    '<button onclick="rgSet(\'' + key + '\',' + step + ')">＋</button></div>';
+
+  return '<div class="note" style="margin:0 0 16px">' +
+      '이 범위 안에서 횟수를 채우면 다음에 무게를 올리자고 알려드립니다.<br>' +
+      (asst ? '보조 기구라 <b>보조 무게가 줄어드는 쪽</b>이 발전입니다.' : '') +
+    '</div>' +
+    '<div class="rg">' +
+      row('최소 횟수', 'lo', 1, 30, 1, '회') +
+      row('최대 횟수', 'hi', 1, 30, 1, '회') +
+      row('목표 세트', 'sets', 1, 10, 1, '세트') +
+      row(asst ? '보조 조절 단위' : '증량 단위', 'inc', 0.5, 20, 1.25, 'kg') +
+    '</div>' +
+    '<div class="note" style="margin:14px 0 16px">' +
+      '<b>' + g.lo + '-' + g.hi + '회</b>를 <b>' + g.sets + '세트</b> 모두 채우면 ' +
+      '<b>' + r1(g.inc) + 'kg</b>씩 ' + (asst ? '보조를 줄입니다' : '올립니다') + '.' +
+    '</div>' +
+    '<button class="btn" onclick="rgSave()">저장</button>';
+}
+
+function rgSet(key, d){
+  const g = rgState;
+  let v = (g[key] || 0) + d;
+  if (key === 'inc') v = Math.max(0.5, Math.min(20, r1(v)));
+  else if (key === 'sets') v = Math.max(1, Math.min(10, v));
+  else v = Math.max(1, Math.min(30, v));
+  g[key] = v;
+  if (key === 'lo' && g.lo > g.hi) g.hi = g.lo;
+  if (key === 'hi' && g.hi < g.lo) g.lo = g.hi;
+  refresh(rangeHTML());
+}
+
+async function rgSave(){
+  const g = rgState;
+  await setTargetRange(g.ex, g.lo, g.hi, g.sets, g.inc);
+  closeSheet(); render();
+  toast('목표를 저장했어요');
+}
+
 /* 타이머 설정 시트 */
 function openTimer(){
   const opts = [60, 90, 120, 150, 180, 240];
@@ -2763,7 +3242,7 @@ function headerHTML(isDated){
     '<div class="hdr-btns">' +
       (isDated ? '<button class="ibtn" onclick="jumpDay(today())" aria-label="오늘로">' +
         svg('cal',19)+'</button>' : '') +
-      '<button class="ibtn" onclick="openPlate()" aria-label="타이머">'+svg('timer',19)+'</button>' +
+      '<button class="ibtn'+(PL.open?' on':'')+'" onclick="togglePlate()" aria-label="타이머">'+svg('timer',19)+'</button>' +
       '<button class="ibtn cat" id="catBtn" onclick="openCat()" aria-label="성장">' +
         gaugeSVG(st.idx, 22) + (alert?'<span class="ibtn-dot"></span>':'') + '</button>' +
     '</div>';
@@ -3015,6 +3494,7 @@ function exCard(sl){
   if (ss.some(x => x.w0)){
     h += '<div class="wnote">W 표시된 세트는 볼륨·신기록 계산에서 빠집니다</div>';
   }
+  h += nextCard(sl);          /* 다음 세트 제안 */
   h += '<div class="ip"><div class="ip-r">';
   if (ex.kind === 'cardio'){
     h += fld(sl.id,'min','시간 (분)',dr.min,5) + fld(sl.id,'dist','거리 (km)',dr.dist,0.5);
@@ -4573,7 +5053,7 @@ function viewMe(){
     '<button class="btn btn-g btn-sm" style="margin-top:8px;color:var(--chest)" onclick="wipe()">기록 전체 삭제</button></div>';
 
   h += '<div class="note" style="text-align:center;margin-top:16px;cursor:pointer" onclick="toggleDiag()">' +
-       'IRONLOG v39 · 종목 '+Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
+       'IRONLOG v41 · 종목 '+Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
   if (showDiag){
     h += '<div class="note" style="text-align:center;margin-top:5px;font-size:9px;opacity:.5;' +
          'font-family:var(--mono);line-height:1.7;word-break:break-all">' + diagLine() + '</div>';
@@ -4605,7 +5085,7 @@ function diagLine(){
   const bh = Math.round(document.body.getBoundingClientRect().height);
   const vv = window.visualViewport;
   return [
-    'v39',
+    'v41',
     'body' + bh,
     'inner' + window.innerHeight,
     'client' + document.documentElement.clientHeight,
@@ -5829,7 +6309,51 @@ async function addSet(slotId){
   /* 드랍은 연속으로 이어지므로 유지, 워밍업은 한 번 쓰고 자동 해제 */
   if (draft[slotId]) draft[slotId].w0 = false;
   vibrate(30);
+  /* 제안과 다르게 기록했으면 그 선택을 남긴다.
+     방금 넣은 세트에서 실제 무게를 읽는다. */
+  const sug = lastSug[slotId];
+  if (sug){
+    const just = D.sets[D.sets.length-1];
+    delete lastSug[slotId];
+    if (just && typeof just.w === 'number' && !just.w0 && !just.drop && sug.w !== just.w){
+      await recordUserOverride(sl.exId, sug.w, just.w, sug.state);
+      maybeAskOverride(sl.exId);
+    }
+  }
+
   toast(pr ? '개인 최고 기록!' : '기록했어요');
+}
+
+/* 같은 방향으로 세 번 벗어나면 한 번만 물어본다.
+   몰래 학습하지 않는다 — 바꿀지 말지는 사용자가 정한다. */
+async function maybeAskOverride(exId){
+  const hint = overrideHint(exId);
+  if (!hint) return;
+  D.prog = D.prog || {};
+  const p = D.prog[exId] = D.prog[exId] || {};
+  const now = Date.now();
+  if (p.askedAt && now - p.askedAt < 30*864e5) return;   /* 거절했으면 30일 쉰다 */
+
+  /* 원판은 0.25kg 단위로 존재한다. 소수 한 자리로 반올림하면 1.25 가 1.3 이 된다. */
+  const q25 = v => Math.max(0.25, Math.round(v * 4) / 4);
+  const cur = incOf(exId);
+  const next = hint.dir === 'lower' ? q25(cur / 2) : q25(cur * 2);
+  p.askedAt = now;
+  await saveData();
+
+  const yes = await ask({
+    title:'증량 폭을 조절할까요?',
+    ok:'그렇게', no:'괜찮아요',
+    body:'최근 세 번 모두 제안보다 ' + (hint.dir === 'lower' ? '낮은' : '높은') +
+         ' 무게를 고르셨어요.<br><br>' +
+         '조절 단위를 <b>' + cur + 'kg → ' + next + 'kg</b> 으로 바꿀까요?'
+  });
+  if (yes){
+    await setTargetRange(exId, 0, 0, 0, next);
+    D.ovr[exId] = [];
+    render();
+    toast('조절 단위를 ' + next + 'kg 으로 바꿨어요');
+  }
 }
 
 async function rmSet(id, fromSheet){
@@ -5988,6 +6512,7 @@ function applyFill(){
 function scrollTop0(){ const a = $('#app'); if (a) a.scrollTop = 0; }
 
 function go(t){
+  if (PL.open) closePlate();   /* 탭을 옮기면 원판을 접는다 */
   tab = t;
   if (t === 'rec' && !recAnchor) recAnchor = viewDate;
   scrollTop0(); render();
@@ -6009,7 +6534,13 @@ Object.assign(window, {
   moveSlot, topExercises, topFoods, avgRest, cancelSession,
   cycleTech, openExMenu, openBar, toggleLegend,
   openPlate, closePlate, plMode, plPick, plStart, plAdjust, plLap, plReset, paintPlate,
-  hideTimerUI, swStart, swPause, swResume, swToggle, swReset, swLap, swNow,
+  hideTimerUI, togglePlate, syncHdrBtn,
+  /* v40 과부하 엔진 — 아직 화면에 쓰이지 않는다 */
+  nextCard, applyNext, openRange, rgSet, rgSave, rangeHTML, maybeAskOverride,
+  incOf, getExerciseHistory, normalizeWorkingSets, determineTargetRange,
+  calculatePerformanceTrend, evaluateRPE, consecutiveHi, lastNSessionsBelow,
+  confidenceOf, decliningStreak, determineProgressionState, calculateNextTarget,
+  generateRecommendation, recOf, recordUserOverride, overrideHint, setTargetRange, PS, swStart, swPause, swResume, swToggle, swReset, swLap, swNow,
   guessCount, looksBulk, qtyUI, packOn, packOff, packB, pieceB, rememberPack,
   dayState, markDay, pendingGaps, syncHdrH,
   mfdsSearch, pickMfds, mfdsRow, aiSearch, pickAi, aiRow,
@@ -6522,12 +7053,19 @@ async function pullMerge(){
       return;
     }
     if (d.act === 'merge' || d.act === 'push'){
-      const before = D.slots.length + D.sets.length + D.meals.length;
-      D = mergeData(D, remote);
-      bumpDV(); rebuildIndex();
-      await saveData();
-      const after = D.slots.length + D.sets.length + D.meals.length;
-      if (after > before) toast('클라우드에서 기록을 가져왔어요');
+      /* 내용이 이미 같으면 합칠 것이 없다.
+         그래도 합치면 저장이 일어나 rev 가 오르고,
+         두 기기가 번갈아 올리고 내리는 일이 끝나지 않는다. */
+      if (remote && sameContent(D, remote)){
+        D.rev = Math.max(D.rev || 0, remote.rev || 0);
+      } else {
+        const before = D.slots.length + D.sets.length + D.meals.length;
+        D = mergeData(D, remote);
+        bumpDV(); rebuildIndex();
+        await saveData();
+        const after = D.slots.length + D.sets.length + D.meals.length;
+        if (after > before) toast('클라우드에서 기록을 가져왔어요');
+      }
     }
     syncState = 'done';
   }catch(e){ syncState = 'error'; console.warn('내려받기 실패', e); }
@@ -6582,16 +7120,21 @@ async function pushVault(){
     /* 내용이 그대로면 올리지 않는다.
        1년치가 800KB 라 불필요한 업로드는 데이터와 배터리를 낭비한다. */
     const mark = D.slots.length+'/'+D.sets.length+'/'+D.meals.length+'/'+
-                 Object.keys(D.tomb||{}).length+'/'+lastSize;
+                 Object.keys(D.tomb||{}).length+'/'+lastSize+'/'+(D.rev||0);
     if (mark === lastPushed){ syncState = 'done'; return; }
-    lastPushed = mark;
     const { error } = await sb.from('vaults').upsert({
       user_id: me.id, payload: D, updated_at: new Date().toISOString()
     });
     if (error) throw error;
+    /* 성공한 뒤에 표시한다.
+       먼저 표시하면 실패했을 때 같은 내용을 다시 올리지 않아 서버가 뒤처진다. */
+    lastPushed = mark;
     syncState = 'done';
     await pushProfile();
-  }catch(e){ syncState = 'error'; console.warn('올리기 실패', e); }
+  }catch(e){
+    lastPushed = null;      /* 다음 기회에 다시 시도한다 */
+    syncState = 'error'; console.warn('올리기 실패', e);
+  }
 }
 
 /* 기록이 바뀔 때마다 곧바로 올리지 않고 3초 모았다가 한 번에 */
