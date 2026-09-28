@@ -695,6 +695,40 @@ body:before{content:'';position:fixed;inset:0;pointer-events:none;z-index:var(--
 .ibtn.on{background:var(--acc);color:#08090B;box-shadow:inset 0 1px 0 rgba(255,255,255,.45)}
 
 
+/* ══ 오늘의 변화 ══ */
+.chg{display:flex;align-items:baseline;gap:9px;padding:11px 0;
+  border-bottom:1px solid rgba(255,255,255,.045)}
+.chg:last-child{border-bottom:none}
+.chg-m{flex:0 0 16px;font-style:normal;text-align:center;font-size:var(--f-label);
+  font-weight:900;color:var(--tx-3);font-family:var(--mono)}
+.chg.up   .chg-m{color:var(--acc)}
+.chg.down .chg-m{color:var(--warn)}
+.chg-n{flex:0 0 auto;font-size:var(--f-body);font-weight:750;max-width:38%;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chg-v{flex:1;min-width:0;font-size:var(--f-label);color:var(--tx-3);
+  font-variant-numeric:tabular-nums;text-align:right;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chg-d{flex:0 0 auto;font-size:var(--f-label);font-weight:800;color:var(--tx-3);
+  font-variant-numeric:tabular-nums;min-width:46px;text-align:right}
+.chg.up   .chg-d{color:var(--acc)}
+.chg.down .chg-d{color:var(--warn)}
+
+/* ══ 다음 시간 ══ */
+.pln{display:flex;align-items:center;gap:10px;padding:12px 0;
+  border-bottom:1px solid rgba(255,255,255,.045)}
+.pln:last-child{border-bottom:none}
+.pln-i{flex:0 0 20px;font-style:normal;text-align:center;font-size:var(--f-micro);
+  font-weight:800;color:var(--tx-3);font-family:var(--mono)}
+.pln-b{flex:1;min-width:0}
+.pln-b b{display:block;font-size:var(--f-body);font-weight:750;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pln-b span{display:block;font-size:var(--f-micro);color:var(--tx-3);margin-top:2px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pln-t{flex:0 0 auto;font-size:var(--f-label);font-weight:850;color:var(--tx-2);
+  font-variant-numeric:tabular-nums}
+.pln.up   .pln-t{color:var(--acc)}
+.pln.down .pln-t{color:var(--warn)}
+
 /* ══ 다음 세트 카드 ══ */
 .nx{display:flex;align-items:center;gap:11px;width:100%;
   margin:0 13px 12px;width:calc(100% - 26px);
@@ -3373,6 +3407,71 @@ function viewWorkout(){
   return h;
 }
 
+/* ═══════════════════════════════════════════
+   운동 종료 요약 (v42)
+
+   "무엇을 했는가" 만 보여주던 화면에
+   "무슨 의미인가" 와 "다음엔 뭘 할까" 를 더한다.
+   ═══════════════════════════════════════════ */
+
+/* 오늘 한 종목이 지난번과 견줘 어떻게 달라졌나 */
+function dayChanges(d){
+  const out = [];
+  slotsOn(d).forEach(sl => {
+    const ex = EX[sl.exId]; if (!ex) return;
+    const W = normalizeWorkingSets(sl.id);
+    if (!W.length) return;
+
+    /* 오늘 이전의 같은 종목 세션 하나 */
+    const H = sessionsOf(sl.exId).filter(x => x.date < d);
+    const prev = H.length ? H[H.length - 1] : null;
+
+    const asst = isAssist(sl.exId);
+    const top = W.reduce((a,x) => (asst ? (x.w < a.w ? x : a) : (x.w > a.w ? x : a)), W[0]);
+    const vol = W.reduce((a,x) => a + (asst ? effLoad(sl.exId, x.w) : x.w) * x.r, 0);
+
+    if (!prev){
+      out.push({ ex:ex.name, part:ex.part, dir:0, first:true,
+                 now:setLabel(top), note:'첫 기록' });
+      return;
+    }
+
+    /* 무게가 같으면 횟수로, 무게가 달라졌으면 무게로 견준다 */
+    let dir = 0, note = '';
+    const better = (a,b) => asst ? a < b : a > b;
+    if (top.w === prev.w){
+      if (top.r > prev.r){ dir = 1;  note = '+' + (top.r - prev.r) + '회'; }
+      else if (top.r < prev.r){ dir = -1; note = (top.r - prev.r) + '회'; }
+      else { dir = 0; note = '변화 없음'; }
+    } else if (better(top.w, prev.w)){
+      dir = 1;  note = (asst ? '보조 −' : '+') + r1(Math.abs(top.w - prev.w)) + 'kg';
+    } else {
+      dir = -1; note = (asst ? '보조 +' : '−') + r1(Math.abs(top.w - prev.w)) + 'kg';
+    }
+
+    out.push({ ex:ex.name, part:ex.part, dir, note, vol,
+               prev:prev.w + 'kg × ' + prev.r, now:setLabel(top) });
+  });
+  return out;
+}
+
+/* 다음 시간에 뭘 할지 — 엔진이 낸 제안을 모은다 */
+function nextPlan(d){
+  const out = [];
+  slotsOn(d).forEach(sl => {
+    const ex = EX[sl.exId]; if (!ex || NO_PROG[ex.kind]) return;
+    const r = recOf(sl.exId, sl.id);
+    if (!r || r.state === PS.NONE) return;
+    const u = PS_UI[r.state] || PS_UI.HOLD;
+    out.push({ ex:ex.name, mark:u.mark, label:u.label, cls:u.cls,
+               to: r.to && r.to.lo
+                   ? r1(r.to.w) + 'kg × ' + r.to.lo + '-' + r.to.hi
+                   : r1(r.to ? r.to.w : 0) + 'kg',
+               why: r.why, same: r.to && r.to.w === r.from.w });
+  });
+  return out;
+}
+
 function sessionDoneHTML(d, slots, vol, cnt){
   const parts = [...new Set(slots.map(x => EX[x.exId] && EX[x.exId].part).filter(Boolean))];
   let h = '<div class="fin"><div class="fin-top">' +
@@ -3395,6 +3494,46 @@ function sessionDoneHTML(d, slots, vol, cnt){
       '<div class="dd-s">'+ss.map(x => '<i'+(x.w0?' style="opacity:.45"':'')+'>' +
         (x.w0?'W ':'')+(x.drop?'↳ ':'')+setLabel(x)+'</i>').join('')+'</div></div>';
   });
+
+  /* ── 오늘의 변화 ── */
+  const ch = dayChanges(d);
+  if (ch.length){
+    const up = ch.filter(x => x.dir > 0).length;
+    const dn = ch.filter(x => x.dir < 0).length;
+    h += '<div class="sec">오늘의 변화</div>';
+    h += '<div class="card" style="padding:4px 14px">';
+    ch.forEach(x => {
+      const cls = x.dir > 0 ? 'up' : x.dir < 0 ? 'down' : 'flat';
+      const mark = x.first ? '·' : x.dir > 0 ? '▲' : x.dir < 0 ? '▼' : '=';
+      h += '<div class="chg ' + cls + '">' +
+        '<i class="chg-m">' + mark + '</i>' +
+        '<span class="chg-n">' + esc(x.ex) + '</span>' +
+        '<span class="chg-v">' + (x.prev ? esc(x.prev) + ' → ' : '') + esc(x.now) + '</span>' +
+        '<span class="chg-d">' + esc(x.note) + '</span></div>';
+    });
+    h += '</div>';
+    if (up || dn){
+      h += '<div class="hint" style="margin-top:8px">' +
+        (up ? '<b style="color:var(--acc)">' + up + '종목</b>이 늘었고 ' : '') +
+        (dn ? '<b>' + dn + '종목</b>이 줄었습니다. ' : '') +
+        '줄었다고 실패는 아닙니다 — 컨디션도 기록의 일부예요.</div>';
+    }
+  }
+
+  /* ── 다음 시간 ── */
+  const plan = nextPlan(d);
+  if (plan.length){
+    h += '<div class="sec">다음 시간</div>';
+    h += '<div class="card" style="padding:4px 14px">';
+    plan.forEach((x, i) => {
+      h += '<div class="pln ' + x.cls + '">' +
+        '<i class="pln-i">' + (i + 1) + '</i>' +
+        '<span class="pln-b"><b>' + esc(x.ex) + '</b>' +
+          '<span>' + esc(x.why) + '</span></span>' +
+        '<span class="pln-t">' + (x.same ? '그대로' : esc(x.to)) + '</span></div>';
+    });
+    h += '</div>';
+  }
 
   const mm = (D.memo || {})[d];
   h += '<div class="sec">메모</div>';
@@ -5057,7 +5196,7 @@ function viewMe(){
     '<button class="btn btn-g btn-sm" style="margin-top:8px;color:var(--chest)" onclick="wipe()">기록 전체 삭제</button></div>';
 
   h += '<div class="note" style="text-align:center;margin-top:16px;cursor:pointer" onclick="toggleDiag()">' +
-       'IRONLOG v41.1 · 종목 '+Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
+       'IRONLOG v42 · 종목 '+Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
   if (showDiag){
     h += '<div class="note" style="text-align:center;margin-top:5px;font-size:9px;opacity:.5;' +
          'font-family:var(--mono);line-height:1.7;word-break:break-all">' + diagLine() + '</div>';
@@ -5089,7 +5228,7 @@ function diagLine(){
   const bh = Math.round(document.body.getBoundingClientRect().height);
   const vv = window.visualViewport;
   return [
-    'v41.1',
+    'v42',
     'body' + bh,
     'inner' + window.innerHeight,
     'client' + document.documentElement.clientHeight,
@@ -6540,7 +6679,7 @@ Object.assign(window, {
   openPlate, closePlate, plMode, plPick, plStart, plAdjust, plLap, plReset, paintPlate,
   hideTimerUI, togglePlate, syncHdrBtn,
   /* v40 과부하 엔진 — 아직 화면에 쓰이지 않는다 */
-  nextCard, applyNext, openRange, rgSet, rgSave, rangeHTML, maybeAskOverride,
+  dayChanges, nextPlan, nextCard, applyNext, openRange, rgSet, rgSave, rangeHTML, maybeAskOverride,
   incOf, getExerciseHistory, normalizeWorkingSets, determineTargetRange,
   calculatePerformanceTrend, evaluateRPE, consecutiveHi, lastNSessionsBelow,
   confidenceOf, decliningStreak, determineProgressionState, calculateNextTarget,
