@@ -695,6 +695,23 @@ body:before{content:'';position:fixed;inset:0;pointer-events:none;z-index:var(--
 .ibtn.on{background:var(--acc);color:#08090B;box-shadow:inset 0 1px 0 rgba(255,255,255,.45)}
 
 
+/* ══ 세트 종류 시트 ══ */
+.strow{display:flex;align-items:center;gap:12px;width:100%;background:none;border:none;
+  border-bottom:1px solid var(--line);padding:15px 2px;cursor:pointer;text-align:left}
+.strow:last-child{border-bottom:none}
+.strow:active{background:var(--card)}
+.strow-m{flex:0 0 26px;text-align:center;font-size:var(--f-body);font-weight:900;
+  color:var(--tx-3);font-family:var(--mono)}
+.strow-t{flex:1;min-width:0}
+.strow-t b{display:block;font-size:var(--f-title);font-weight:750;color:var(--tx)}
+.strow-t span{display:block;font-size:var(--f-label);color:var(--tx-3);margin-top:2px}
+.strow-c{color:var(--acc);font-size:var(--f-title);font-weight:900}
+.strow.on .strow-m{color:var(--acc)}
+.strow.off{opacity:.4;cursor:default}
+.ip-go.drop{background:linear-gradient(180deg,#FFD08A,#C98A2E);color:#08090B;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.5)}
+.ip-go.warm{background:var(--steel);color:var(--tx-2);box-shadow:var(--lit)}
+
 /* ══ 오늘의 변화 ══ */
 .chg{display:flex;align-items:baseline;gap:9px;padding:11px 0;
   border-bottom:1px solid rgba(255,255,255,.045)}
@@ -777,6 +794,19 @@ body:before{content:'';position:fixed;inset:0;pointer-events:none;z-index:var(--
 /* ══ 아이콘 ══ */
 svg.i{fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;
   display:block;flex:none}
+
+/* ══ 운동 중 헤더 칩 ══ */
+.wko{flex:1;min-width:0;height:38px;background:var(--steel);border:none;
+  border-radius:var(--r-sm);cursor:pointer;box-shadow:var(--lit);
+  display:flex;align-items:center;gap:8px;padding:0 13px;
+  transition:filter .12s var(--eo)}
+.wko:active{filter:brightness(1.25)}
+.wko-d{width:6px;height:6px;border-radius:50%;background:var(--acc);flex:none;
+  animation:beat 1.8s ease-in-out infinite}
+.wko em{font-style:normal;font-size:var(--f-micro);font-weight:800;letter-spacing:.18em;
+  color:var(--tx-3)}
+.wko b{margin-left:auto;font-size:var(--f-title);font-weight:850;letter-spacing:-.03em;
+  color:var(--acc);font-variant-numeric:tabular-nums}
 
 /* ══ 한 줄 헤더 ══ */
 .hdr-row{display:flex;align-items:center;gap:8px}
@@ -2204,6 +2234,13 @@ function dayDuration(d){
   if (mins < 1 || mins > 360) return null;
   return mins;
 }
+/* 운동 경과 시간 — 52:31 형태 */
+function fmtClock(min){
+  const m = Math.max(0, Math.floor(min || 0));
+  const h = Math.floor(m / 60);
+  return h ? h + ':' + String(m % 60).padStart(2,'0') : m + '분';
+}
+
 const fmtDur = m => {
   if (m == null) return '';
   if (m < 1) return '방금 시작';
@@ -3168,6 +3205,83 @@ async function rgSave(){
   toast('목표를 저장했어요');
 }
 
+/* 운동 중 헤더를 누르면 뜨는 메뉴 */
+function openSessMenu(){
+  const d = viewDate, ses = sessOf(d);
+  if (!ses) return;
+  const row = (icon, label, sub, act, danger) =>
+    '<button class="mrow' + (danger ? ' danger' : '') + '" onclick="' + act + '">' +
+    '<span class="mrow-i">' + icon + '</span>' +
+    '<span class="mrow-t"><b>' + label + '</b>' + (sub ? '<span>' + sub + '</span>' : '') + '</span>' +
+    '<span class="mrow-g">›</span></button>';
+
+  let h = '<div class="card" style="text-align:center;padding:18px 14px;margin-bottom:14px">' +
+    '<div style="font-size:var(--f-micro);color:var(--tx-3);font-weight:800;letter-spacing:.2em">경과 시간</div>' +
+    '<div style="font-size:34px;font-weight:850;letter-spacing:-.05em;margin-top:6px;' +
+      'font-variant-numeric:tabular-nums">' + fmtClock(sessMinutes(d)) + '</div>' +
+    '<div style="font-size:var(--f-label);color:var(--tx-3);margin-top:4px">' +
+      ses.start + ' 시작 · ' + daySets(d) + '세트</div></div>';
+
+  h += row('✓','운동 종료','오늘 기록을 마칩니다','closeSheet();finishSession()');
+  h += row('📅','다른 날짜 보기','','closeSheet();pickDate()');
+  h += row('✕','시작 취소','기록은 남고 시간만 지웁니다','closeSheet();cancelSession()', true);
+  openSheet('운동 중', h);
+}
+
+
+/* ═══════════════════════════════════════════
+   세트 종류 (v43)
+
+   기본은 언제나 '일반'이다.
+   특수 세트는 필요할 때만 꺼내 쓴다 — 평소에는 방해하지 않는다.
+   ═══════════════════════════════════════════ */
+function openSetType(slotId){
+  const sl = D.slots.find(x => x.id === slotId); if (!sl) return;
+  const d = draft[slotId] || (draft[slotId] = mkDraft(sl));
+  const hasSet = setsOf(slotId).length > 0;
+  const cur = d.w0 ? 'warm' : d.dropOn ? 'drop' : 'normal';
+
+  const row = (key, mark, name, desc, act) =>
+    '<button class="strow' + (cur === key ? ' on' : '') + '" onclick="' + act + '">' +
+    '<span class="strow-m">' + mark + '</span>' +
+    '<span class="strow-t"><b>' + name + '</b><span>' + desc + '</span></span>' +
+    (cur === key ? '<span class="strow-c">✓</span>' : '') + '</button>';
+
+  let h = row('normal','—','일반 세트','평소대로 기록합니다',
+              'pickSetType(\'' + slotId + '\',\'normal\')');
+  h += row('warm','W','워밍업','볼륨·신기록 계산에서 빠집니다',
+           'pickSetType(\'' + slotId + '\',\'warm\')');
+  h += hasSet
+    ? row('drop','↳','드롭세트','무게를 낮추며 쉬지 않고 이어갑니다',
+          'pickSetType(\'' + slotId + '\',\'drop\')')
+    : '<div class="strow off"><span class="strow-m">↳</span>' +
+      '<span class="strow-t"><b>드롭세트</b><span>첫 세트를 기록한 뒤 쓸 수 있어요</span></span></div>';
+  h += row('super','⛓',
+           sl.gid ? '묶음 해제' : '슈퍼세트로 묶기',
+           sl.gid ? groupLabel(sl.gid, sl.date) + ' 에서 빼냅니다' : '다른 종목과 번갈아 합니다',
+           'closeSheet();openLink(\'' + slotId + '\')');
+  openSheet('세트 종류', h);
+}
+
+async function pickSetType(slotId, kind){
+  const d = draft[slotId] = draft[slotId] || {};
+  d.w0 = (kind === 'warm');
+  d.dropOn = (kind === 'drop');
+  closeSheet(); render();
+  vibrate(8);
+  toast(kind === 'warm' ? '워밍업 — 통계에서 빠집니다'
+      : kind === 'drop' ? '드롭세트 — 기록하면 무게가 자동으로 내려갑니다'
+      : '일반 세트');
+}
+
+/* ── 드롭세트 연속 기록 ──
+   기록할 때마다 무게를 한 단계씩 낮춰 다음 드롭을 바로 칠 수 있게 한다. */
+function dropStep(exId, w){
+  const inc = incOf(exId) || 2.5;
+  const cut = Math.max(inc, Math.round(w * 0.2 / inc) * inc);   /* 약 20% */
+  return Math.max(inc, r1(w - cut));
+}
+
 /* 타이머 설정 시트 */
 function openTimer(){
   const opts = [60, 90, 120, 150, 180, 240];
@@ -3266,6 +3380,22 @@ function headerHTML(isDated){
   if (isDated){
     const dow = DAYS[new Date(viewDate).getDay()];
     const isT = viewDate === today();
+    /* 운동 중이면 날짜 대신 경과 시간을 앞에 세운다.
+       운동 화면에서 가장 먼저 알아야 할 것은 '얼마나 했는가' 다. */
+    const ses = sessOf(viewDate);
+    if (ses && !ses.end && isT){
+      return '<button class="wko" onclick="openSessMenu()">' +
+          '<i class="wko-d"></i><em>WORKOUT</em>' +
+          '<b>' + fmtClock(sessMinutes(viewDate)) + '</b>' +
+        '</button>' +
+        '<div class="hdr-btns">' +
+          '<button class="ibtn" onclick="pickDate()" aria-label="날짜">'+svg('cal',19)+'</button>' +
+          '<button class="ibtn'+(PL.open?' on':'')+'" onclick="togglePlate()" aria-label="타이머">'+svg('timer',19)+'</button>' +
+          '<button class="ibtn cat" id="catBtn" onclick="openCat()" aria-label="성장">' +
+            gaugeSVG(st.idx, 22) + (alert?'<span class="ibtn-dot"></span>':'') + '</button>' +
+        '</div>';
+    }
+
     left = '<button class="hb-a" onclick="goDay(-1)" aria-label="이전 날">'+svg('prev',19)+'</button>' +
       '<button class="hb-d'+(isT?'':' past')+'" onclick="pickDate()">' +
         '<b>'+fmtD(viewDate)+' <em>'+dow+'</em></b>' +
@@ -3326,8 +3456,10 @@ function viewWorkout(){
     }
   }
 
+  /* 운동 중 표시는 헤더로 옮겼다. 본문은 기록에만 집중한다.
+     지난 날짜를 볼 때만 여기에 남긴다. */
   const ses = sessOf(d);
-  if (ses && !ses.end){
+  if (ses && !ses.end && d !== today()){
     h += '<div class="live"><i></i><span>운동 중</span>' +
       '<b>'+ses.start+' 시작 · '+fmtDur(sessMinutes(d))+'</b>' +
       '<button class="live-x" onclick="cancelSession()" aria-label="시작 취소">취소</button></div>';
@@ -3649,7 +3781,10 @@ function exCard(sl){
       dr.w, ex.inc||2.5) +
          fld(sl.id,'r','횟수',dr.r,1);
   }
-  h += '<button class="ip-go" onclick="addSet(\''+sl.id+'\')">기록</button></div>';
+  /* 어떤 세트를 넣는지 버튼에서 바로 알 수 있게 한다 */
+  h += '<button class="ip-go'+(dr.dropOn?' drop':'')+(dr.w0?' warm':'')+'" ' +
+    'onclick="addSet(\''+sl.id+'\')">' +
+    (dr.w0 ? '워밍업' : dr.dropOn ? '드롭' : '기록') + '</button></div>';
 
   /* RPE 와 세트 성격을 한 줄에 담는다.
      예전에는 워밍업·드랍이 따로 한 줄, RPE 가 또 한 줄이라 화면이 길어졌다. */
@@ -3657,8 +3792,8 @@ function exCard(sl){
     const canDrop = ss.length > 0;
     const tag = dr.w0 ? 'W' : (dr.dropOn ? '↳' : '');
     h += '<div class="rp" id="rp-'+sl.id+'">' +
-      '<button type="button" class="rp-tag'+(tag?' on':'')+'" onclick="cycleTech(\''+sl.id+'\','+canDrop+')" ' +
-        'aria-label="세트 성격">'+(tag || '일반')+'</button>' +
+      '<button type="button" class="rp-tag'+(tag?' on':'')+'" onclick="openSetType(\''+sl.id+'\')" ' +
+        'aria-label="세트 종류">'+(tag || '일반')+' ▾</button>' +
       '<em>RPE</em>' + [6,7,8,9,10].map(v =>
         '<button type="button" data-v="'+v+'" aria-pressed="'+(v===dr.rpe)+'" onclick="setRpe(\''+sl.id+'\','+v+')">'+v+'</button>'
       ).join('') + '</div>';
@@ -5196,7 +5331,7 @@ function viewMe(){
     '<button class="btn btn-g btn-sm" style="margin-top:8px;color:var(--chest)" onclick="wipe()">기록 전체 삭제</button></div>';
 
   h += '<div class="note" style="text-align:center;margin-top:16px;cursor:pointer" onclick="toggleDiag()">' +
-       'IRONLOG v42 · 종목 '+Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
+       'IRONLOG v43 · 종목 '+Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
   if (showDiag){
     h += '<div class="note" style="text-align:center;margin-top:5px;font-size:9px;opacity:.5;' +
          'font-family:var(--mono);line-height:1.7;word-break:break-all">' + diagLine() + '</div>';
@@ -5228,7 +5363,7 @@ function diagLine(){
   const bh = Math.round(document.body.getBoundingClientRect().height);
   const vv = window.visualViewport;
   return [
-    'v42',
+    'v43',
     'body' + bh,
     'inner' + window.innerHeight,
     'client' + document.documentElement.clientHeight,
@@ -6452,6 +6587,26 @@ async function addSet(slotId){
   /* 드랍은 연속으로 이어지므로 유지, 워밍업은 한 번 쓰고 자동 해제 */
   if (draft[slotId]) draft[slotId].w0 = false;
   vibrate(30);
+  /* 드롭세트면 다음 드롭을 바로 칠 수 있게 무게를 낮춰둔다 */
+  const dnow = draft[slotId];
+  if (dnow && dnow.dropOn){
+    const nw = dropStep(sl.exId, num(dnow.w));
+    dnow.w = nw;
+    toast('↳ 다음 드롭 ' + nw + 'kg · 마치려면 종류를 일반으로');
+  }
+
+  /* 묶인 종목이면 다음 운동을 바로 펼친다 — 오가는 수고를 없앤다 */
+  if (sl.gid && !dnow.dropOn){
+    const mates = slotsOn(sl.date).filter(x => x.gid === sl.gid && x.id !== sl.id);
+    if (mates.length){
+      const nextSl = mates.reduce((a,x) =>
+        setsOf(x.id).length < setsOf(a.id).length ? x : a, mates[0]);
+      openEx = nextSl.id;
+      const nx = EX[nextSl.exId];
+      if (nx) toast('다음 → ' + nx.name);
+    }
+  }
+
   /* 제안과 다르게 기록했으면 그 선택을 남긴다.
      방금 넣은 세트에서 실제 무게를 읽는다. */
   const sug = lastSug[slotId];
@@ -6679,7 +6834,7 @@ Object.assign(window, {
   openPlate, closePlate, plMode, plPick, plStart, plAdjust, plLap, plReset, paintPlate,
   hideTimerUI, togglePlate, syncHdrBtn,
   /* v40 과부하 엔진 — 아직 화면에 쓰이지 않는다 */
-  dayChanges, nextPlan, nextCard, applyNext, openRange, rgSet, rgSave, rangeHTML, maybeAskOverride,
+  fmtClock, openSessMenu, openSetType, pickSetType, dropStep, dayChanges, nextPlan, nextCard, applyNext, openRange, rgSet, rgSave, rangeHTML, maybeAskOverride,
   incOf, getExerciseHistory, normalizeWorkingSets, determineTargetRange,
   calculatePerformanceTrend, evaluateRPE, consecutiveHi, lastNSessionsBelow,
   confidenceOf, decliningStreak, determineProgressionState, calculateNextTarget,
