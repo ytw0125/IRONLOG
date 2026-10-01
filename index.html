@@ -724,7 +724,9 @@ body:before{content:'';position:fixed;inset:0;pointer-events:none;z-index:var(--
 .sw{position:relative;overflow:hidden;background:var(--card-2);
   border-radius:var(--r-lg)}
 /* 안쪽은 카드 색을 꽉 채워야 밀렸을 때 뒤가 비치지 않는다 */
-.sw-in{position:relative;z-index:2;background:var(--card);width:100%}
+.sw-in{position:relative;z-index:2;background:var(--card);width:100%;
+  /* 세로 스크롤만 브라우저에 넘기고 가로는 우리가 받는다 */
+  touch-action:pan-y}
 .sw-l,.sw-r{position:absolute;top:0;bottom:0;display:flex;z-index:3;
   transition:transform .26s var(--eo);will-change:transform}
 .sw-l{left:0;transform:translateX(-100%)}
@@ -3389,7 +3391,7 @@ function dropStep(exId, w){
    · 오른쪽으로 밀면 왼쪽 버튼 (마치기 등)
    · 세로로 먼저 움직이면 스크롤로 넘긴다
    ═══════════════════════════════════════════════════ */
-const SWIPE = { el:null, x0:0, y0:0, dx:0, axis:null, open:null, w:0 };
+const SWIPE = { el:null, x0:0, y0:0, dx:0, axis:null, open:null, w:0, guard:0 };
 
 function swipeWrap(inner, left, right, key){
   /* left/right : [{ label, cls, act }] */
@@ -3493,8 +3495,21 @@ function swipeClose(){
     if (to){ el.classList.add('sw-on'); SWIPE.open = el; vibrate(10); }
     else el.classList.remove('sw-on');
 
+    /* 옆으로 밀었으면 뒤따라오는 클릭을 막는다.
+       이걸 안 하면 손을 떼는 순간 카드가 펼쳐져 버튼이 사라진다. */
+    if (SWIPE.axis === 'x') SWIPE.guard = Date.now();
     SWIPE.el = null; SWIPE.axis = null; SWIPE.dx = 0;
   }
+
+  /* 민 직후의 클릭 한 번을 삼킨다 */
+  document.addEventListener('click', e => {
+    if (SWIPE.guard && Date.now() - SWIPE.guard < 500){
+      if (!e.target.closest('.sw-b')){
+        e.stopPropagation(); e.preventDefault();
+      }
+      SWIPE.guard = 0;
+    }
+  }, true);
 
   document.addEventListener('touchstart', start, { passive:true });
   document.addEventListener('touchmove',  move,  { passive:false });
@@ -3506,6 +3521,25 @@ function swipeClose(){
   document.addEventListener('mouseup',   end);
   /* 다른 곳을 건드리면 닫는다 */
   document.addEventListener('scroll', swipeClose, true);
+
+  /* 길게 누르면 전체 메뉴. 미는 걸 모르는 사람에게도 길이 있어야 한다. */
+  let holdT = null;
+  const clearHold = () => { if (holdT){ clearTimeout(holdT); holdT = null; } };
+  document.addEventListener('touchstart', e => {
+    const box = e.target.closest && e.target.closest('.sw[data-k]');
+    if (!box) return;
+    const key = box.getAttribute('data-k'); if (!key) return;
+    clearHold();
+    holdT = setTimeout(() => {
+      holdT = null;
+      SWIPE.guard = Date.now();
+      vibrate([12,28,12]);
+      openExMenu(key);
+    }, 450);
+  }, { passive:true });
+  document.addEventListener('touchmove', clearHold, { passive:true });
+  document.addEventListener('touchend', clearHold);
+  document.addEventListener('touchcancel', clearHold);
 })();
 
 /* 되돌리기 — 지운 직후 5초 동안 한 번 */
@@ -4017,7 +4051,7 @@ function exCard(sl){
       '<span class="st-v">'+c3+bg+'</span>' +
       '<span class="st-v">'+c4+'</span>' +
       '<span class="st-e">'+(s.rpe||'')+'</span>' +
-      '<button class="st-x" onclick="event.stopPropagation();rmSet(\''+s.id+'\')" aria-label="삭제">✕</button></div>';
+      '<button class="st-x" onclick="event.stopPropagation();swDelSet(\''+s.id+'\')" aria-label="삭제">✕</button></div>';
   });
 
   /* 입력 바 */
@@ -5588,7 +5622,7 @@ function viewMe(){
     '<button class="btn btn-g btn-sm" style="margin-top:8px;color:var(--chest)" onclick="wipe()">기록 전체 삭제</button></div>';
 
   h += '<div class="note" style="text-align:center;margin-top:16px;cursor:pointer" onclick="toggleDiag()">' +
-       'IRONLOG v44 · 종목 '+Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
+       'IRONLOG v44.1 · 종목 '+Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
   if (showDiag){
     h += '<div class="note" style="text-align:center;margin-top:5px;font-size:9px;opacity:.5;' +
          'font-family:var(--mono);line-height:1.7;word-break:break-all">' + diagLine() + '</div>';
@@ -5620,7 +5654,7 @@ function diagLine(){
   const bh = Math.round(document.body.getBoundingClientRect().height);
   const vv = window.visualViewport;
   return [
-    'v44',
+    'v44.1',
     'body' + bh,
     'inner' + window.innerHeight,
     'client' + document.documentElement.clientHeight,
@@ -6666,7 +6700,7 @@ function openExMenu(id){
   if (i < day.length-1) h += row('▼','아래로 옮기기','', 'closeSheet();moveSlot(\''+id+'\',1)');
   if (ex.kind === 'bar')
     h += row('🏋︎','봉 무게 바꾸기', barOf(ex.name)+'kg 봉으로 계산 중', 'closeSheet();openBar(\''+q(ex.name)+'\')');
-  h += row('✕','종목 삭제','기록한 세트도 함께 지웁니다','closeSheet();rmSlot(\''+id+'\')', true);
+  h += row('✕','종목 삭제','되돌릴 수 있어요','closeSheet();swDelSlot(\''+id+'\')', true);
 
   openSheet(ex.name, h);
 }
@@ -6942,6 +6976,22 @@ async function maybeAskOverride(exId){
   }
 }
 
+/* 세트 한 줄 삭제 — 묻지 않고 지우되 되돌릴 수 있게 */
+async function swDelSet(id){
+  const st = D.sets.find(x => x.id === id); if (!st) return;
+  const keep = JSON.parse(JSON.stringify(st));
+  const idx = D.sets.findIndex(x => x.id === id);
+  bury(id);
+  D.sets.splice(idx, 1);
+  await saveData(); render(); vibrate([12,30,12]);
+  offerUndo(setLabel(keep) + ' 삭제', async () => {
+    D.sets.splice(Math.min(idx, D.sets.length), 0, keep);
+    if (D.tomb) delete D.tomb[id];
+    await saveData(); render();
+    toast('되돌렸어요');
+  });
+}
+
 async function rmSet(id, fromSheet){
   if (fromSheet && !await ask({ title:'세트 삭제', danger:true, ok:'삭제', body:'이 세트를 지웁니다.' })) return;
   bury(id);
@@ -7122,7 +7172,7 @@ Object.assign(window, {
   openPlate, closePlate, plMode, plPick, plStart, plAdjust, plLap, plReset, paintPlate,
   hideTimerUI, togglePlate, syncHdrBtn,
   /* v40 과부하 엔진 — 아직 화면에 쓰이지 않는다 */
-  swipeWrap, swipeDo, swipeClose, offerUndo, runUndo, swDelSlot,
+  swipeWrap, swipeDo, swipeClose, offerUndo, runUndo, swDelSlot, swDelSet,
   fmtClock, openSessMenu, openSetType, pickSetType, dropStep, dayChanges, nextPlan, nextCard, applyNext, openRange, rgSet, rgSave, rangeHTML, maybeAskOverride,
   incOf, getExerciseHistory, normalizeWorkingSets, determineTargetRange,
   calculatePerformanceTrend, evaluateRPE, consecutiveHi, lastNSessionsBelow,
