@@ -194,6 +194,10 @@ body:before{content:'';position:fixed;inset:0;pointer-events:none;z-index:var(--
   letter-spacing:.14em;font-family:var(--mono)}
 
 /* ══ 운동 카드 (아코디언) ══ */
+.ex .sw{border-radius:var(--r-lg)}
+.ex .sw-in{background:var(--card);border-radius:var(--r-lg)}
+/* 카드가 밀릴 때는 바깥 테두리 효과를 잠시 끈다 */
+.ex:has(.sw-in.sw-on){box-shadow:none}
 .ex{background:var(--card);border:none;border-radius:var(--r-lg);
   margin-bottom:8px;overflow:hidden;box-shadow:var(--lit);
   transition:box-shadow .2s var(--eo)}
@@ -675,6 +679,26 @@ body:before{content:'';position:fixed;inset:0;pointer-events:none;z-index:var(--
 .pl-ctl button.acc{background:var(--acc);color:#08090B;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.45)}
 
+
+/* ── 끝나는 시각 ── */
+.pl-fin{font-size:var(--f-micro);color:var(--tx-3);font-weight:700;margin-top:6px;
+  letter-spacing:.08em;font-variant-numeric:tabular-nums;visibility:hidden}
+
+/* ── iOS 식 조작 ── */
+.pl-ctl button.rd{flex:1;background:rgba(255,107,74,.16);color:var(--warn);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+.pl-ctl button.rd.off{opacity:.4}
+.pl-ctl button.gn{flex:1.4;background:rgba(255,184,77,.18);color:var(--acc);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.pl-ctl button.lp{flex:1;background:var(--steel);color:var(--tx-2)}
+
+/* ── 시간 조절 ── */
+.pl-adj{display:flex;gap:6px;margin-top:9px}
+.pl-adj button{flex:1;min-height:42px;border:none;border-radius:var(--r-sm);
+  background:var(--card-2);color:var(--tx-2);font-size:var(--f-label);font-weight:800;
+  cursor:pointer;box-shadow:var(--edge);font-variant-numeric:tabular-nums}
+.pl-adj button:active{filter:brightness(1.4)}
+
 /* ── 랩 기록 ── */
 .pl-laps{max-height:0;overflow:hidden;transition:max-height .3s var(--eo)}
 .pl-laps.on{max-height:148px;overflow-y:auto;margin-top:14px}
@@ -694,6 +718,30 @@ body:before{content:'';position:fixed;inset:0;pointer-events:none;z-index:var(--
 /* 타이머가 열려 있을 때 헤더 버튼 */
 .ibtn.on{background:var(--acc);color:#08090B;box-shadow:inset 0 1px 0 rgba(255,255,255,.45)}
 
+
+
+/* ══ 밀어서 조작 ══ */
+.sw{position:relative;overflow:hidden;background:var(--card-2);
+  border-radius:var(--r-lg)}
+/* 안쪽은 카드 색을 꽉 채워야 밀렸을 때 뒤가 비치지 않는다 */
+.sw-in{position:relative;z-index:2;background:var(--card);width:100%}
+.sw-l,.sw-r{position:absolute;top:0;bottom:0;display:flex;z-index:3;
+  transition:transform .26s var(--eo);will-change:transform}
+.sw-l{left:0;transform:translateX(-100%)}
+.sw-r{right:0;transform:translateX(100%)}
+.sw-b{border:none;min-width:88px;padding:0 14px;cursor:pointer;height:100%;
+  font-size:var(--f-label);font-weight:800;letter-spacing:-.01em;
+  background:var(--card-3);color:var(--tx)}
+.sw-b.del{background:var(--warn);color:#08090B}
+.sw-b.acc{background:var(--acc);color:#08090B}
+.sw-b.ok{background:var(--good);color:#08090B}
+.sw-b:active{filter:brightness(1.2)}
+
+/* 되돌리기 토스트 */
+.t-undo{background:rgba(255,255,255,.14);border:none;color:var(--tx);
+  font-size:var(--f-label);font-weight:800;padding:6px 11px;border-radius:var(--r-sm);
+  margin-left:10px;cursor:pointer}
+#toast.wide{max-width:none;white-space:nowrap}
 
 /* ══ 세트 종류 시트 ══ */
 .strow{display:flex;align-items:center;gap:12px;width:100%;background:none;border:none;
@@ -1412,6 +1460,7 @@ svg.i{fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;
         <div class="pl-mode" id="plMode">REST</div>
         <div class="pl-num" id="plNum">0:00</div>
         <div class="pl-sub" id="plSub">준비됨</div>
+      <div class="pl-fin" id="plFin"></div>
       </div>
     </div>
   </div>
@@ -1421,6 +1470,7 @@ svg.i{fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;
 
   <!-- 조작 -->
   <div class="pl-ctl" id="plCtl"></div>
+  <div class="pl-adj" id="plAdj"></div>
 
   <!-- 랩 기록 (스톱워치) -->
   <div class="pl-laps" id="plLaps"></div>
@@ -2665,6 +2715,26 @@ function plReset(){
   stopTimer(); paintPlate(); vibrate(10);
 }
 
+/* 원판을 좌우로 밀어 모드를 바꾼다 */
+(function plateSwipe(){
+  let x0 = null, y0 = null;
+  const get = e => e.touches ? e.touches[0] : e;
+  document.addEventListener('touchstart', e => {
+    if (!PL.open) return;
+    const d = e.target.closest && e.target.closest('.pl-disc');
+    if (!d) return;
+    const t = get(e); x0 = t.clientX; y0 = t.clientY;
+  }, { passive:true });
+  document.addEventListener('touchend', e => {
+    if (x0 === null) return;
+    const t = e.changedTouches ? e.changedTouches[0] : e;
+    const dx = t.clientX - x0, dy = t.clientY - y0;
+    x0 = null;
+    if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy)) return;
+    plMode(dx < 0 ? 'watch' : 'rest');
+  });
+})();
+
 /* 타이머 UI 를 완전히 감춘다.
    시간은 계속 흐르고 알림도 그대로 울린다 — 화면만 비운다. */
 const TU = { hidden:false };
@@ -2712,33 +2782,59 @@ function paintPlate(){
   const arc = $('#plArc');
   if (arc) arc.setAttribute('stroke-dashoffset', (C * (1 - pct)).toFixed(1));
 
-  /* 퀵 선택 */
+  /* 퀵 선택 — 아직 시작하지 않았을 때만 보여준다.
+     돌아가는 중에는 시간을 고르는 자리가 아니다. */
   const q = $('#plQuick');
-  if (watch){ q.innerHTML = ''; q.style.display = 'none'; }
+  if (watch || T.on){ q.innerHTML = ''; q.style.display = 'none'; }
   else {
     q.style.display = '';
     q.innerHTML = REST_OPTS.map(v =>
-      '<button class="' + (PL.pick === v && !T.on ? 'on' : '') + '" ' +
+      '<button class="' + (PL.pick === v ? 'on' : '') + '" ' +
       'onclick="plPick(' + v + ')">' + mmss(v) + '</button>').join('');
   }
 
+  /* 끝나는 시각 — iOS 타이머처럼 '언제 끝나는지' 를 같이 알려준다 */
+  const fin = $('#plFin');
+  if (fin){
+    if (!watch && T.on && T.left > 0 && !T.paused){
+      const t = new Date(Date.now() + T.left * 1000);
+      fin.textContent = '종료 ' + String(t.getHours()).padStart(2,'0') + ':' +
+                        String(t.getMinutes()).padStart(2,'0');
+      fin.style.visibility = 'visible';
+    } else fin.style.visibility = 'hidden';
+  }
+
   /* 조작 버튼 */
-  const run = T.on && !T.paused;
+  /* iOS 타이머를 따른다 — 버튼은 둘.
+     왼쪽은 취소·리셋, 오른쪽은 시작·일시정지.
+     돌고 있을 때만 시간 조절이 아래에 나온다. */
   let c = '';
   if (watch){
     const go = SW.running && !SW.paused;
-    c += '<button onclick="plReset()">리셋</button>';
-    c += '<button class="main" onclick="plStart()">' +
+    c += '<button class="rd' + (SW.running ? '' : ' off') + '" onclick="plReset()">' +
+         (SW.running ? '리셋' : '리셋') + '</button>';
+    c += '<button class="gn" onclick="plStart()">' +
          (!SW.running ? '시작' : (SW.paused ? '계속' : '일시정지')) + '</button>';
-    c += '<button class="' + (go ? 'acc' : '') + '" onclick="plLap()"' +
-         (go ? '' : ' disabled style="opacity:.4"') + '>랩</button>';
+    if (go) c += '<button class="lp" onclick="plLap()">랩</button>';
   } else {
-    c += '<button onclick="plAdjust(-10)">−10초</button>';
-    c += '<button class="main" onclick="plStart()">' +
+    c += '<button class="rd' + (T.on ? '' : ' off') + '" onclick="plReset()">취소</button>';
+    c += '<button class="gn" onclick="plStart()">' +
          (!T.on ? '시작' : (T.paused ? '계속' : '일시정지')) + '</button>';
-    c += '<button onclick="plAdjust(30)">+30초</button>';
   }
   $('#plCtl').innerHTML = c;
+
+  /* 시간 조절은 돌아가는 중에만 */
+  const adj = $('#plAdj');
+  if (adj){
+    if (!watch && T.on){
+      adj.style.display = '';
+      adj.innerHTML =
+        '<button onclick="plAdjust(-30)">−30초</button>' +
+        '<button onclick="plAdjust(-10)">−10초</button>' +
+        '<button onclick="plAdjust(10)">+10초</button>' +
+        '<button onclick="plAdjust(30)">+30초</button>';
+    } else { adj.style.display = 'none'; adj.innerHTML = ''; }
+  }
 
   /* 랩 목록 */
   const L = $('#plLaps');
@@ -3282,6 +3378,154 @@ function dropStep(exId, w){
   return Math.max(inc, r1(w - cut));
 }
 
+
+/* ═══════════════════════════════════════════════════
+   밀어서 조작 (v44)
+
+   한 줄을 옆으로 밀면 숨어 있던 버튼이 드러난다.
+   iOS 의 메일·메시지와 같은 방식이라 따로 배울 것이 없다.
+
+   · 왼쪽으로 밀면 오른쪽 버튼 (삭제 등)
+   · 오른쪽으로 밀면 왼쪽 버튼 (마치기 등)
+   · 세로로 먼저 움직이면 스크롤로 넘긴다
+   ═══════════════════════════════════════════════════ */
+const SWIPE = { el:null, x0:0, y0:0, dx:0, axis:null, open:null, w:0 };
+
+function swipeWrap(inner, left, right, key){
+  /* left/right : [{ label, cls, act }] */
+  const side = (arr, pos) => !arr || !arr.length ? '' :
+    '<div class="sw-' + pos + '">' + arr.map(b =>
+      '<button class="sw-b ' + (b.cls||'') + '" onclick="swipeDo(event,\'' + b.act + '\')">' +
+      b.label + '</button>').join('') + '</div>';
+  return '<div class="sw" data-k="' + (key||'') + '">' +
+    side(left,'l') + side(right,'r') +
+    '<div class="sw-in">' + inner + '</div></div>';
+}
+
+/* 버튼을 누르면 먼저 닫고 동작한다 — 열린 채로 화면이 바뀌면 어색하다 */
+function swipeDo(ev, act){
+  ev.stopPropagation();
+  swipeClose();
+  setTimeout(() => { try{ (new Function(act))(); }catch(e){ console.warn(e); } }, 120);
+}
+
+/* 버튼판을 얼마나 들여놓을지 그린다. 카드 자체는 움직이지 않는다. */
+function swipePaint(box, v){
+  const L = box.querySelector('.sw-l'), R = box.querySelector('.sw-r');
+  if (R){
+    const w = R.offsetWidth;
+    const shown = Math.max(0, Math.min(w, -v));
+    R.style.transform = 'translateX(' + (w - shown) + 'px)';
+  }
+  if (L){
+    const w = L.offsetWidth;
+    const shown = Math.max(0, Math.min(w, v));
+    L.style.transform = 'translateX(' + (shown - w) + 'px)';
+  }
+}
+
+function swipeClose(){
+  if (SWIPE.open){
+    const box = SWIPE.open.parentElement;
+    if (box) swipePaint(box, 0);
+    SWIPE.open.classList.remove('sw-on');
+    SWIPE.open = null;
+  }
+}
+
+(function swipeInit(){
+  const TH = 10;          /* 이만큼 움직여야 방향을 정한다 */
+  const SNAP = 0.45;      /* 버튼 폭의 45% 를 넘기면 열린다 */
+
+  const inner = t => t && t.closest ? t.closest('.sw-in') : null;
+
+  function start(e){
+    const t = e.touches ? e.touches[0] : e;
+    const el = inner(e.target);
+    if (!el){ swipeClose(); return; }
+    if (SWIPE.open && SWIPE.open !== el) swipeClose();
+    SWIPE.el = el; SWIPE.x0 = t.clientX; SWIPE.y0 = t.clientY;
+    SWIPE.dx = 0; SWIPE.axis = null;
+    const box = el.parentElement;
+    ['.sw-l','.sw-r'].forEach(k => { const p = box.querySelector(k); if (p) p.style.transition = 'none'; });
+  }
+
+  function move(e){
+    if (!SWIPE.el) return;
+    const t = e.touches ? e.touches[0] : e;
+    const dx = t.clientX - SWIPE.x0, dy = t.clientY - SWIPE.y0;
+
+    if (!SWIPE.axis){
+      if (Math.abs(dx) < TH && Math.abs(dy) < TH) return;
+      /* 세로가 더 크면 스크롤에 양보한다 */
+      SWIPE.axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+      if (SWIPE.axis === 'y'){ end(); return; }
+    }
+    if (SWIPE.axis !== 'x') return;
+
+    const box = SWIPE.el.parentElement;
+    const L = box.querySelector('.sw-l'), R = box.querySelector('.sw-r');
+    const maxL = L ? L.offsetWidth : 0, maxR = R ? R.offsetWidth : 0;
+
+    /* 버튼이 없는 쪽으로는 조금만 끌리고 되돌아온다 */
+    let v = dx;
+    if (v > 0) v = maxL ? Math.min(v, maxL * 1.25) : v * 0.25;
+    else       v = maxR ? Math.max(v, -maxR * 1.25) : v * 0.25;
+
+    SWIPE.dx = v;
+    swipePaint(box, v);
+    if (e.cancelable) e.preventDefault();
+  }
+
+  function end(){
+    const el = SWIPE.el; if (!el){ SWIPE.axis = null; return; }
+    const box = el.parentElement;
+    ['.sw-l','.sw-r'].forEach(k => { const p = box.querySelector(k); if (p) p.style.transition = ''; });
+    const L = box.querySelector('.sw-l'), R = box.querySelector('.sw-r');
+    const maxL = L ? L.offsetWidth : 0, maxR = R ? R.offsetWidth : 0;
+    const v = SWIPE.dx;
+
+    let to = 0;
+    if (v > 0 && maxL && v > maxL * SNAP) to = maxL;
+    else if (v < 0 && maxR && -v > maxR * SNAP) to = -maxR;
+
+    swipePaint(box, to);
+    if (to){ el.classList.add('sw-on'); SWIPE.open = el; vibrate(10); }
+    else el.classList.remove('sw-on');
+
+    SWIPE.el = null; SWIPE.axis = null; SWIPE.dx = 0;
+  }
+
+  document.addEventListener('touchstart', start, { passive:true });
+  document.addEventListener('touchmove',  move,  { passive:false });
+  document.addEventListener('touchend',   end);
+  document.addEventListener('touchcancel',end);
+  /* 데스크톱에서도 동작하게 — 테스트와 PC 사용을 위해 */
+  document.addEventListener('mousedown', start);
+  document.addEventListener('mousemove', move);
+  document.addEventListener('mouseup',   end);
+  /* 다른 곳을 건드리면 닫는다 */
+  document.addEventListener('scroll', swipeClose, true);
+})();
+
+/* 되돌리기 — 지운 직후 5초 동안 한 번 */
+let undoBuf = null, undoT = null;
+function offerUndo(label, restore){
+  undoBuf = restore;
+  clearTimeout(undoT);
+  const el = $('#toast');
+  el.innerHTML = esc(label) +
+    ' <button class="t-undo" onclick="runUndo()">되돌리기</button>';
+  el.classList.add('on','wide');
+  undoT = setTimeout(() => { el.classList.remove('on','wide'); undoBuf = null; }, 5000);
+}
+async function runUndo(){
+  const f = undoBuf; undoBuf = null;
+  clearTimeout(undoT);
+  $('#toast').classList.remove('on','wide');
+  if (f) await f();
+}
+
 /* 타이머 설정 시트 */
 function openTimer(){
   const opts = [60, 90, 120, 150, 180, 240];
@@ -3712,11 +3956,24 @@ function exCard(sl){
 
   const gcls = (sl.gid ? ' grouped' : '') + (sl.done ? ' fin' : '');
   let h = pre + '<div class="ex'+(open?' open':'')+gcls+'">';
-  h += '<div class="ex-hd" onclick="toggleEx(\''+sl.id+'\')">' +
+  /* 접힌 카드를 옆으로 밀면 자주 쓰는 동작이 바로 나온다 */
+  const head = '<div class="ex-hd" onclick="toggleEx(\''+sl.id+'\')">' +
     '<i class="ex-cl" style="background:'+part.color+'"></i>' +
     '<div class="ex-tt"><b>'+(sl.done?'<i class="ex-ck">✓</i>':'')+esc(ex.name)+'</b><span>'+part.name+' · '+KIND[ex.kind]+
       ' · <em>'+sum+'</em></span></div>' +
     '<span class="ex-ar">▾</span></div>';
+
+  if (open){
+    h += head;
+  } else {
+    const L = sl.done
+      ? [{ label:'다시', cls:'acc', act:"undoneSlot('"+sl.id+"')" }]
+      : [{ label:'마치기', cls:'ok',  act:"doneSlot('"+sl.id+"')" }];
+    /* 한쪽에 하나씩만 둔다. 둘을 넣으면 카드가 절반이나 밀려
+       정작 어떤 종목인지 보이지 않는다. 순서 옮기기는 ⋯ 메뉴에 그대로 있다. */
+    const R = [{ label:'삭제', cls:'del', act:"swDelSlot('"+sl.id+"')" }];
+    h += swipeWrap(head, L, R, sl.id);
+  }
 
   if (!open) return h + '</div>';
 
@@ -5331,7 +5588,7 @@ function viewMe(){
     '<button class="btn btn-g btn-sm" style="margin-top:8px;color:var(--chest)" onclick="wipe()">기록 전체 삭제</button></div>';
 
   h += '<div class="note" style="text-align:center;margin-top:16px;cursor:pointer" onclick="toggleDiag()">' +
-       'IRONLOG v43 · 종목 '+Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
+       'IRONLOG v44 · 종목 '+Object.keys(EX).length+'개 · 음식 '+Object.keys(FOODMAP).length+'개</div>';
   if (showDiag){
     h += '<div class="note" style="text-align:center;margin-top:5px;font-size:9px;opacity:.5;' +
          'font-family:var(--mono);line-height:1.7;word-break:break-all">' + diagLine() + '</div>';
@@ -5363,7 +5620,7 @@ function diagLine(){
   const bh = Math.round(document.body.getBoundingClientRect().height);
   const vv = window.visualViewport;
   return [
-    'v43',
+    'v44',
     'body' + bh,
     'inner' + window.innerHeight,
     'client' + document.documentElement.clientHeight,
@@ -6283,6 +6540,37 @@ async function addSlot(name){
   await saveData(); closeSheet(); tab = 'workout'; render();
   toast(name+' 추가');
 }
+/* 밀어서 지울 때는 확인창 대신 되돌리기를 준다.
+   운동 중에 팝업을 읽게 하는 것보다 이쪽이 빠르고 안전하다. */
+async function swDelSlot(id){
+  const sl = D.slots.find(x => x.id === id);
+  if (!sl) return;
+  const name = EX[sl.exId] ? EX[sl.exId].name : sl.exId;
+  const keep = { slot: JSON.parse(JSON.stringify(sl)),
+                 sets: setsOf(id).map(x => JSON.parse(JSON.stringify(x))) };
+  const cnt = keep.sets.length;
+
+  bury(id);
+  if (sl.gid){
+    const mates = slotsOn(sl.date).filter(x => x.gid === sl.gid && x.id !== id);
+    if (mates.length === 1) delete mates[0].gid;
+  }
+  keep.sets.forEach(x => bury(x.id));
+  D.slots = D.slots.filter(x => x.id !== id);
+  D.sets  = D.sets.filter(x => x.slotId !== id);
+  if (openEx === id) openEx = null;
+  await saveData(); render();
+  vibrate([14,40,14]);
+
+  offerUndo(name + ' 삭제' + (cnt ? ' · ' + cnt + '세트' : ''), async () => {
+    D.slots.push(keep.slot);
+    keep.sets.forEach(x => D.sets.push(x));
+    if (D.tomb){ delete D.tomb[id]; keep.sets.forEach(x => delete D.tomb[x.id]); }
+    await saveData(); render();
+    toast('되돌렸어요');
+  });
+}
+
 async function rmSlot(id){
   const sl = D.slots.find(x => x.id === id);
   const n = sl ? setsOf(id).length : 0;
@@ -6834,6 +7122,7 @@ Object.assign(window, {
   openPlate, closePlate, plMode, plPick, plStart, plAdjust, plLap, plReset, paintPlate,
   hideTimerUI, togglePlate, syncHdrBtn,
   /* v40 과부하 엔진 — 아직 화면에 쓰이지 않는다 */
+  swipeWrap, swipeDo, swipeClose, offerUndo, runUndo, swDelSlot,
   fmtClock, openSessMenu, openSetType, pickSetType, dropStep, dayChanges, nextPlan, nextCard, applyNext, openRange, rgSet, rgSave, rangeHTML, maybeAskOverride,
   incOf, getExerciseHistory, normalizeWorkingSets, determineTargetRange,
   calculatePerformanceTrend, evaluateRPE, consecutiveHi, lastNSessionsBelow,
